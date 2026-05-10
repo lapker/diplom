@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Аккаунт заблокирован — FSN GALLERY CRM</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 50%, #1e3a5f 100%);
+      font-family: 'Inter', sans-serif;
+    }
+    .blocked-card {
+      background: #fff;
+      border-radius: 20px;
+      padding: 48px 40px;
+      max-width: 460px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 25px 60px rgba(0,0,0,.3);
+    }
+    .blocked-icon {
+      font-size: 4rem;
+      margin-bottom: 20px;
+      display: block;
+    }
+    .blocked-title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: #1e293b;
+      margin-bottom: 12px;
+    }
+    .blocked-msg {
+      color: #64748b;
+      font-size: .95rem;
+      line-height: 1.6;
+      margin-bottom: 32px;
+    }
+    .blocked-msg strong {
+      color: #dc2626;
+    }
+    .btn-back {
+      display: inline-block;
+      padding: 12px 32px;
+      background: #2563eb;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background .2s;
+    }
+    .btn-back:hover { background: #1d4ed8; }
+    .blocked-footer {
+      margin-top: 24px;
+      font-size: .78rem;
+      color: #94a3b8;
+    }
+  </style>
+</head>
+<body>
+  <div class="blocked-card" id="blockedCard">
+    <span class="blocked-icon" id="blockedIcon">🔒</span>
+    <div class="blocked-title" id="blockedTitle">Аккаунт заблокирован</div>
+    <div class="blocked-msg" id="blockedMsg">
+      Ваш аккаунт был <strong>заблокирован</strong> администратором системы.<br><br>
+      Если вы считаете, что это ошибка, обратитесь к администратору компании.
+    </div>
+    <a href="login.html" class="btn-back" onclick="doLogout()">← Вернуться на страницу входа</a>
+    <div class="blocked-footer">© 2026 FSN GALLERY — Система управления клиентами</div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script src="js/utils.js"></script>
+  <script>
+    async function doLogout() {
+      try { await api.logout(); } catch {}
+      auth.clear();
+    }
+    // Проверяем — это pending (ожидание роли) или blocked (заблокирован)?
+    const isPending = new URLSearchParams(location.search).get('pending') === '1';
+    if (isPending) {
+      document.getElementById('blockedIcon').textContent = '⏳';
+      document.getElementById('blockedTitle').textContent = 'Аккаунт ожидает активации';
+      document.getElementById('blockedMsg').innerHTML =
+        'Ваш аккаунт зарегистрирован, но ещё <strong style="color:#d97706">не активирован</strong>.<br><br>' +
+        'Пожалуйста, обратитесь к администратору компании для назначения роли менеджера. ' +
+        'После активации вы сможете войти в систему.';
+    }
+    doLogout();
+  </script>
+</body>
+</html>

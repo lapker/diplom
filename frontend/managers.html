@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Менеджеры — FSN GALLERY CRM</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="app-layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">🏠</div>
+    <div><div class="logo-text">FSN GALLERY</div><div class="logo-sub">Керамическая плитка</div></div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-title">Менеджер</div>
+      <button class="nav-item" data-page="dashboard" onclick="navigate('dashboard.html')"><span class="nav-icon">📊</span> Личный кабинет</button>
+      <button class="nav-item" data-page="clients" onclick="navigate('clients.html')"><span class="nav-icon">👥</span> Мои клиенты</button>
+      <button class="nav-item" data-page="deals" onclick="navigate('deals.html')"><span class="nav-icon">🤝</span> Мои сделки</button>
+      <button class="nav-item" data-page="my-offers" onclick="navigate('offers.html?my=1')"><span class="nav-icon">📄</span> Мои КП</button>
+      <div class="nav-section-title">Администратор</div>
+      <button class="nav-item" data-page="admin" onclick="navigate('admin.html')"><span class="nav-icon">🏢</span> Панель управления</button>
+      <button class="nav-item" data-page="managers" onclick="navigate('managers.html')"><span class="nav-icon">👤</span> Менеджеры</button>
+      <button class="nav-item" data-page="all-clients" onclick="navigate('all-clients.html')"><span class="nav-icon">📋</span> Все клиенты</button>
+      <button class="nav-item" data-page="all-deals" onclick="navigate('all-deals.html')"><span class="nav-icon">📁</span> Все сделки</button>
+      <button class="nav-item" data-page="offers" onclick="navigate('offers.html')"><span class="nav-icon">📄</span> Все КП</button>
+      <button class="nav-item" data-page="reports" onclick="navigate('reports.html')"><span class="nav-icon">📈</span> Отчёты</button>
+      <button class="nav-item" data-page="references" onclick="navigate('references.html')"><span class="nav-icon">📚</span> Справочники</button>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="avatar" id="sidebarAvatar">?</div>
+        <div class="user-info">
+          <div class="user-name" id="sidebarUserName">—</div>
+          <div class="user-role" id="sidebarUserRole">—</div>
+        </div>
+      </div>
+      <button class="btn-logout" id="logoutBtn">🚪 Выйти</button>
+    </div>
+  </aside>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <div class="main-content">
+    <header class="top-header">
+      <button class="sidebar-toggle" id="sidebarToggle">☰</button>
+      <span class="header-title">Управление менеджерами</span>
+      <div class="header-actions">
+        <button class="btn btn-primary btn-sm" onclick="openAddManagerModal()">➕ Добавить менеджера</button>
+      </div>
+    </header>
+
+    <main class="page-content">
+      <div class="page-header">
+        <div class="page-header-left">
+          <h1>👤 Пользователи и роли</h1>
+          <p id="managersCount">Загрузка...</p>
+        </div>
+        <button class="btn btn-primary" onclick="openAddManagerModal()">➕ Добавить менеджера</button>
+      </div>
+
+      <!-- Ожидают назначения роли -->
+      <div id="pendingSection" style="display:none;margin-bottom:24px">
+        <div class="card" style="border-left:4px solid #f59e0b">
+          <div class="card-header">
+            <span class="card-title">⏳ Ожидают назначения роли <span id="pendingBadge" class="badge badge-warning" style="margin-left:6px"></span></span>
+          </div>
+          <div class="card-body" id="pendingList"></div>
+        </div>
+      </div>
+
+      <!-- Все пользователи -->
+      <div class="card mb-3">
+        <div class="card-header">
+          <span class="card-title">👥 Все пользователи системы</span>
+          <span style="font-size:.8rem;color:#64748b">Здесь можно назначать и менять роли</span>
+        </div>
+        <div class="card-body" id="allUsersWrap"><div class="spinner"></div></div>
+      </div>
+
+      <div id="managersGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));gap:16px">
+        <div class="spinner" style="grid-column:1/-1"></div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- Модал: Добавить менеджера -->
+<div class="modal-overlay" id="modalAddManager">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="managerModalTitle">➕ Новый менеджер</span>
+      <button class="modal-close" onclick="modal.close('modalAddManager')">✕</button>
+    </div>
+    <div class="modal-body">
+      <form id="managerForm" novalidate>
+        <input type="hidden" id="mf_id">
+        <div class="form-group">
+          <label class="form-label">ФИО <span class="required">*</span></label>
+          <input type="text" class="form-control" id="mf_fullname" placeholder="Иванов Иван Иванович" required>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Логин <span class="required">*</span></label>
+            <input type="text" class="form-control" id="mf_login" placeholder="ivanov" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Пароль <span class="required" id="pwdRequired">*</span></label>
+            <input type="password" class="form-control" id="mf_password" placeholder="Минимум 6 символов">
+            <div class="form-hint" id="pwdHint" style="display:none">Оставьте пустым, чтобы не менять пароль</div>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Email</label>
+            <input type="email" class="form-control" id="mf_email" placeholder="email@company.ru">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Телефон</label>
+            <input type="tel" class="form-control" id="mf_phone" placeholder="+375291234567 или 80291234567">
+            <div class="form-hint">Формат: +375291234567 или 80291234567</div>
+          </div>
+        </div>
+        <div class="form-error hidden" id="mfError" style="padding:10px;background:#fee2e2;border-radius:6px;"></div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="modal.close('modalAddManager')">Отмена</button>
+      <button class="btn btn-primary" id="saveManagerBtn" onclick="saveManager()">Сохранить</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/utils.js"></script>
+<script>
+  if (!auth.requireAdmin()) throw new Error('not admin');
+  initSidebar('managers');
+
+  let managers = [];
+  let editingId = null;
+
+  async function loadManagers() {
+    const grid = document.getElementById('managersGrid');
+    grid.innerHTML = '<div class="spinner" style="grid-column:1/-1"></div>';
+    try {
+      [managers] = await Promise.all([
+        api.getManagers(),
+        loadPending(),
+      ]);
+      document.getElementById('managersCount').textContent = `Всего менеджеров: ${managers.length}`;
+      renderManagers();
+    } catch (e) {
+      grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><p>Ошибка: ${e.message}</p></div>`;
+    }
+  }
+
+  async function loadPending() {
+    try {
+      const pending = await api.getPendingManagers();
+      const section = document.getElementById('pendingSection');
+      const list    = document.getElementById('pendingList');
+      const badge   = document.getElementById('pendingBadge');
+      if (!pending.length) { section.style.display = 'none'; return; }
+      section.style.display = '';
+      badge.textContent = pending.length;
+      list.innerHTML = pending.map(p => `
+        <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #f1f5f9">
+          <div style="width:40px;height:40px;background:#fef3c7;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;color:#d97706;font-size:.9rem;flex-shrink:0">
+            ${fmt.initials(p.FullName)}
+          </div>
+          <div style="flex:1">
+            <div style="font-weight:600">${p.FullName}</div>
+            <div style="font-size:.8rem;color:#64748b">@${p.Login} · Зарегистрирован ${fmt.datetime(p.CreatedAt)}</div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-success btn-sm" onclick="approvePending(${p.UserID}, '${p.FullName}')">✓ Назначить менеджером</button>
+            <button class="btn btn-danger btn-sm" onclick="rejectPending(${p.UserID}, '${p.FullName}')">✕ Отклонить</button>
+          </div>
+        </div>
+      `).join('');
+    } catch(e) { /* не критично */ }
+  }
+
+  async function approvePending(id, name) {
+    if (!confirm(`Назначить роль менеджера пользователю "${name}"?`)) return;
+    try {
+      await api.approveManager(id);
+      toast.success(`Роль менеджера назначена: ${name}`);
+      await Promise.all([loadManagers(), loadAllUsers()]);
+    } catch(e) { toast.error(e.message); }
+  }
+
+  async function rejectPending(id, name) {
+    if (!confirm(`Отклонить заявку от "${name}"? Аккаунт будет удалён.`)) return;
+    try {
+      await api.rejectManager(id);
+      toast.success(`Заявка отклонена`);
+      await Promise.all([loadManagers(), loadAllUsers()]);
+    } catch(e) { toast.error(e.message); }
+  }
+
+  function renderManagers() {
+    const grid = document.getElementById('managersGrid');
+    if (!managers.length) {
+      grid.innerHTML = `
+        <div class="empty-state" style="grid-column:1/-1">
+          <div class="empty-icon">👤</div>
+          <h3>Нет менеджеров</h3>
+          <p>Добавьте первого менеджера</p>
+          <button class="btn btn-primary mt-2" onclick="openAddManagerModal()">➕ Добавить менеджера</button>
+        </div>`;
+      return;
+    }
+    grid.innerHTML = managers.map(m => `
+      <div class="manager-card" style="${!m.IsActive ? 'opacity:.7;border-color:#fca5a5' : ''}">
+        <div class="manager-avatar" style="background:${m.IsActive ? '#2563eb' : '#94a3b8'}">
+          ${fmt.initials(m.FullName)}
+        </div>
+        <div class="manager-info">
+          <div class="manager-name">
+            ${m.FullName}
+            ${!m.IsActive ? '<span class="badge badge-danger" style="margin-left:6px">Заблокирован</span>' : ''}
+          </div>
+          <div class="manager-login">@${m.Login} ${m.Email ? '· ' + m.Email : ''}</div>
+          <div class="manager-stats">
+            <div class="manager-stat">Клиентов: <strong>${m.ClientCount}</strong></div>
+            <div class="manager-stat">Продажи/мес: <strong style="color:#16a34a">${fmt.money(m.MonthlySales)}</strong></div>
+            <div class="manager-stat">Вход: <strong>${fmt.datetime(m.LastLoginAt)}</strong></div>
+          </div>
+          ${m.Phone ? `<div style="font-size:.78rem;color:#64748b;margin-top:4px">📞 ${m.Phone}</div>` : ''}
+        </div>
+        <div class="manager-actions">
+          <button class="btn btn-outline btn-sm btn-icon" onclick="openEditManagerModal(${m.UserID})" title="Редактировать">✏️</button>
+          ${m.IsActive
+            ? `<button class="btn btn-warning btn-sm btn-icon" onclick="toggleManager(${m.UserID}, false)" title="Заблокировать">🔒</button>`
+            : `<button class="btn btn-success btn-sm btn-icon" onclick="toggleManager(${m.UserID}, true)" title="Разблокировать">🔓</button>`
+          }
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function openAddManagerModal() {
+    editingId = null;
+    document.getElementById('managerModalTitle').textContent = '➕ Новый менеджер';
+    document.getElementById('managerForm').reset();
+    document.getElementById('mf_id').value = '';
+    document.getElementById('mf_login').disabled = false;
+    document.getElementById('pwdRequired').style.display = '';
+    document.getElementById('pwdHint').style.display = 'none';
+    document.getElementById('mfError').classList.add('hidden');
+    document.getElementById('saveManagerBtn').textContent = 'Создать менеджера';
+    modal.open('modalAddManager');
+  }
+
+  function openEditManagerModal(id) {
+    editingId = id;
+    const m = managers.find(x => x.UserID === id);
+    if (!m) return;
+    document.getElementById('managerModalTitle').textContent = '✏️ Редактирование менеджера';
+    document.getElementById('mf_id').value       = m.UserID;
+    document.getElementById('mf_fullname').value = m.FullName;
+    document.getElementById('mf_login').value    = m.Login;
+    document.getElementById('mf_login').disabled = true;
+    document.getElementById('mf_email').value    = m.Email || '';
+    document.getElementById('mf_phone').value    = m.Phone || '';
+    document.getElementById('mf_password').value = '';
+    document.getElementById('pwdRequired').style.display = 'none';
+    document.getElementById('pwdHint').style.display = '';
+    document.getElementById('mfError').classList.add('hidden');
+    document.getElementById('saveManagerBtn').textContent = 'Сохранить изменения';
+    modal.open('modalAddManager');
+  }
+
+  async function saveManager() {
+    const btn   = document.getElementById('saveManagerBtn');
+    const errEl = document.getElementById('mfError');
+    errEl.classList.add('hidden');
+
+    const fullname  = document.getElementById('mf_fullname').value.trim();
+    const login     = document.getElementById('mf_login').value.trim();
+    const password  = document.getElementById('mf_password').value;
+    const rawEmail  = document.getElementById('mf_email').value.trim();
+    const rawPhone  = document.getElementById('mf_phone').value.trim();
+
+    if (!fullname) { errEl.textContent = 'Введите ФИО'; errEl.classList.remove('hidden'); return; }
+
+    // Валидация email
+    if (rawEmail && !validateEmail(rawEmail)) {
+      errEl.textContent = 'Неверный формат email';
+      errEl.classList.remove('hidden');
+      return;
+    }
+    // Валидация телефона
+    if (rawPhone && !validateByPhone(rawPhone)) {
+      errEl.textContent = 'Неверный формат телефона. Используйте: +375291234567 или 80291234567';
+      errEl.classList.remove('hidden');
+      return;
+    }
+
+    const email = rawEmail || null;
+    const phone = rawPhone ? normalizePhone(rawPhone) : null;
+
+    btn.disabled = true;
+    btn.textContent = 'Сохранение...';
+
+    try {
+      if (editingId) {
+        const data = { full_name: fullname, email, phone };
+        if (password) data.password = password;
+        await api.updateManager(editingId, data);
+        toast.success('Данные менеджера обновлены!');
+      } else {
+        if (!login)    { errEl.textContent = 'Введите логин';  errEl.classList.remove('hidden'); btn.disabled=false; btn.textContent='Создать менеджера'; return; }
+        if (!password) { errEl.textContent = 'Введите пароль'; errEl.classList.remove('hidden'); btn.disabled=false; btn.textContent='Создать менеджера'; return; }
+        if (password.length < 6) { errEl.textContent = 'Пароль должен быть не менее 6 символов'; errEl.classList.remove('hidden'); btn.disabled=false; btn.textContent='Создать менеджера'; return; }
+        await api.createManager({ login, password, full_name: fullname, email, phone });
+        toast.success('Менеджер успешно создан!');
+      }
+      modal.close('modalAddManager');
+      await Promise.all([loadManagers(), loadAllUsers()]);
+    } catch (e) {
+      errEl.textContent = e.message;
+      errEl.classList.remove('hidden');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = editingId ? 'Сохранить изменения' : 'Создать менеджера';
+    }
+  }
+
+  async function toggleManager(id, active) {
+    const m = managers.find(x => x.UserID === id);
+    const name = (m && m.FullName) ? m.FullName : 'менеджера';
+    try {
+      await api.toggleManager(id, active);
+      toast.success('Менеджер «' + name + '» ' + (active ? 'разблокирован' : 'заблокирован'));
+      await Promise.all([loadManagers(), loadAllUsers()]);
+    } catch (e) {
+      toast.error('Ошибка: ' + e.message);
+    }
+  }
+
+  async function loadAllUsers() {
+    const wrap = document.getElementById('allUsersWrap');
+    try {
+      const users = await api.getAllUsers();
+      if (!users.length) {
+        wrap.innerHTML = '<div style="padding:16px;color:#64748b">Нет пользователей</div>';
+        return;
+      }
+      wrap.innerHTML = `
+        <div class="table-wrapper">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Пользователь</th>
+                <th>Логин</th>
+                <th>Текущая роль</th>
+                <th>Статус</th>
+                <th>Изменить роль</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${users.map(u => {
+                const currentRole = u.RoleName || (u.IsPendingRole ? 'pending' : 'none');
+                const isSelf = u.UserID === (auth.getUser()?.user_id);
+                return `
+                  <tr style="${!u.IsActive && !u.IsPendingRole ? 'opacity:.6' : ''}">
+                    <td>
+                      <div style="display:flex;align-items:center;gap:10px">
+                        <div style="width:36px;height:36px;background:${u.IsActive ? '#dbeafe' : '#f1f5f9'};border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;color:${u.IsActive ? '#2563eb' : '#94a3b8'};font-size:.8rem;flex-shrink:0">
+                          ${fmt.initials(u.FullName)}
+                        </div>
+                        <div>
+                          <div style="font-weight:600">${u.FullName}</div>
+                          <div style="font-size:.75rem;color:#64748b">${u.Email || '—'}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td style="font-family:monospace;font-size:.85rem">@${u.Login}</td>
+                    <td>
+                      ${currentRole === 'admin' ? '<span class="badge badge-primary">Администратор</span>'
+                        : currentRole === 'manager' ? '<span class="badge badge-success">Менеджер</span>'
+                        : currentRole === 'pending' ? '<span class="badge badge-warning">Ожидает роли</span>'
+                        : '<span class="badge badge-secondary">Без роли</span>'}
+                    </td>
+                    <td>
+                      ${u.IsActive ? '<span class="badge badge-success">Активен</span>' : '<span class="badge badge-danger">Заблокирован</span>'}
+                    </td>
+                    <td>
+                      ${isSelf ? '<span style="color:#94a3b8;font-size:.8rem">Вы</span>' : `
+                         <select class="form-control" style="width:160px;display:inline-block"
+                          onchange="changeRole(${u.UserID}, this.value, '${u.FullName}', this)">
+                          <option value="none" ${!u.RoleName || u.RoleName === 'admin' ? 'selected' : ''}>— Без роли —</option>
+                          <option value="manager" ${u.RoleName === 'manager' ? 'selected' : ''}>Менеджер</option>
+                        </select>`}
+                    </td>
+                  </tr>`;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>`;
+    } catch(e) {
+      wrap.innerHTML = `<div style="padding:16px;color:#dc2626">Ошибка: ${e.message}</div>`;
+    }
+  }
+
+  async function changeRole(userId, roleName, userName, selectEl) {
+    const label = roleName === 'none' ? 'убрать роль' : `назначить роль "Менеджер"`;
+    if (!confirm(`${label} для пользователя "${userName}"?`)) {
+      // Откатываем select
+      await loadAllUsers();
+      return;
+    }
+    try {
+      await api.changeUserRole(userId, roleName === 'none' ? null : roleName);
+      toast.success(`Роль обновлена для ${userName}`);
+      await Promise.all([loadManagers(), loadAllUsers()]);
+    } catch(e) {
+      toast.error(e.message);
+      loadAllUsers();
+    }
+  }
+
+  // Если пришли с ?new=1
+  if (new URLSearchParams(location.search).get('new') === '1') {
+    window.addEventListener('load', () => openAddManagerModal());
+  }
+
+  loadManagers();
+  loadAllUsers();
+</script>
+</body>
+</html>

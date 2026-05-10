@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Личный кабинет — TileCRM</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="app-layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">🏠</div>
+      <div>
+        <div class="logo-text">FSN GALLERY</div>
+        <div class="logo-sub">Керамическая плитка</div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-title">Менеджер</div>
+      <button class="nav-item" data-page="dashboard" onclick="navigate('dashboard.html')">
+        <span class="nav-icon">📊</span> Личный кабинет
+      </button>
+      <button class="nav-item" data-page="clients" onclick="navigate('clients.html')">
+        <span class="nav-icon">👥</span> Мои клиенты
+      </button>
+      <button class="nav-item" data-page="deals" onclick="navigate('deals.html')">
+        <span class="nav-icon">🤝</span> Мои сделки
+      </button>
+      <button class="nav-item" data-page="my-offers" id="navMyOffers" onclick="navigate('offers.html?my=1')">
+        <span class="nav-icon">📄</span> Мои КП
+      </button>
+      <div class="nav-section-title" data-role="admin" style="display:none">Администратор</div>
+      <button class="nav-item" data-page="admin" data-role="admin" style="display:none" onclick="navigate('admin.html')">
+        <span class="nav-icon">🏢</span> Панель управления
+      </button>
+      <button class="nav-item" data-page="managers" data-role="admin" style="display:none" onclick="navigate('managers.html')">
+        <span class="nav-icon">👤</span> Менеджеры
+      </button>
+      <button class="nav-item" data-page="all-clients" data-role="admin" style="display:none" onclick="navigate('all-clients.html')">
+        <span class="nav-icon">📋</span> Все клиенты
+      </button>
+      <button class="nav-item" data-page="all-deals" data-role="admin" style="display:none" onclick="navigate('all-deals.html')">
+        <span class="nav-icon">📁</span> Все сделки
+      </button>
+      <button class="nav-item" data-page="offers" data-role="admin" style="display:none" onclick="navigate('offers.html')">
+        <span class="nav-icon">📄</span> Все КП
+      </button>
+      <button class="nav-item" data-page="reports" data-role="admin" style="display:none" onclick="navigate('reports.html')">
+        <span class="nav-icon">📈</span> Отчёты
+      </button>
+      <button class="nav-item" data-page="references" data-role="admin" style="display:none" onclick="navigate('references.html')">
+        <span class="nav-icon">📚</span> Справочники
+      </button>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="avatar" id="sidebarAvatar">?</div>
+        <div class="user-info">
+          <div class="user-name" id="sidebarUserName">—</div>
+          <div class="user-role" id="sidebarUserRole">—</div>
+        </div>
+      </div>
+      <button class="btn-logout" id="logoutBtn">🚪 Выйти</button>
+    </div>
+  </aside>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <!-- Main -->
+  <div class="main-content">
+    <header class="top-header">
+      <button class="sidebar-toggle" id="sidebarToggle">☰</button>
+      <span class="header-title">Личный кабинет</span>
+      <div class="header-actions">
+        <button class="btn btn-primary btn-sm" onclick="navigate('clients.html?new=1')">
+          ➕ Новый клиент
+        </button>
+      </div>
+    </header>
+
+    <main class="page-content">
+      <!-- Приветствие -->
+      <div style="margin-bottom:24px">
+        <p id="welcomeSub" style="font-size:1rem;color:#64748b;margin:0">Загрузка данных...</p>
+      </div>
+
+      <!-- Вкладки: Обзор / Рейтинг -->
+      <div class="tabs" style="margin-bottom:16px">
+        <button class="tab-btn active" onclick="switchDashTab('overview')">📊 Обзор</button>
+        <button class="tab-btn" onclick="switchDashTab('rating')">🏆 Рейтинг</button>
+      </div>
+
+      <!-- Вкладка: Обзор -->
+      <div id="dash-tab-overview">
+        <!-- Статистика -->
+        <div class="stats-grid" id="statsGrid">
+          <div class="stat-card">
+            <div class="stat-icon blue">👥</div>
+            <div class="stat-info">
+              <div class="stat-value" id="statClients">—</div>
+              <div class="stat-label">Моих клиентов</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon green">💰</div>
+            <div class="stat-info">
+              <div class="stat-value" id="statMonthlySales">—</div>
+              <div class="stat-label">Продажи за текущий месяц</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon orange">🤝</div>
+            <div class="stat-info">
+              <div class="stat-value" id="statMonthlyDeals">—</div>
+              <div class="stat-label">Активных сделок</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Персональный план выполнения (plan_percent квота) -->
+        <div id="personalPlanWrap" style="margin-bottom:16px"></div>
+
+        <!-- План продаж и квоты -->
+        <div id="planQuotaWrap" style="margin-bottom:16px"></div>
+
+        <!-- Быстрые действия -->
+        <div class="card mb-3">
+          <div class="card-header">
+            <span class="card-title">⚡ Быстрые действия</span>
+          </div>
+          <div class="card-body">
+            <div style="display:flex;gap:12px;flex-wrap:wrap">
+              <button class="btn btn-primary" onclick="openNewClientModal()">
+                ➕ Добавить клиента
+              </button>
+              <button class="btn btn-success" onclick="navigate('deals.html')">
+                🤝 Мои сделки
+              </button>
+              <button class="btn btn-outline" onclick="navigate('clients.html')">
+                👥 Список клиентов
+              </button>
+              <button class="btn btn-outline" onclick="navigate('offers.html?my=1')">
+                📄 Мои КП
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Последние клиенты -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">🕐 Последние клиенты</span>
+            <a href="clients.html" class="btn btn-ghost btn-sm">Все клиенты →</a>
+          </div>
+          <div id="recentClientsWrap">
+            <div class="spinner"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Вкладка: Рейтинг -->
+      <div id="dash-tab-rating" style="display:none">
+        <div class="tabs" style="margin-bottom:16px">
+          <button class="tab-btn active" onclick="switchRatingPeriod('month')">📅 За месяц</button>
+          <button class="tab-btn" onclick="switchRatingPeriod('all')">🏆 Общий</button>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title" id="ratingTitle">🏆 Рейтинг менеджеров за текущий месяц</span>
+          </div>
+          <div class="card-body" id="ratingTableWrap">
+            <div class="spinner"></div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- Модал: Новый клиент -->
+<div class="modal-overlay" id="modalNewClient">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <span class="modal-title">➕ Новый клиент</span>
+      <button class="modal-close" onclick="modal.close('modalNewClient')">✕</button>
+    </div>
+    <div class="modal-body">
+      <form id="newClientForm" novalidate>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">ФИО / Название <span class="required">*</span></label>
+            <input type="text" class="form-control" id="nc_fullname" placeholder="Иванов Иван Иванович" maxlength="100" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Компания</label>
+            <input type="text" class="form-control" id="nc_company" placeholder="ООО «Название»" maxlength="200">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Телефон <span class="required">*</span></label>
+            <input type="tel" class="form-control" id="nc_phone" placeholder="+375291234567 или 80291234567" maxlength="20" required>
+            <div class="form-hint">Формат: +375291234567 или 80291234567</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Email</label>
+            <input type="email" class="form-control" id="nc_email" placeholder="email@example.com" maxlength="100">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Тип клиента <span class="required">*</span></label>
+            <select class="form-control" id="nc_type" required>
+              <option value="">Выберите тип...</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Источник привлечения <span class="required">*</span></label>
+            <select class="form-control" id="nc_source" required>
+              <option value="">Выберите источник...</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Дата первого контакта</label>
+            <input type="date" class="form-control" id="nc_date">
+          </div>
+          <div class="form-group">
+            <label class="form-label">День рождения</label>
+            <input type="date" class="form-control" id="nc_birthday">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Адрес</label>
+          <input type="text" class="form-control" id="nc_address" placeholder="г. Минск, ул. ..." maxlength="200">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Заметка</label>
+          <textarea class="form-control" id="nc_notes" rows="3" placeholder="Дополнительная информация..." maxlength="1000"></textarea>
+        </div>
+        <div class="form-error hidden" id="ncError" style="padding:10px;background:#fee2e2;border-radius:6px;"></div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="modal.close('modalNewClient')">Отмена</button>
+      <button class="btn btn-primary" id="saveClientBtn" onclick="saveNewClient()">Сохранить клиента</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/utils.js"></script>
+<script>
+  if (!auth.requireAuth()) throw new Error('not auth');
+
+  var user = auth.getUser();
+
+  initSidebar('dashboard');
+
+  var now = new Date();
+  var MONTHS_NOM = ['январь','февраль','март','апрель','май','июнь',
+                      'июль','август','сентябрь','октябрь','ноябрь','декабрь'];
+  document.getElementById('welcomeSub').textContent =
+    'Статистика за ' + MONTHS_NOM[now.getMonth()] + ' ' + now.getFullYear() + ' года';
+
+  function switchDashTab(tab) {
+    var tabs = document.querySelectorAll('.tabs .tab-btn');
+    tabs.forEach(function(b, i) {
+      b.classList.toggle('active', (tab === 'overview' && i === 0) || (tab === 'rating' && i === 1));
+    });
+    document.getElementById('dash-tab-overview').style.display = tab === 'overview' ? '' : 'none';
+    document.getElementById('dash-tab-rating').style.display   = tab === 'rating'   ? '' : 'none';
+    if (tab === 'rating') loadRating('month');
+  }
+
+  var _ratingPeriod = 'month';
+  function switchRatingPeriod(period) {
+    _ratingPeriod = period;
+    var btns = document.querySelectorAll('#dash-tab-rating .tabs .tab-btn');
+    btns.forEach(function(b, i) {
+      b.classList.toggle('active', (period === 'month' && i === 0) || (period === 'all' && i === 1));
+    });
+    document.getElementById('ratingTitle').textContent =
+      period === 'month' ? '🏆 Рейтинг менеджеров за текущий месяц' : '🏆 Общий рейтинг менеджеров';
+    loadRating(period);
+  }
+
+  async function loadRating(period) {
+    var wrap = document.getElementById('ratingTableWrap');
+    wrap.innerHTML = '<div class="spinner"></div>';
+    try {
+      var data = await api.get('/stats/ranking?period=' + period);
+      if (!data.length) {
+        wrap.innerHTML = '<div class="empty-state"><p>Нет данных</p></div>';
+        return;
+      }
+      var rows = data.map(function(m, i) {
+        var isMe = m.UserID === user.user_id;
+        var bg = isMe ? 'background:#eff6ff' : '';
+        return '<tr style="' + bg + '">' +
+          '<td>' + (i+1) + '</td>' +
+          '<td><strong>' + m.ManagerName + '</strong>' + (isMe ? ' <span class="badge badge-primary" style="font-size:.65rem">Я</span>' : '') + '</td>' +
+          '<td style="text-align:right;font-weight:700;color:#16a34a">' + fmt.money(m.TotalSales) + '</td>' +
+          '<td style="text-align:right">' + m.DealsCount + '</td>' +
+        '</tr>';
+      }).join('');
+      wrap.innerHTML = '<div class="table-wrapper"><table class="table"><thead><tr><th>#</th><th>Менеджер</th><th style="text-align:right">Продажи (BYN)</th><th style="text-align:right">Сделок</th></tr></thead><tbody>' + rows + '</tbody></table></div>';
+    } catch(e) {
+      wrap.innerHTML = '<p style="color:#ef4444">Ошибка: ' + e.message + '</p>';
+    }
+  }
+
+  async function loadStats() {
+    try {
+      var s = await api.managerStats();
+      document.getElementById('statClients').textContent = s.TotalClients;
+      document.getElementById('statMonthlySales').textContent = fmt.money(s.MonthlySales);
+      document.getElementById('statMonthlyDeals').textContent = s.ActiveDeals ?? s.MonthlyDeals;
+    } catch (e) {
+      toast.error('Ошибка загрузки статистики: ' + e.message);
+    }
+  }
+
+  async function loadPersonalPlanPercent() {
+    var wrap = document.getElementById('personalPlanWrap');
+    try {
+      var plan = await api.getCurrentPlan().catch(function() { return null; });
+      if (!plan) {
+        wrap.innerHTML = '';
+        return;
+      }
+      var pct = Math.min(plan.ProgressPct || 0, 100);
+      var color = pct >= 100 ? '#16a34a' : pct >= 70 ? '#d97706' : '#2563eb';
+      wrap.innerHTML = '<div class="card mb-3"><div class="card-header"><span class="card-title">📊 Мой персональный прогресс (' + MONTHS_NOM[now.getMonth()] + ' ' + now.getFullYear() + ')</span></div><div class="card-body"><div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-size:1rem;font-weight:700;color:' + color + '">' + pct + '%</span><span style="font-size:.85rem;color:#64748b">' + fmt.money(plan.ActualAmount) + ' из ' + fmt.money(plan.TargetAmount) + '</span></div><div style="background:#e2e8f0;border-radius:8px;height:16px;overflow:hidden"><div style="width:' + pct + '%;background:' + color + ';height:100%;border-radius:8px;transition:width .5s"></div></div></div></div>';
+    } catch(e) {
+      wrap.innerHTML = '';
+    }
+  }
+
+  async function loadPlanAndQuotas() {
+    var wrap = document.getElementById('planQuotaWrap');
+    try {
+      // План продаж - прогресс всех пользователей по завершённым сделкам
+      var companyPlan = await api.getCompanyPlan().catch(function() { return null; });
+      var quotas = await api.getQuotaProgress().catch(function() { return []; });
+
+      var html = '';
+
+      // План продаж компании (все пользователи, завершённые сделки)
+      if (companyPlan) {
+        var pct = Math.min(companyPlan.ProgressPct || 0, 100);
+        var color = pct >= 100 ? '#16a34a' : pct >= 70 ? '#d97706' : '#2563eb';
+        html += '<div class="card mb-3"><div class="card-header"><span class="card-title">🎯 План продаж на ' + MONTHS_NOM[now.getMonth()] + ' ' + now.getFullYear() + '</span></div><div class="card-body"><div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-size:.85rem;color:#64748b">Прогресс компании (все менеджеры)</span><span style="font-weight:700;color:' + color + '">' + pct + '%</span></div><div style="background:#e2e8f0;border-radius:8px;height:12px;overflow:hidden"><div style="width:' + pct + '%;background:' + color + ';height:100%;border-radius:8px;transition:width .5s"></div></div><div style="display:flex;justify-content:space-between;margin-top:6px;font-size:.78rem;color:#64748b"><span>Факт: <strong>' + fmt.money(companyPlan.ActualAmount) + '</strong></span><span>Цель: <strong>' + fmt.money(companyPlan.TargetAmount) + '</strong></span></div></div></div>';
+      }
+
+      // Квоты (без plan_percent - он показывается отдельно)
+      var filteredQuotas = quotas.filter(function(q) { return q.QuotaType !== 'plan_percent'; });
+      if (filteredQuotas.length) {
+        var QUOTA_LABELS = {
+          'sales_amount': 'Сумма продаж',
+          'deals_count': 'Количество сделок',
+          'new_clients': 'Новых клиентов'
+        };
+        html += '<div class="card mb-3"><div class="card-header"><span class="card-title">📊 Мои квоты на ' + MONTHS_NOM[now.getMonth()] + '</span></div><div class="card-body">';
+        filteredQuotas.forEach(function(q) {
+          var qpct = Math.min(q.ProgressPct || 0, 100);
+          var qcolor = qpct >= 100 ? '#16a34a' : qpct >= 70 ? '#d97706' : '#2563eb';
+          var isMoney = q.QuotaType === 'sales_amount';
+          var actual = isMoney ? fmt.money(q.ActualValue) : q.ActualValue;
+          var target = isMoney ? fmt.money(q.TargetValue) : q.TargetValue;
+          var label = QUOTA_LABELS[q.QuotaType] || q.QuotaType;
+          html += '<div style="margin-bottom:14px"><div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:.85rem;font-weight:600">' + label + '</span><span style="font-weight:700;color:' + qcolor + '">' + qpct + '%</span></div><div style="background:#e2e8f0;border-radius:8px;height:10px;overflow:hidden"><div style="width:' + qpct + '%;background:' + qcolor + ';height:100%;border-radius:8px"></div></div><div style="display:flex;justify-content:space-between;margin-top:4px;font-size:.75rem;color:#64748b"><span>Факт: <strong>' + actual + '</strong></span><span>Цель: <strong>' + target + '</strong></span></div></div>';
+        });
+        html += '</div></div>';
+      }
+
+      wrap.innerHTML = html;
+    } catch(e) { /* не критично */ }
+  }
+
+  async function loadRecentClients() {
+    var wrap = document.getElementById('recentClientsWrap');
+    try {
+      var clients = await api.getClients();
+      var recent = clients.slice(0, 8);
+      if (!recent.length) {
+        wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">👥</div><h3>Нет клиентов</h3><p>Добавьте первого клиента</p></div>';
+        return;
+      }
+      var rows = recent.map(function(c) {
+        var company = c.CompanyName ? '<div style="font-size:.78rem;color:#64748b">' + c.CompanyName + '</div>' : '';
+        return '<tr><td><div style="font-weight:600">' + c.FullName + '</div>' + company + '</td><td>' + c.Phone + '</td><td><span class="badge badge-secondary">' + c.ClientType + '</span></td><td>' + statusBadge(c.Status) + '</td><td style="font-weight:600">' + fmt.money(c.TotalPurchases) + '</td><td>' + fmt.date(c.LastPurchaseDate) + '</td><td><button class="btn btn-outline btn-sm" onclick="navigate(\'client.html?id=' + c.ClientID + '\')">Открыть</button></td></tr>';
+      }).join('');
+      wrap.innerHTML = '<div class="table-wrapper"><table class="table"><thead><tr><th>Клиент</th><th>Телефон</th><th>Тип</th><th>Статус</th><th>Сумма покупок</th><th>Последняя покупка</th><th></th></tr></thead><tbody>' + rows + '</tbody></table></div>';
+    } catch (e) {
+      wrap.innerHTML = '<div class="empty-state"><p>Ошибка загрузки: ' + e.message + '</p></div>';
+    }
+  }
+
+  async function openNewClientModal() {
+    var refs = await loadReferences();
+    fillSelect(document.getElementById('nc_type'), refs.client_types, 'ClientTypeID', 'TypeName');
+    fillSelect(document.getElementById('nc_source'), refs.lead_sources, 'LeadSourceID', 'SourceName');
+    document.getElementById('newClientForm').reset();
+    var today = new Date().toISOString().split('T')[0];
+    document.getElementById('nc_date').value = today;
+    setMaxToday(document.getElementById('nc_date'));
+    setMaxToday(document.getElementById('nc_birthday'));
+    document.getElementById('ncError').classList.add('hidden');
+    modal.open('modalNewClient');
+  }
+
+  async function saveNewClient() {
+    var btn = document.getElementById('saveClientBtn');
+    var errEl = document.getElementById('ncError');
+    errEl.classList.add('hidden');
+
+    var rawPhone = document.getElementById('nc_phone').value.trim();
+    var rawEmail = document.getElementById('nc_email').value.trim();
+    var rawDate = document.getElementById('nc_date').value;
+
+    if (!rawPhone || !validateByPhone(rawPhone)) {
+      errEl.textContent = 'Неверный формат телефона. Используйте: +375291234567 или 80291234567';
+      errEl.classList.remove('hidden');
+      return;
+    }
+    if (!validateEmail(rawEmail)) {
+      errEl.textContent = 'Неверный формат email';
+      errEl.classList.remove('hidden');
+      return;
+    }
+    if (rawDate && !validateNotFuture(rawDate)) {
+      errEl.textContent = 'Дата первого контакта не может быть в будущем';
+      errEl.classList.remove('hidden');
+      return;
+    }
+
+    var birthday = document.getElementById('nc_birthday').value;
+    if (birthday && !validateNotFuture(birthday)) {
+      errEl.textContent = 'День рождения не может быть в будущем';
+      errEl.classList.remove('hidden');
+      return;
+    }
+
+    var data = {
+      full_name: document.getElementById('nc_fullname').value.trim(),
+      company_name: document.getElementById('nc_company').value.trim() || null,
+      phone: normalizePhone(rawPhone),
+      email: rawEmail || null,
+      client_type_id: document.getElementById('nc_type').value,
+      lead_source_id: document.getElementById('nc_source').value,
+      first_contact_date: rawDate || null,
+      birth_date: birthday || null,
+      address: document.getElementById('nc_address').value.trim() || null,
+      notes: document.getElementById('nc_notes').value.trim() || null,
+    };
+
+    if (!data.full_name || !data.client_type_id || !data.lead_source_id) {
+      errEl.textContent = 'Заполните все обязательные поля';
+      errEl.classList.remove('hidden');
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Сохранение...';
+    try {
+      var res = await api.createClient(data);
+      toast.success('Клиент успешно добавлен!');
+      modal.close('modalNewClient');
+      document.getElementById('newClientForm').reset();
+      navigate('client.html?id=' + res.client_id);
+    } catch (e) {
+      errEl.textContent = e.message;
+      errEl.classList.remove('hidden');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Сохранить клиента';
+    }
+  }
+
+  if (new URLSearchParams(location.search).get('new') === '1') {
+    window.addEventListener('load', function() { openNewClientModal(); });
+  }
+
+
+  loadPersonalPlanPercent();
+  loadPlanAndQuotas();
+  loadStats();
+  loadRecentClients();
+</script>
+</body>
+</html>

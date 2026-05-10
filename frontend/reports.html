@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Отчёты — FSN GALLERY CRM</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .bar-chart { display:flex; flex-direction:column; gap:8px; }
+    .bar-row { display:flex; align-items:center; gap:10px; font-size:.82rem; }
+    .bar-label { width:160px; text-align:right; color:#64748b; flex-shrink:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .bar-track { flex:1; height:18px; background:#f1f5f9; border-radius:4px; overflow:hidden; }
+    .bar-fill  { height:100%; border-radius:4px; transition:width .4s; }
+    .bar-value { width:120px; flex-shrink:0; font-weight:700; color:#1e293b; font-size:.8rem; }
+    .report-table { width:100%; border-collapse:collapse; font-size:.85rem; }
+    .report-table th { background:#f8fafc; padding:8px 12px; text-align:left; font-weight:600; font-size:.78rem; color:#64748b; border-bottom:1px solid #e2e8f0; }
+    .report-table td { padding:8px 12px; border-bottom:1px solid #f1f5f9; }
+    .report-table tr:last-child td { border-bottom:none; }
+    .rank-badge { display:inline-block; width:24px; height:24px; border-radius:50%; text-align:center; font-weight:700; font-size:.8rem; line-height:24px; }
+    .rank-1 { background:#fbbf24; color:#fff; }
+    .rank-2 { background:#94a3b8; color:#fff; }
+    .rank-3 { background:#f97316; color:#fff; }
+    .rank-other { background:#e2e8f0; color:#64748b; }
+  </style>
+</head>
+<body>
+<div class="app-layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">🏠</div>
+      <div>
+        <div class="logo-text">FSN GALLERY</div>
+        <div class="logo-sub">Керамическая плитка</div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-title">Менеджер</div>
+      <button class="nav-item" data-page="dashboard" onclick="navigate('dashboard.html')">
+        <span class="nav-icon">📊</span> Личный кабинет
+      </button>
+      <button class="nav-item" data-page="clients" onclick="navigate('clients.html')">
+        <span class="nav-icon">👥</span> Мои клиенты
+      </button>
+      <button class="nav-item" data-page="deals" onclick="navigate('deals.html')">
+        <span class="nav-icon">🤝</span> Мои сделки
+      </button>
+      <button class="nav-item" data-page="my-offers" id="navMyOffers" onclick="navigate('offers.html?my=1')">
+        <span class="nav-icon">📄</span> Мои КП
+      </button>
+      <div class="nav-section-title" data-role="admin" style="display:none">Администратор</div>
+      <button class="nav-item" data-page="admin" data-role="admin" style="display:none" onclick="navigate('admin.html')">
+        <span class="nav-icon">🏢</span> Панель управления
+      </button>
+      <button class="nav-item" data-page="managers" data-role="admin" style="display:none" onclick="navigate('managers.html')">
+        <span class="nav-icon">👤</span> Менеджеры
+      </button>
+      <button class="nav-item" data-page="all-clients" onclick="navigate('all-clients.html')">
+        <span class="nav-icon">📋</span> Все клиенты
+      </button>
+      <button class="nav-item" data-page="all-deals" onclick="navigate('all-deals.html')">
+        <span class="nav-icon">📁</span> Все сделки
+      </button>
+      <button class="nav-item" data-page="offers" onclick="navigate('offers.html')">
+        <span class="nav-icon">📄</span> Все КП
+      </button>
+      <button class="nav-item" data-page="reports" onclick="navigate('reports.html')">
+        <span class="nav-icon">📈</span> Отчёты
+      </button>
+      <button class="nav-item" data-page="references" onclick="navigate('references.html')">
+        <span class="nav-icon">📚</span> Справочники
+      </button>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="avatar" id="sidebarAvatar">?</div>
+        <div class="user-info">
+          <div class="user-name" id="sidebarUserName">—</div>
+          <div class="user-role" id="sidebarUserRole">—</div>
+        </div>
+      </div>
+      <button class="btn-logout" id="logoutBtn">🚪 Выйти</button>
+    </div>
+  </aside>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <!-- Main -->
+  <div class="main-content">
+    <header class="top-header">
+      <button class="sidebar-toggle" id="sidebarToggle">☰</button>
+      <span class="header-title">Отчёты</span>
+    </header>
+
+    <main class="page-content">
+      <div style="margin-bottom:20px">
+        <h1>📈 Отчёты и аналитика</h1>
+      </div>
+
+      <!-- Фильтры дат -->
+      <div class="card mb-3">
+        <div class="card-body" style="padding:12px 16px">
+          <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+            <div class="form-group" style="margin:0">
+              <label class="form-label" style="margin-bottom:4px">С</label>
+              <input type="date" class="form-control" id="fromDate" style="width:160px">
+            </div>
+            <div class="form-group" style="margin:0">
+              <label class="form-label" style="margin-bottom:4px">По</label>
+              <input type="date" class="form-control" id="toDate" style="width:160px">
+            </div>
+            <div style="padding-top:20px;display:flex;gap:8px">
+              <button class="btn btn-primary btn-sm" onclick="loadCurrentTab()">🔍 Применить</button>
+              <button class="btn btn-outline btn-sm" onclick="setCurrentMonth()">Текущий месяц</button>
+              <button class="btn btn-outline btn-sm" onclick="setCurrentYear()">Текущий год</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Вкладки -->
+      <div class="tabs" style="margin-bottom:16px">
+        <button class="tab-btn active" onclick="switchReportTab('managers')">👤 Эффективность менеджеров</button>
+        <button class="tab-btn" onclick="switchReportTab('sources')">🔗 Источники клиентов</button>
+        <button class="tab-btn" onclick="switchReportTab('sales')">📊 Динамика продаж</button>
+      </div>
+
+      <!-- Менеджеры -->
+      <div id="report-tab-managers">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">👤 Эффективность менеджеров</span>
+            <div style="display:flex;gap:8px">
+              <a id="exportManagersXlsx" href="#" class="btn btn-outline btn-sm" onclick="exportReport('managers','xlsx')">📊 Excel</a>
+              <a id="exportManagersPdf"  href="#" class="btn btn-outline btn-sm" onclick="exportReport('managers','html')">🖨 Печать</a>
+            </div>
+          </div>
+          <div class="card-body" id="managersContent"><div class="spinner"></div></div>
+        </div>
+      </div>
+
+      <!-- Источники -->
+      <div id="report-tab-sources" style="display:none">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">🔗 Источники клиентов</span>
+            <div style="display:flex;gap:8px">
+              <a href="#" class="btn btn-outline btn-sm" onclick="exportReport('sources','xlsx')">📊 Excel</a>
+              <a href="#" class="btn btn-outline btn-sm" onclick="exportReport('sources','html')">🖨 Печать</a>
+            </div>
+          </div>
+          <div class="card-body" id="sourcesContent"><div class="spinner"></div></div>
+        </div>
+      </div>
+
+      <!-- Динамика продаж -->
+      <div id="report-tab-sales" style="display:none">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">📊 Динамика продаж</span>
+            <div style="display:flex;gap:8px;align-items:center">
+              <select class="form-control" id="salesPeriod" style="width:120px" onchange="loadSalesReport()">
+                <option value="month">По месяцам</option>
+                <option value="week">По неделям</option>
+                <option value="day">По дням</option>
+              </select>
+              <a href="#" class="btn btn-outline btn-sm" onclick="exportReport('sales','xlsx')">📊 Excel</a>
+              <a href="#" class="btn btn-outline btn-sm" onclick="exportReport('sales','html')">🖨 Печать</a>
+            </div>
+          </div>
+          <div class="card-body" id="salesContent"><div class="spinner"></div></div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/utils.js"></script>
+<script>
+  if (!auth.requireAdmin()) throw new Error('not admin');
+
+  initSidebar('reports');
+
+  const now = new Date();
+  let currentTab = 'managers';
+
+  function setCurrentMonth() {
+    const y = now.getFullYear(), m = now.getMonth();
+    document.getElementById('fromDate').value = new Date(y, m, 1).toISOString().split('T')[0];
+    document.getElementById('toDate').value   = new Date(y, m+1, 0).toISOString().split('T')[0];
+    loadCurrentTab();
+  }
+
+  function setCurrentYear() {
+    document.getElementById('fromDate').value = `${now.getFullYear()}-01-01`;
+    document.getElementById('toDate').value   = `${now.getFullYear()}-12-31`;
+    loadCurrentTab();
+  }
+
+  function switchReportTab(tab) {
+    currentTab = tab;
+    const tabs = ['managers', 'sources', 'sales'];
+    document.querySelectorAll('.tab-btn').forEach((b, i) => b.classList.toggle('active', tabs[i] === tab));
+    tabs.forEach(t => { document.getElementById(`report-tab-${t}`).style.display = t === tab ? '' : 'none'; });
+    loadCurrentTab();
+  }
+
+  function loadCurrentTab() {
+    if (currentTab === 'managers') loadManagersReport();
+    else if (currentTab === 'sources') loadSourcesReport();
+    else loadSalesReport();
+  }
+
+  function getDateParams() {
+    const from = document.getElementById('fromDate').value;
+    const to   = document.getElementById('toDate').value;
+    return from && to ? { from, to } : {};
+  }
+
+  async function loadManagersReport() {
+    const el = document.getElementById('managersContent');
+    el.innerHTML = '<div class="spinner"></div>';
+    try {
+      const data = await api.reportManagers(getDateParams());
+      if (!data.length) { el.innerHTML = '<div class="empty-state"><p>Нет данных</p></div>'; return; }
+      const maxSales = Math.max(...data.map(r => r.TotalSales || 0), 1);
+      el.innerHTML = `
+        <div class="table-wrapper">
+          <table class="report-table">
+            <thead><tr>
+              <th>#</th><th>Менеджер</th>
+              <th style="text-align:right">Сделок</th>
+              <th style="text-align:right">Сумма продаж</th>
+              <th style="text-align:right">Средний чек</th>
+              <th style="text-align:right">Новых клиентов</th>
+              <th>Продажи</th>
+            </tr></thead>
+            <tbody>
+              ${data.map((r, i) => {
+                const rankCls = i === 0 ? 'rank-1' : i === 1 ? 'rank-2' : i === 2 ? 'rank-3' : 'rank-other';
+                const pct = maxSales > 0 ? (r.TotalSales / maxSales * 100) : 0;
+                return `<tr>
+                  <td><span class="rank-badge ${rankCls}">${i+1}</span></td>
+                  <td><strong>${r.ManagerName}</strong></td>
+                  <td style="text-align:right">${r.DealsCount}</td>
+                  <td style="text-align:right;font-weight:700;color:#16a34a">${fmt.money(r.TotalSales)}</td>
+                  <td style="text-align:right">${fmt.money(r.AvgDealValue)}</td>
+                  <td style="text-align:right">${r.NewClientsCount}</td>
+                  <td style="width:160px">
+                    <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:#2563eb"></div></div>
+                  </td>
+                </tr>`;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>`;
+    } catch(e) { el.innerHTML = `<p style="color:#ef4444">Ошибка: ${e.message}</p>`; }
+  }
+
+  async function loadSourcesReport() {
+    const el = document.getElementById('sourcesContent');
+    el.innerHTML = '<div class="spinner"></div>';
+    try {
+      const data = await api.reportSources(getDateParams());
+      if (!data.length) { el.innerHTML = '<div class="empty-state"><p>Нет данных</p></div>'; return; }
+      const maxCount = Math.max(...data.map(r => r.ClientsCount || 0), 1);
+      const colors = ['#2563eb','#7c3aed','#16a34a','#d97706','#dc2626','#0891b2','#db2777'];
+      el.innerHTML = `
+        <div class="bar-chart" style="margin-bottom:20px">
+          ${data.map((r, i) => `
+            <div class="bar-row">
+              <div class="bar-label" title="${r.SourceName}">${r.SourceName}</div>
+              <div class="bar-track"><div class="bar-fill" style="width:${r.ClientsCount/maxCount*100}%;background:${colors[i%colors.length]}"></div></div>
+              <div class="bar-value">${r.ClientsCount} клиентов (${r.Percentage}%)</div>
+            </div>`).join('')}
+        </div>
+        <div class="table-wrapper">
+          <table class="report-table">
+            <thead><tr><th>Источник</th><th style="text-align:right">Клиентов</th><th style="text-align:right">%</th></tr></thead>
+            <tbody>
+              ${data.map(r => `<tr>
+                <td>${r.SourceName}</td>
+                <td style="text-align:right;font-weight:700">${r.ClientsCount}</td>
+                <td style="text-align:right;color:#64748b">${r.Percentage}%</td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>`;
+    } catch(e) { el.innerHTML = `<p style="color:#ef4444">Ошибка: ${e.message}</p>`; }
+  }
+
+  async function loadSalesReport() {
+    const el = document.getElementById('salesContent');
+    el.innerHTML = '<div class="spinner"></div>';
+    try {
+      const period = document.getElementById('salesPeriod').value;
+      const params = { ...getDateParams(), period };
+      const data = await api.reportSales(params);
+      if (!data.length) { el.innerHTML = '<div class="empty-state"><p>Нет данных за выбранный период</p></div>'; return; }
+      const maxSales = Math.max(...data.map(r => r.SalesAmount || 0), 1);
+      el.innerHTML = `
+        <div class="bar-chart" style="margin-bottom:20px">
+          ${data.map(r => `
+            <div class="bar-row">
+              <div class="bar-label">${r.PeriodLabel}</div>
+              <div class="bar-track"><div class="bar-fill" style="width:${r.SalesAmount/maxSales*100}%;background:#16a34a"></div></div>
+              <div class="bar-value">${fmt.money(r.SalesAmount)} (${r.DealsCount} сд.)</div>
+            </div>`).join('')}
+        </div>
+        <div class="table-wrapper">
+          <table class="report-table">
+            <thead><tr><th>Период</th><th style="text-align:right">Сумма продаж</th><th style="text-align:right">Сделок</th></tr></thead>
+            <tbody>
+              ${data.map(r => `<tr>
+                <td>${r.PeriodLabel}</td>
+                <td style="text-align:right;font-weight:700;color:#16a34a">${fmt.money(r.SalesAmount)}</td>
+                <td style="text-align:right">${r.DealsCount}</td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>`;
+    } catch(e) { el.innerHTML = `<p style="color:#ef4444">Ошибка: ${e.message}</p>`; }
+  }
+
+  function exportReport(type, format) {
+    const params = { type, format };
+    const dp = getDateParams();
+    if (dp.from) params.from = dp.from;
+    if (dp.to)   params.to   = dp.to;
+    if (type === 'sales') params.period = document.getElementById('salesPeriod').value;
+    const q = new URLSearchParams(Object.fromEntries(Object.entries(params).filter(([,v])=>v))).toString();
+    const url = `/api/reports/export?${q}`;
+    if (format === 'html') {
+      // Open print window
+      fetch(url, { credentials: 'include' })
+        .then(r => r.text())
+        .then(html => {
+          const w = window.open('', '_blank');
+          w.document.write(html);
+          w.document.close();
+          w.onload = () => { w.focus(); w.print(); };
+        });
+    } else {
+      window.location.href = url;
+    }
+  }
+
+  // Init
+  setCurrentMonth();
+  loadManagersReport();
+</script>
+</body>
+</html>

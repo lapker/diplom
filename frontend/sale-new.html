@@ -1,0 +1,517 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Новая продажа — FSN GALLERY CRM</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="app-layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">🏠</div>
+      <div>
+        <div class="logo-text">FSN GALLERY</div>
+        <div class="logo-sub">Керамическая плитка</div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-title">Менеджер</div>
+      <button class="nav-item" data-page="dashboard" onclick="navigate('dashboard.html')">
+        <span class="nav-icon">📊</span> Личный кабинет
+      </button>
+      <button class="nav-item" data-page="clients" onclick="navigate('clients.html')">
+        <span class="nav-icon">👥</span> Мои клиенты
+      </button>
+      <button class="nav-item" data-page="sale-new" onclick="navigate('sale-new.html')">
+        <span class="nav-icon">🛒</span> Новая продажа
+      </button>
+      <button class="nav-item" data-page="my-offers" id="navMyOffers" onclick="navigate('offers.html?my=1')"><span class="nav-icon">📄</span> Мои КП</button>
+      <div class="nav-section-title" data-role="admin" style="display:none">Администратор</div>
+      <button class="nav-item" data-page="admin" data-role="admin" style="display:none" onclick="navigate('admin.html')">
+        <span class="nav-icon">🏢</span> Панель управления
+      </button>
+      <button class="nav-item" data-page="managers" data-role="admin" style="display:none" onclick="navigate('managers.html')">
+        <span class="nav-icon">👤</span> Менеджеры
+      </button>
+      <button class="nav-item" data-page="all-clients" data-role="admin" style="display:none" onclick="navigate('all-clients.html')">
+        <span class="nav-icon">📋</span> Все клиенты
+      </button>
+      <button class="nav-item" data-page="offers" data-role="admin" style="display:none" onclick="navigate('offers.html')">
+        <span class="nav-icon">📄</span> Все КП
+      </button>
+      <button class="nav-item" data-page="reports" data-role="admin" style="display:none" onclick="navigate('reports.html')">
+        <span class="nav-icon">📈</span> Отчёты
+      </button>
+      <button class="nav-item" data-page="references" data-role="admin" style="display:none" onclick="navigate('references.html')">
+        <span class="nav-icon">📚</span> Справочники
+      </button>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="avatar" id="sidebarAvatar">?</div>
+        <div class="user-info">
+          <div class="user-name" id="sidebarUserName">—</div>
+          <div class="user-role" id="sidebarUserRole">—</div>
+        </div>
+      </div>
+      <button class="btn-logout" id="logoutBtn">🚪 Выйти</button>
+    </div>
+  </aside>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <!-- Main -->
+  <div class="main-content">
+    <header class="top-header">
+      <button class="sidebar-toggle" id="sidebarToggle">☰</button>
+      <span class="header-title">Новая продажа</span>
+    </header>
+
+    <main class="page-content">
+      <div class="breadcrumb">
+        <a href="clients.html">Клиенты</a>
+        <span class="sep">›</span>
+        <span>Новая продажа</span>
+      </div>
+
+      <div class="page-header">
+        <div class="page-header-left">
+          <h1>🛒 Оформление продажи</h1>
+          <p>Выберите клиента, добавьте товары и сохраните продажу</p>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 360px;gap:24px;align-items:start" id="saleLayout">
+
+        <!-- Левая колонка: форма -->
+        <div>
+          <!-- Клиент -->
+          <div class="card mb-3">
+            <div class="card-header">
+              <span class="card-title">👤 Клиент</span>
+            </div>
+            <div class="card-body">
+              <div class="form-group" style="margin-bottom:0">
+                <label class="form-label">Выберите клиента <span class="required">*</span></label>
+                <select class="form-control" id="clientSelect">
+                  <option value="">Загрузка клиентов...</option>
+                </select>
+              </div>
+              <div id="clientInfo" style="margin-top:14px;display:none">
+                <div style="background:#f8fafc;border-radius:8px;padding:12px 14px;border:1px solid #e2e8f0">
+                  <div style="font-weight:700" id="ciName">—</div>
+                  <div style="font-size:.82rem;color:#64748b" id="ciPhone">—</div>
+                  <div style="font-size:.82rem;color:#64748b" id="ciStatus">—</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Дата и примечание -->
+          <div class="card mb-3">
+            <div class="card-header">
+              <span class="card-title">📅 Детали продажи</span>
+            </div>
+            <div class="card-body">
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Дата продажи <span class="required">*</span></label>
+                  <input type="date" class="form-control" id="saleDate">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Примечание</label>
+                  <textarea class="form-control" id="saleNotes" rows="2" placeholder="Необязательно..." maxlength="2000"></textarea>
+                  <div class="form-hint">Максимум 2000 символов</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Товары -->
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">📦 Товары</span>
+              <button class="btn btn-primary btn-sm" onclick="openAddItemModal()">➕ Добавить товар</button>
+            </div>
+            <div class="card-body" style="padding:0">
+              <div id="itemsWrap">
+                <div class="empty-state" style="padding:40px 20px">
+                  <div class="empty-icon">📦</div>
+                  <h3>Нет товаров</h3>
+                  <p>Нажмите «Добавить товар» для начала</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Правая колонка: итог -->
+        <div style="position:sticky;top:80px">
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">💰 Итог</span>
+            </div>
+            <div class="card-body">
+              <div style="margin-bottom:16px">
+                <div style="display:flex;justify-content:space-between;margin-bottom:8px;font-size:.875rem">
+                  <span style="color:#64748b">Позиций:</span>
+                  <span id="totalItems" style="font-weight:600">0</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;margin-bottom:8px;font-size:.875rem">
+                  <span style="color:#64748b">Количество единиц:</span>
+                  <span id="totalQty" style="font-weight:600">0</span>
+                </div>
+                <hr class="divider" style="margin:12px 0">
+                <div style="display:flex;justify-content:space-between;align-items:center">
+                  <span style="font-weight:700">Итого:</span>
+                  <span id="totalAmount" style="font-size:1.4rem;font-weight:800;color:#16a34a">0 ₽</span>
+                </div>
+              </div>
+              <div class="form-error hidden" id="saleError" style="padding:10px;background:#fee2e2;border-radius:6px;margin-bottom:12px"></div>
+              <button class="btn btn-success w-100 btn-lg" id="saveSaleBtn" onclick="saveSale()">
+                ✅ Оформить продажу
+              </button>
+              <button class="btn btn-outline w-100 mt-1" onclick="history.back()">
+                Отмена
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- Модал: Добавить товар -->
+<div class="modal-overlay" id="modalAddItem">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <span class="modal-title">📦 Добавить товар</span>
+      <button class="modal-close" onclick="modal.close('modalAddItem')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Категория</label>
+        <select class="form-control" id="itemCategory" onchange="filterProducts()">
+          <option value="">Все категории</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Товар <span class="required">*</span></label>
+        <select class="form-control" id="itemProduct" onchange="onProductSelect()">
+          <option value="">Выберите товар...</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Количество <span class="required">*</span></label>
+          <input type="number" class="form-control" id="itemQty" min="1" max="99999" step="1" placeholder="1" oninput="calcItemTotal()">
+          <div class="form-hint">Минимум 1, максимум 99999 единиц</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Единица</label>
+          <input type="text" class="form-control" id="itemUnit" readonly style="background:#f8fafc">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Цена за единицу</label>
+          <input type="text" class="form-control" id="itemPrice" readonly style="background:#f8fafc;color:#16a34a;font-weight:600" placeholder="Выберите товар...">
+          <div class="form-hint">Цена устанавливается автоматически из каталога</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Сумма</label>
+          <input type="text" class="form-control" id="itemTotal" readonly style="background:#f8fafc;font-weight:700;color:#16a34a">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="modal.close('modalAddItem')">Отмена</button>
+      <button class="btn btn-primary" onclick="addItem()">Добавить в продажу</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/utils.js"></script>
+<script>
+  if (!auth.requireAuth()) throw new Error('not auth');
+  initSidebar('sale-new');
+
+  let products = [];
+  let clients  = [];
+  let saleItems = [];
+
+  const preselectedClientId = new URLSearchParams(location.search).get('client');
+
+  async function init() {
+    const todayStr = new Date().toISOString().split('T')[0];
+    document.getElementById('saleDate').value = todayStr;
+    setMaxToday(document.getElementById('saleDate'));
+
+    // Загружаем клиентов и товары параллельно
+    [clients, products] = await Promise.all([api.getClients(), api.getProducts()]);
+
+    // Заполняем список клиентов
+    const sel = document.getElementById('clientSelect');
+    sel.innerHTML = '<option value="">— Выберите клиента —</option>';
+    clients.forEach(c => {
+      const opt = document.createElement('option');
+      opt.value = c.ClientID;
+      opt.textContent = c.FullName + (c.CompanyName ? ` (${c.CompanyName})` : '');
+      sel.appendChild(opt);
+    });
+
+    if (preselectedClientId) {
+      sel.value = preselectedClientId;
+      onClientSelect();
+    }
+
+    // Заполняем категории
+    const cats = [...new Set(products.map(p => p.CategoryName))].sort();
+    const catSel = document.getElementById('itemCategory');
+    cats.forEach(c => {
+      const opt = document.createElement('option');
+      opt.value = c;
+      opt.textContent = c;
+      catSel.appendChild(opt);
+    });
+
+    filterProducts();
+  }
+
+  function onClientSelect() {
+    const id = parseInt(document.getElementById('clientSelect').value);
+    const info = document.getElementById('clientInfo');
+    if (!id) { info.style.display = 'none'; return; }
+    const c = clients.find(x => x.ClientID === id);
+    if (!c) return;
+    document.getElementById('ciName').textContent = c.FullName;
+    document.getElementById('ciPhone').textContent = '📞 ' + c.Phone;
+    document.getElementById('ciStatus').textContent = 'Статус: ' + c.Status + ' · Покупок: ' + fmt.money(c.TotalPurchases);
+    info.style.display = 'block';
+  }
+
+  document.getElementById('clientSelect').addEventListener('change', onClientSelect);
+
+  function filterProducts() {
+    const cat = document.getElementById('itemCategory').value;
+    const filtered = cat ? products.filter(p => p.CategoryName === cat) : products;
+    const sel = document.getElementById('itemProduct');
+    sel.innerHTML = '<option value="">— Выберите товар —</option>';
+    filtered.forEach(p => {
+      const opt = document.createElement('option');
+      opt.value = p.ProductID;
+      opt.dataset.price = p.Price;
+      opt.dataset.unit  = p.Unit;
+      opt.textContent = `${p.ProductName} — ${fmt.money(p.Price)}/${p.Unit}`;
+      sel.appendChild(opt);
+    });
+    document.getElementById('itemPrice').value = '';
+    document.getElementById('itemUnit').value  = '';
+    document.getElementById('itemTotal').value = '';
+  }
+
+  function onProductSelect() {
+    const sel = document.getElementById('itemProduct');
+    const opt = sel.options[sel.selectedIndex];
+    if (!opt.value) return;
+    document.getElementById('itemPrice').value = opt.dataset.price;
+    document.getElementById('itemUnit').value  = opt.dataset.unit;
+    calcItemTotal();
+  }
+
+  function calcItemTotal() {
+    const qty   = parseFloat(document.getElementById('itemQty').value)   || 0;
+    const price = parseFloat(document.getElementById('itemPrice').value) || 0;
+    document.getElementById('itemTotal').value = fmt.money(qty * price);
+  }
+
+  function openAddItemModal() {
+    document.getElementById('itemQty').value   = '';
+    document.getElementById('itemTotal').value = '';
+    modal.open('modalAddItem');
+  }
+
+  // Максимально допустимая сумма продажи (ограничение типа numeric в БД)
+  const MAX_SALE_TOTAL = 9999999999.99;
+
+  function addItem() {
+    const productId = parseInt(document.getElementById('itemProduct').value);
+    const qty       = parseFloat(document.getElementById('itemQty').value);
+    const price     = parseFloat(document.getElementById('itemPrice').value);
+
+    if (!productId) {
+      toast.warning('Выберите товар');
+      return;
+    }
+    if (!qty || qty < 1) {
+      toast.warning('Количество должно быть не менее 1');
+      return;
+    }
+    if (qty > 99999) {
+      toast.warning('Количество не может превышать 99999');
+      return;
+    }
+    if (!price) {
+      toast.warning('Цена не определена. Выберите товар из списка.');
+      return;
+    }
+
+    // Проверяем, не превысит ли итоговая сумма допустимый предел
+    const currentTotal = saleItems.reduce((s, i) => s + i.quantity * i.unit_price, 0);
+    const newItemTotal = qty * price;
+    if (currentTotal + newItemTotal > MAX_SALE_TOTAL) {
+      toast.error(`Итоговая сумма продажи превышает допустимый предел (${fmt.money(MAX_SALE_TOTAL)}). Уменьшите количество или выберите другой товар.`);
+      return;
+    }
+
+    const product = products.find(p => p.ProductID === productId);
+    saleItems.push({
+      product_id:  productId,
+      quantity:    qty,
+      unit_price:  price,
+      productName: product.ProductName,
+      unit:        product.Unit,
+      sku:         product.SKU,
+    });
+
+    modal.close('modalAddItem');
+    renderItems();
+  }
+
+  function removeItem(idx) {
+    saleItems.splice(idx, 1);
+    renderItems();
+  }
+
+  function renderItems() {
+    const wrap = document.getElementById('itemsWrap');
+    if (!saleItems.length) {
+      wrap.innerHTML = `<div class="empty-state" style="padding:40px 20px"><div class="empty-icon">📦</div><h3>Нет товаров</h3><p>Нажмите «Добавить товар»</p></div>`;
+      updateTotals();
+      return;
+    }
+
+    wrap.innerHTML = `
+      <table class="sale-items-table">
+        <thead>
+          <tr>
+            <th>Товар</th>
+            <th>Арт.</th>
+            <th>Кол-во</th>
+            <th>Ед.</th>
+            <th>Цена</th>
+            <th>Сумма</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          ${saleItems.map((item, i) => `
+            <tr>
+              <td style="font-weight:500">${item.productName}</td>
+              <td style="font-size:.78rem;color:#64748b">${item.sku || '—'}</td>
+              <td>${item.quantity}</td>
+              <td>${item.unit}</td>
+              <td>${fmt.money(item.unit_price)}</td>
+              <td style="font-weight:700;color:#16a34a">${fmt.money(item.quantity * item.unit_price)}</td>
+              <td><button class="btn-remove" onclick="removeItem(${i})">✕</button></td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    `;
+    updateTotals();
+  }
+
+  function updateTotals() {
+    const total = saleItems.reduce((s, i) => s + i.quantity * i.unit_price, 0);
+    const qty   = saleItems.reduce((s, i) => s + i.quantity, 0);
+    document.getElementById('totalItems').textContent  = saleItems.length;
+    document.getElementById('totalQty').textContent    = qty.toFixed(2);
+    document.getElementById('totalAmount').textContent = fmt.money(total);
+  }
+
+  async function saveSale() {
+    const btn    = document.getElementById('saveSaleBtn');
+    const errEl  = document.getElementById('saleError');
+    errEl.classList.add('hidden');
+
+    const clientId = document.getElementById('clientSelect').value;
+    const saleDate = document.getElementById('saleDate').value;
+    const notes    = document.getElementById('saleNotes').value.trim();
+
+    if (!clientId) {
+      errEl.textContent = 'Выберите клиента';
+      errEl.classList.remove('hidden');
+      return;
+    }
+    if (saleDate && !validateNotFuture(saleDate)) {
+      errEl.textContent = 'Дата продажи не может быть в будущем';
+      errEl.classList.remove('hidden');
+      return;
+    }
+    if (!saleItems.length) {
+      errEl.textContent = 'Добавьте хотя бы один товар';
+      errEl.classList.remove('hidden');
+      return;
+    }
+
+    const totalAmount = saleItems.reduce((s, i) => s + i.quantity * i.unit_price, 0);
+    if (totalAmount > MAX_SALE_TOTAL) {
+      errEl.textContent = `Итоговая сумма продажи (${fmt.money(totalAmount)}) превышает допустимый предел. Уменьшите количество товаров.`;
+      errEl.classList.remove('hidden');
+      return;
+    }
+    if (notes && notes.length > 2000) {
+      errEl.textContent = 'Примечание не может превышать 2000 символов';
+      errEl.classList.remove('hidden');
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Сохранение...';
+
+    try {
+      const res = await api.createSale({
+        client_id: parseInt(clientId),
+        sale_date: saleDate,
+        notes:     notes || null,
+        items:     saleItems.map(i => ({
+          product_id: i.product_id,
+          quantity:   i.quantity,
+          unit_price: i.unit_price,
+        })),
+      });
+
+      toast.success('Продажа успешно оформлена!');
+      setTimeout(() => navigate('client.html?id=' + clientId), 800);
+    } catch (e) {
+      errEl.textContent = e.message;
+      errEl.classList.remove('hidden');
+      btn.disabled = false;
+      btn.textContent = '✅ Оформить продажу';
+    }
+  }
+
+  // Адаптивность для мобильных
+  function checkLayout() {
+    const layout = document.getElementById('saleLayout');
+    if (window.innerWidth < 768) {
+      layout.style.gridTemplateColumns = '1fr';
+    } else {
+      layout.style.gridTemplateColumns = '1fr 360px';
+    }
+  }
+  window.addEventListener('resize', checkLayout);
+  checkLayout();
+
+  init();
+</script>
+</body>
+</html>

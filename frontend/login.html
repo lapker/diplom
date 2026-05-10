@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Вход — FSN GALLERY CRM</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .login-tabs {
+      display: flex;
+      border-bottom: 1px solid #e2e8f0;
+      margin-bottom: 20px;
+    }
+    .login-tab {
+      flex: 1;
+      padding: 10px 0;
+      background: none;
+      border: none;
+      font-size: .95rem;
+      font-weight: 600;
+      color: #64748b;
+      cursor: pointer;
+      transition: color .2s;
+      border-bottom: 2px solid transparent;
+      font-family: inherit;
+      margin-bottom: -1px;
+    }
+    .login-tab.active {
+      color: #2563eb;
+      border-bottom: 2px solid #2563eb;
+    }
+    .login-tab-panel { display: none; }
+    .login-tab-panel.active { display: block; }
+    .pending-info {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: .85rem;
+      color: #1d4ed8;
+      line-height: 1.5;
+      margin-top: 16px;
+    }
+    .pending-info strong { display: block; margin-bottom: 4px; font-size: .9rem; }
+    .login-bg-pattern {
+      position: fixed; inset: 0; z-index: 0;
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 50%, #1e3a5f 100%);
+      overflow: hidden;
+    }
+    .login-bg-pattern::before {
+      content: '';
+      position: absolute;
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(37,99,235,.15) 0%, transparent 70%);
+      top: -200px; right: -200px;
+    }
+    .login-bg-pattern::after {
+      content: '';
+      position: absolute;
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(37,99,235,.1) 0%, transparent 70%);
+      bottom: -100px; left: -100px;
+    }
+    .login-page { position: relative; z-index: 1; }
+    /* ── Password input wrapper ── */
+    .pwd-wrap {
+      position: relative;
+      display: block;
+    }
+    .pwd-wrap .form-control {
+      padding-right: 40px;
+    }
+    .pwd-toggle {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 28px;
+      height: 28px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 2px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #94a3b8;
+      transition: color .2s;
+    }
+    .pwd-toggle:hover {
+      color: #64748b;
+    }
+    .pwd-toggle:focus-visible {
+      outline: 2px solid var(--primary);
+      outline-offset: 2px;
+      border-radius: 4px;
+    }
+    .pwd-toggle svg {
+      width: 20px;
+      height: 20px;
+    }
+    /* Маскирование пароля через text-security */
+    .pwd-masked {
+      -webkit-text-security: disc !important;
+      -moz-text-security: disc !important;
+      text-security: disc !important;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-bg-pattern"></div>
+  <div class="login-page">
+    <div class="login-card">
+      <div class="login-header">
+        <div class="login-logo">🏠</div>
+        <div class="login-title">FSN GALLERY</div>
+        <div class="login-subtitle">Система управления клиентской базой<br>компании по продаже керамической плитки</div>
+      </div>
+      <div class="login-body">
+        <!-- Вкладки -->
+        <div class="login-tabs">
+          <button class="login-tab active" id="tabLogin" onclick="switchTab('login')">Вход</button>
+          <button class="login-tab" id="tabRegister" onclick="switchTab('register')">Регистрация</button>
+        </div>
+
+        <!-- Панель входа -->
+        <div class="login-tab-panel active" id="panelLogin">
+          <form id="loginForm" novalidate>
+            <div class="form-group">
+              <label class="form-label" for="loginInput">
+                Логин <span class="required">*</span>
+              </label>
+              <input type="text" id="loginInput" class="form-control" placeholder="Введите логин" autocomplete="username" maxlength="50" required>
+              <div class="form-error hidden" id="loginError"></div>
+            </div>
+              <div class="form-group">
+                <label class="form-label" for="passwordInput">
+                  Пароль <span class="required">*</span>
+                </label>
+                <div class="pwd-wrap">
+                  <input type="text" id="passwordInput" class="form-control pwd-masked" placeholder="Введите пароль" maxlength="100" required>
+                  <button type="button" id="togglePwd" class="pwd-toggle" aria-label="Показать пароль">
+                    <!-- Eye open (show password) -->
+                    <svg id="eyeOpen" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                      <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                    <!-- Eye closed (hide password) -->
+                    <svg id="eyeClosed" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                      <line x1="1" y1="1" x2="23" y2="23"></line>
+                    </svg>
+                  </button>
+                </div>
+                <div class="form-error hidden" id="passwordError"></div>
+              </div>
+            <div class="form-error hidden" id="formError" style="margin-bottom:12px;padding:10px;background:#fee2e2;border-radius:6px;"></div>
+            <button type="submit" class="btn btn-primary w-100 btn-lg" id="submitBtn">
+              Войти в систему
+            </button>
+          </form>
+        </div>
+
+        <!-- Панель регистрации -->
+        <div class="login-tab-panel" id="panelRegister">
+          <div id="regFormWrap">
+            <form id="registerForm" novalidate>
+              <div class="form-group">
+                <label class="form-label">ФИО <span class="required">*</span></label>
+                <input type="text" id="reg_fullname" class="form-control" placeholder="Иванов Иван Иванович" maxlength="100" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Логин <span class="required">*</span></label>
+                <input type="text" id="reg_login" class="form-control" placeholder="ivanov" maxlength="50" required autocomplete="username">
+                <div class="form-hint">Минимум 3 символа. Только латинские буквы, цифры и _</div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Пароль <span class="required">*</span></label>
+                <input type="password" id="reg_password" class="form-control" placeholder="Минимум 6 символов" maxlength="100" required autocomplete="new-password">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Повторите пароль <span class="required">*</span></label>
+                <input type="password" id="reg_password2" class="form-control" placeholder="Повторите пароль" maxlength="100" required autocomplete="new-password">
+              </div>
+              <div class="form-error hidden" id="regError" style="margin-bottom:12px;padding:10px;background:#fee2e2;border-radius:6px;"></div>
+              <button type="submit" class="btn btn-primary w-100 btn-lg" id="regSubmitBtn">
+                Зарегистрироваться
+              </button>
+            </form>
+          </div>
+          <div class="pending-info" id="regSuccessInfo" style="display:none">
+            <strong>Регистрация успешна!</strong>
+            Ваш аккаунт создан. Обратитесь к администратору для получения роли менеджера. После назначения роли вы сможете войти в систему.
+          </div>
+        </div>
+      </div>
+      <div class="login-footer">
+        © 2026 FSN GALLERY — Система управления клиентами
+      </div>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script src="js/utils.js"></script>
+  <script>
+    // Если уже авторизован — редирект
+    if (auth.isLoggedIn()) {
+      window.location.href = auth.isAdmin() ? 'admin.html' : 'dashboard.html';
+    }
+
+    function switchTab(tab) {
+      document.getElementById('tabLogin').classList.toggle('active', tab === 'login');
+      document.getElementById('tabRegister').classList.toggle('active', tab === 'register');
+      document.getElementById('panelLogin').classList.toggle('active', tab === 'login');
+      document.getElementById('panelRegister').classList.toggle('active', tab === 'register');
+    }
+
+    // Показ/скрытие пароля через кнопку с глазиком
+    document.getElementById('togglePwd').addEventListener('click', function() {
+      const inp = document.getElementById('passwordInput');
+      const eyeOpen = document.getElementById('eyeOpen');
+      const eyeClosed = document.getElementById('eyeClosed');
+      
+      if (inp.classList.contains('pwd-masked')) {
+        // Показываем пароль - убираем маску
+        inp.classList.remove('pwd-masked');
+        eyeOpen.style.display = 'none';
+        eyeClosed.style.display = '';
+      } else {
+        // Скрываем пароль - добавляем маску
+        inp.classList.add('pwd-masked');
+        eyeOpen.style.display = '';
+        eyeClosed.style.display = 'none';
+      }
+    });
+
+    // Форма входа
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const login    = document.getElementById('loginInput').value.trim();
+      const password = document.getElementById('passwordInput').value;
+      const errEl    = document.getElementById('formError');
+      const btn      = document.getElementById('submitBtn');
+
+      errEl.classList.add('hidden');
+      let valid = true;
+
+      if (!login) {
+        document.getElementById('loginError').textContent = 'Введите логин';
+        document.getElementById('loginError').classList.remove('hidden');
+        document.getElementById('loginInput').classList.add('is-invalid');
+        valid = false;
+      } else {
+        document.getElementById('loginError').classList.add('hidden');
+        document.getElementById('loginInput').classList.remove('is-invalid');
+      }
+      if (!password) {
+        document.getElementById('passwordError').textContent = 'Введите пароль';
+        document.getElementById('passwordError').classList.remove('hidden');
+        document.getElementById('passwordInput').classList.add('is-invalid');
+        valid = false;
+      } else {
+        document.getElementById('passwordError').classList.add('hidden');
+        document.getElementById('passwordInput').classList.remove('is-invalid');
+      }
+      if (!valid) return;
+
+      btn.disabled = true;
+      btn.textContent = 'Вход...';
+      try {
+        const user = await api.login(login, password);
+        auth.setUser(user);
+        setTimeout(() => {
+          window.location.href = user.role === 'admin' ? 'admin.html' : 'dashboard.html';
+        }, 300);
+      } catch (err) {
+        if (err.blocked) {
+          auth.clear();
+          window.location.href = 'blocked.html';
+          return;
+        }
+        if (err.pending) {
+          auth.clear();
+          window.location.href = 'blocked.html?pending=1';
+          return;
+        }
+        errEl.textContent = err.message || 'Ошибка входа';
+        errEl.classList.remove('hidden');
+        btn.disabled = false;
+        btn.textContent = 'Войти в систему';
+      }
+    });
+
+    // Форма регистрации
+    document.getElementById('registerForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const fullname  = document.getElementById('reg_fullname').value.trim();
+      const login     = document.getElementById('reg_login').value.trim();
+      const password  = document.getElementById('reg_password').value;
+      const password2 = document.getElementById('reg_password2').value;
+      const errEl     = document.getElementById('regError');
+      const btn       = document.getElementById('regSubmitBtn');
+
+      errEl.classList.add('hidden');
+      if (!fullname) { errEl.textContent = 'Введите ФИО'; errEl.classList.remove('hidden'); return; }
+      if (!login || login.length < 3) { errEl.textContent = 'Логин должен содержать не менее 3 символов'; errEl.classList.remove('hidden'); return; }
+      if (!/^[a-zA-Z0-9_]+$/.test(login)) { errEl.textContent = 'Логин может содержать только латинские буквы, цифры и _'; errEl.classList.remove('hidden'); return; }
+      if (!password || password.length < 6) { errEl.textContent = 'Пароль должен содержать не менее 6 символов'; errEl.classList.remove('hidden'); return; }
+      if (password !== password2) { errEl.textContent = 'Пароли не совпадают'; errEl.classList.remove('hidden'); return; }
+
+      btn.disabled = true;
+      btn.textContent = 'Регистрация...';
+      try {
+        await api.register({ login, password, full_name: fullname });
+        document.getElementById('regFormWrap').style.display = 'none';
+        document.getElementById('regSuccessInfo').style.display = '';
+      } catch (err) {
+        errEl.textContent = err.message || 'Ошибка регистрации';
+        errEl.classList.remove('hidden');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Зарегистрироваться';
+      }
+    });
+  </script>
+</body>
+</html>

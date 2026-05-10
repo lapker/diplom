@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Все сделки — FSN GALLERY CRM</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .kanban-board {
+      display: flex;
+      gap: 12px;
+      overflow-x: auto;
+      padding-bottom: 16px;
+      align-items: flex-start;
+    }
+    .kanban-column {
+      min-width: 220px;
+      max-width: 220px;
+      background: #f8fafc;
+      border-radius: 12px;
+      border: 1px solid #e2e8f0;
+      flex-shrink: 0;
+    }
+    .kanban-col-header {
+      padding: 10px 12px;
+      font-weight: 700;
+      font-size: .8rem;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-radius: 12px 12px 0 0;
+      background: #f1f5f9;
+    }
+    .kanban-col-header.completed { background: #f0fdf4; }
+    .kanban-col-count {
+      background: #e2e8f0;
+      border-radius: 12px;
+      padding: 1px 8px;
+      font-size: .75rem;
+      font-weight: 700;
+    }
+    .kanban-cards {
+      padding: 8px;
+      min-height: 80px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .deal-card {
+      background: #fff;
+      border-radius: 8px;
+      padding: 10px 12px;
+      border: 1px solid #e2e8f0;
+      cursor: pointer;
+      transition: box-shadow .15s, transform .1s;
+      position: relative;
+    }
+    .deal-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,.1); transform: translateY(-1px); }
+    .deal-card .priority-bar { position: absolute; left: 0; top: 0; bottom: 0; width: 4px; border-radius: 8px 0 0 8px; }
+    .priority-1 { background: #94a3b8; }
+    .priority-2 { background: #f59e0b; }
+    .priority-3 { background: #ef4444; }
+    .deal-card-title { font-weight: 600; font-size: .85rem; margin-left: 6px; margin-bottom: 4px; color: #1e293b; }
+    .deal-card-client { font-size: .75rem; color: #64748b; margin-left: 6px; margin-bottom: 6px; }
+    .deal-card-meta { display: flex; justify-content: space-between; align-items: center; margin-left: 6px; font-size: .72rem; color: #94a3b8; }
+    .deal-card-budget { font-weight: 700; color: #16a34a; font-size: .78rem; }
+    .deadline-overdue { color: #dc2626 !important; font-weight: 600; }
+    .deadline-soon    { color: #d97706 !important; }
+    .deal-type-badge { font-size: .68rem; padding: 1px 6px; border-radius: 4px; font-weight: 600; }
+    .deal-type-retail    { background: #dbeafe; color: #2563eb; }
+    .deal-type-wholesale { background: #d1fae5; color: #065f46; }
+  </style>
+</head>
+<body>
+<div class="app-layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">🏠</div>
+      <div>
+        <div class="logo-text">FSN GALLERY</div>
+        <div class="logo-sub">Керамическая плитка</div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-title">Менеджер</div>
+      <button class="nav-item" data-page="dashboard" onclick="navigate('dashboard.html')">
+        <span class="nav-icon">📊</span> Личный кабинет
+      </button>
+      <button class="nav-item" data-page="clients" onclick="navigate('clients.html')">
+        <span class="nav-icon">👥</span> Мои клиенты
+      </button>
+      <button class="nav-item" data-page="deals" onclick="navigate('deals.html')">
+        <span class="nav-icon">🤝</span> Мои сделки
+      </button>
+      <button class="nav-item" data-page="my-offers" onclick="navigate('offers.html?my=1')">
+        <span class="nav-icon">📄</span> Мои КП
+      </button>
+      <div class="nav-section-title">Администратор</div>
+      <button class="nav-item" data-page="admin" onclick="navigate('admin.html')">
+        <span class="nav-icon">🏢</span> Панель управления
+      </button>
+      <button class="nav-item" data-page="managers" onclick="navigate('managers.html')">
+        <span class="nav-icon">👤</span> Менеджеры
+      </button>
+      <button class="nav-item" data-page="all-clients" onclick="navigate('all-clients.html')">
+        <span class="nav-icon">📋</span> Все клиенты
+      </button>
+      <button class="nav-item" data-page="all-deals" onclick="navigate('all-deals.html')">
+        <span class="nav-icon">📁</span> Все сделки
+      </button>
+      <button class="nav-item" data-page="offers" onclick="navigate('offers.html')">
+        <span class="nav-icon">📄</span> Все КП
+      </button>
+      <button class="nav-item" data-page="reports" onclick="navigate('reports.html')">
+        <span class="nav-icon">📈</span> Отчёты
+      </button>
+      <button class="nav-item" data-page="references" onclick="navigate('references.html')">
+        <span class="nav-icon">📚</span> Справочники
+      </button>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="avatar" id="sidebarAvatar">?</div>
+        <div class="user-info">
+          <div class="user-name" id="sidebarUserName">—</div>
+          <div class="user-role" id="sidebarUserRole">—</div>
+        </div>
+      </div>
+      <button class="btn-logout" id="logoutBtn">🚪 Выйти</button>
+    </div>
+  </aside>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <!-- Main -->
+  <div class="main-content">
+    <header class="top-header">
+      <button class="sidebar-toggle" id="sidebarToggle">☰</button>
+      <span class="header-title">Все сделки</span>
+      <div class="header-actions">
+      </div>
+    </header>
+
+    <main class="page-content">
+      <div class="page-header">
+        <div class="page-header-left">
+          <h1>📁 Все сделки компании</h1>
+          <p id="dealsCount">Загрузка...</p>
+        </div>
+      </div>
+
+      <!-- Фильтры -->
+      <div class="card mb-3">
+        <div class="card-body" style="padding:12px 16px">
+          <div style="display:flex;align-items:center;flex-wrap:wrap;gap:8px">
+            <span style="font-size:.8rem;color:#64748b">Фильтры:</span>
+            <select class="form-control" id="filterManager" style="width:200px" onchange="renderBoard()">
+              <option value="">Все менеджеры</option>
+            </select>
+            <select class="form-control" id="filterStage" style="width:180px" onchange="renderBoard()">
+              <option value="">Все этапы</option>
+            </select>
+            <select class="form-control" id="filterPriority" style="width:150px" onchange="renderBoard()">
+              <option value="">Все приоритеты</option>
+              <option value="3">Высокий</option>
+              <option value="2">Средний</option>
+              <option value="1">Низкий</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Канбан-доска -->
+      <div id="kanbanWrap">
+        <div class="spinner"></div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/utils.js"></script>
+<script>
+  if (!auth.requireAdmin()) throw new Error('not admin');
+  initSidebar('all-deals');
+
+  let allDeals  = [];
+  let allStages = [];
+  let allManagers = [];
+
+  const today = new Date(); today.setHours(0,0,0,0);
+
+  function deadlineClass(dl) {
+    if (!dl) return '';
+    const d = new Date(dl); d.setHours(0,0,0,0);
+    const diff = (d - today) / 86400000;
+    if (diff < 0)  return 'deadline-overdue';
+    if (diff <= 3) return 'deadline-soon';
+    return '';
+  }
+
+  function escHtml(s) {
+    return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  async function init() {
+    [allStages, allManagers, allDeals] = await Promise.all([
+      api.getDealStages(),
+      api.getManagers(),
+      api.getDeals(),  // без фильтра — возвращает все для admin
+    ]);
+
+    // Заполнить фильтры
+    const fs = document.getElementById('filterStage');
+    allStages.forEach(s => {
+      const o = document.createElement('option');
+      o.value = s.StageID;
+      o.textContent = s.StageName;
+      fs.appendChild(o);
+    });
+    const fm = document.getElementById('filterManager');
+    allManagers.forEach(m => {
+      const o = document.createElement('option');
+      o.value = m.UserID;
+      o.textContent = m.FullName;
+      fm.appendChild(o);
+    });
+
+    document.getElementById('dealsCount').textContent = `Всего сделок: ${allDeals.length}`;
+    renderBoard();
+  }
+
+  function renderBoard() {
+    const wrap = document.getElementById('kanbanWrap');
+    const filterStage    = document.getElementById('filterStage').value;
+    const filterPriority = document.getElementById('filterPriority').value;
+    const filterManager  = document.getElementById('filterManager').value;
+
+    let filtered = allDeals;
+    if (filterStage)    filtered = filtered.filter(d => String(d.StageID) === filterStage);
+    if (filterPriority) filtered = filtered.filter(d => String(d.Priority) === filterPriority);
+    if (filterManager)  filtered = filtered.filter(d => String(d.ManagerID) === filterManager);
+
+    let stagesToShow = filterStage
+      ? allStages.filter(s => String(s.StageID) === filterStage)
+      : allStages;
+
+    document.getElementById('dealsCount').textContent = `Показано сделок: ${filtered.length}`;
+
+    let html = '<div class="kanban-board">';
+    stagesToShow.forEach(stage => {
+      const deals = filtered.filter(d => d.StageID === stage.StageID);
+      html += `
+        <div class="kanban-column">
+          <div class="kanban-col-header ${stage.IsCompleted ? 'completed' : ''}">
+            <span>${stage.StageName}</span>
+            <span class="kanban-col-count">${deals.length}</span>
+          </div>
+          <div class="kanban-cards">
+            ${deals.map(d => renderDealCard(d)).join('')}
+            ${deals.length === 0 ? '<div style="text-align:center;color:#cbd5e1;font-size:.75rem;padding:12px">Нет сделок</div>' : ''}
+          </div>
+        </div>`;
+    });
+    html += '</div>';
+    wrap.innerHTML = html;
+  }
+
+  function renderDealCard(d) {
+    const dlClass = deadlineClass(d.Deadline);
+    const typeClass = d.DealType === 'опт' ? 'deal-type-wholesale' : 'deal-type-retail';
+    const stageOrder = d.StageOrder || 1;
+    let cardBorder = '';
+    if (d.Deadline && !d.IsCompleted) {
+      const dc = deadlineClass(d.Deadline);
+      if (dc === 'deadline-overdue') cardBorder = 'border-color:#fca5a5';
+      else if (dc === 'deadline-soon') cardBorder = 'border-color:#fde68a';
+    }
+
+    let extraHtml = '';
+    if (stageOrder === 1) {
+      extraHtml = '';
+    } else if (stageOrder === 2) {
+      extraHtml = `
+        <div class="deal-card-meta" style="margin-top:4px">
+          <span class="deal-type-badge ${typeClass}">${d.DealType}</span>
+          ${d.Budget ? `<span class="deal-card-budget">${fmt.money(d.Budget)}</span>` : ''}
+        </div>`;
+    } else {
+      const sumDisplay = d.Budget ? fmt.money(d.Budget) : '—';
+      let dateDisplay = '';
+      if (d.IsCompleted && d.CompletedAt) {
+        dateDisplay = `<div style="font-size:.72rem;margin-top:4px;margin-left:6px;color:#16a34a">✅ ${fmt.date(d.CompletedAt)}</div>`;
+      } else if (d.Deadline) {
+        dateDisplay = `<div style="font-size:.72rem;margin-top:4px;margin-left:6px" class="${dlClass}">📅 ${fmt.date(d.Deadline)}</div>`;
+      }
+      extraHtml = `
+        <div class="deal-card-meta" style="margin-top:4px">
+          <span class="deal-type-badge ${typeClass}">${d.DealType}</span>
+          <span class="deal-card-budget">${sumDisplay}</span>
+        </div>
+        ${dateDisplay}`;
+    }
+
+    return `
+      <div class="deal-card" style="${cardBorder}" onclick="navigate('deal.html?id=${d.DealID}')">
+        <div class="priority-bar priority-${d.Priority}"></div>
+        <div class="deal-card-title">${escHtml(d.Title)}</div>
+        <div style="font-size:.72rem;color:#94a3b8;margin-left:6px;margin-bottom:2px">#${d.DealID}</div>
+        <div class="deal-card-client">
+          👤 ${escHtml(d.ClientName)}
+          ${d.ClientCompany ? `<br><small>${escHtml(d.ClientCompany)}</small>` : ''}
+          ${d.ManagerName ? `<br><small>👔 ${escHtml(d.ManagerName)}</small>` : ''}
+        </div>
+        ${extraHtml}
+      </div>`;
+  }
+
+  init();
+</script>
+</body>
+</html>

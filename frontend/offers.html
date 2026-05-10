@@ -1,0 +1,520 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Коммерческие предложения — FSN GALLERY CRM</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .offer-status-active   { background:#dcfce7;color:#166534;padding:2px 10px;border-radius:12px;font-size:.75rem;font-weight:700 }
+    .offer-status-expired  { background:#f1f5f9;color:#64748b;padding:2px 10px;border-radius:12px;font-size:.75rem;font-weight:700 }
+    .offer-status-used     { background:#dbeafe;color:#1e40af;padding:2px 10px;border-radius:12px;font-size:.75rem;font-weight:700 }
+    .offer-card { background:#fff;border-radius:12px;border:1px solid #e2e8f0;padding:16px 20px;margin-bottom:12px }
+    .offer-card-header { display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:10px }
+    .offer-number { font-size:1rem;font-weight:800;color:#1e293b }
+    .offer-meta { font-size:.78rem;color:#64748b }
+    .offer-items-table { width:100%;border-collapse:collapse;font-size:.82rem;margin-top:10px }
+    .offer-items-table th { background:#f8fafc;padding:6px 10px;text-align:left;font-weight:600;font-size:.75rem;color:#64748b;border-bottom:1px solid #e2e8f0 }
+    .offer-items-table td { padding:6px 10px;border-bottom:1px solid #f1f5f9 }
+  </style>
+</head>
+<body>
+<div class="app-layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">🏠</div>
+      <div>
+        <div class="logo-text">FSN GALLERY</div>
+        <div class="logo-sub">Керамическая плитка</div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-title">Менеджер</div>
+      <button class="nav-item" data-page="dashboard" onclick="navigate('dashboard.html')">
+        <span class="nav-icon">📊</span> Личный кабинет
+      </button>
+      <button class="nav-item" data-page="clients" onclick="navigate('clients.html')">
+        <span class="nav-icon">👥</span> Мои клиенты
+      </button>
+      <button class="nav-item" data-page="deals" onclick="navigate('deals.html')">
+        <span class="nav-icon">🤝</span> Мои сделки
+      </button>
+      <button class="nav-item" data-page="my-offers" id="navMyOffers" onclick="navigate('offers.html?my=1')">
+        <span class="nav-icon">📄</span> Мои КП
+      </button>
+      <div class="nav-section-title" data-role="admin" style="display:none">Администратор</div>
+      <button class="nav-item" data-page="admin" data-role="admin" style="display:none" onclick="navigate('admin.html')">
+        <span class="nav-icon">🏢</span> Панель управления
+      </button>
+      <button class="nav-item" data-page="managers" data-role="admin" style="display:none" onclick="navigate('managers.html')">
+        <span class="nav-icon">👤</span> Менеджеры
+      </button>
+      <button class="nav-item" data-page="all-clients" data-role="admin" style="display:none" onclick="navigate('all-clients.html')">
+        <span class="nav-icon">📋</span> Все клиенты
+      </button>
+      <button class="nav-item" data-page="all-deals" data-role="admin" style="display:none" onclick="navigate('all-deals.html')">
+        <span class="nav-icon">📁</span> Все сделки
+      </button>
+      <button class="nav-item" data-page="offers" data-role="admin" style="display:none" onclick="navigate('offers.html')">
+        <span class="nav-icon">📄</span> Все КП
+      </button>
+      <button class="nav-item" data-page="reports" data-role="admin" style="display:none" onclick="navigate('reports.html')">
+        <span class="nav-icon">📈</span> Отчёты
+      </button>
+      <button class="nav-item" data-page="references" data-role="admin" style="display:none" onclick="navigate('references.html')">
+        <span class="nav-icon">📚</span> Справочники
+      </button>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="avatar" id="sidebarAvatar">?</div>
+        <div class="user-info">
+          <div class="user-name" id="sidebarUserName">—</div>
+          <div class="user-role" id="sidebarUserRole">—</div>
+        </div>
+      </div>
+      <button class="btn-logout" id="logoutBtn">🚪 Выйти</button>
+    </div>
+  </aside>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <!-- Main -->
+  <div class="main-content">
+    <header class="top-header">
+      <button class="sidebar-toggle" id="sidebarToggle">☰</button>
+      <span class="header-title" id="headerTitle">Коммерческие предложения</span>
+      <div class="header-actions">
+        <button class="btn btn-primary btn-sm" onclick="openCreateOfferModal()">➕ Создать КП</button>
+      </div>
+    </header>
+
+    <main class="page-content">
+      <div class="page-header">
+        <div class="page-header-left">
+          <h1>📄 Коммерческие предложения</h1>
+          <p id="offersCount">Загрузка...</p>
+        </div>
+      </div>
+
+      <!-- Фильтры -->
+      <div class="card mb-3">
+        <div class="card-body" style="padding:12px 16px">
+          <div class="search-bar">
+            <div class="search-input-wrap">
+              <span class="search-icon">🔍</span>
+              <input type="text" class="form-control" id="searchInput" placeholder="Поиск по номеру, клиенту...">
+            </div>
+            <select class="form-control" id="statusFilter" style="width:160px;flex-shrink:0">
+              <option value="">Все статусы</option>
+              <option value="active">Активные</option>
+              <option value="expired">Истёкшие</option>
+              <option value="used">Использованные</option>
+            </select>
+            <button class="btn btn-outline btn-sm" onclick="resetFilters()">Сбросить</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Список КП -->
+      <div id="offersContainer">
+        <div class="spinner"></div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- Модал: Создать КП -->
+<div class="modal-overlay" id="modalCreateOffer">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <span class="modal-title">➕ Создать коммерческое предложение</span>
+      <button class="modal-close" onclick="modal.close('modalCreateOffer')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Клиент <span class="required">*</span></label>
+        <select class="form-control" id="co_client" onchange="onClientSelectForOffer()">
+          <option value="">Выберите клиента...</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Срок действия <span class="required">*</span></label>
+        <input type="date" class="form-control" id="co_expires" min="">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Примечание</label>
+        <textarea class="form-control" id="co_notes" rows="2" maxlength="500" placeholder="Дополнительная информация..."></textarea>
+      </div>
+      <div class="form-error hidden" id="coError" style="padding:10px;background:#fee2e2;border-radius:6px"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="modal.close('modalCreateOffer')">Отмена</button>
+      <button class="btn btn-primary" id="saveOfferBtn" onclick="saveOffer()">Создать КП</button>
+    </div>
+  </div>
+</div>
+
+<!-- Модал: Добавить позицию в КП -->
+<div class="modal-overlay" id="modalAddOfferItem">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <span class="modal-title">➕ Добавить позицию в КП</span>
+      <button class="modal-close" onclick="modal.close('modalAddOfferItem')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Товар <span class="required">*</span></label>
+        <select class="form-control" id="oi_product" onchange="onOfferProductSelect()">
+          <option value="">Выберите товар...</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Скидка (%)</label>
+          <input type="number" class="form-control" id="oi_discount" placeholder="0" min="1" max="100" step="0.1" oninput="onOfferDiscountInput()">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Базовая цена</label>
+          <input type="text" class="form-control" id="oi_base_price" readonly style="background:#f8fafc;cursor:not-allowed">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Цена со скидкой</label>
+          <input type="text" class="form-control" id="oi_discounted_price" readonly style="background:#f8fafc;cursor:not-allowed">
+        </div>
+      </div>
+      <div class="form-error hidden" id="oiError" style="padding:10px;background:#fee2e2;border-radius:6px"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="modal.close('modalAddOfferItem')">Отмена</button>
+      <button class="btn btn-primary" id="saveOfferItemBtn" onclick="saveOfferItem()">Добавить</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/utils.js"></script>
+<script>
+  if (!auth.requireAuth()) throw new Error('not auth');
+
+  const currentUser = auth.getUser();
+  const isAdmin = currentUser.role === 'admin';
+  // Менеджеры всегда видят "Мои КП", администраторы выбирают через URL параметр
+  const isMyOffers = isAdmin ? window.location.search.includes('my=1') : true;
+
+  initSidebar(isMyOffers ? 'my-offers' : 'offers');
+
+  // Заголовок зависит от режима
+  if (isMyOffers) {
+    document.getElementById('headerTitle').textContent = 'Мои коммерческие предложения';
+  } else if (isAdmin) {
+    document.getElementById('headerTitle').textContent = 'Все коммерческие предложения';
+  }
+
+  let allOffers = [];
+  let allProducts = [];
+  let allClients = [];
+  let currentOfferId = null;
+
+  function esc(s) {
+    return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  function statusBadgeOffer(status) {
+    if (status === 'active')  return '<span class="offer-status-active">Активно</span>';
+    if (status === 'expired') return '<span class="offer-status-expired">Истёк</span>';
+    if (status === 'used')    return '<span class="offer-status-used">Израсходовано</span>';
+    return '<span class="offer-status-expired">' + status + '</span>';
+  }
+
+  async function loadOffers() {
+    const container = document.getElementById('offersContainer');
+    container.innerHTML = '<div class="spinner"></div>';
+    try {
+      let offers;
+      if (isMyOffers) {
+        // Только КП текущего пользователя (для менеджера — свои, для админа — свои если с my=1)
+        offers = await api.getOffers({ my: '1' });
+      } else {
+        // Админ без my=1 — все КП
+        offers = await api.getOffers({ all: '1' });
+      }
+      allOffers = offers;
+      renderOffers();
+    } catch(e) {
+      container.innerHTML = '<div class="empty-state"><p>Ошибка: ' + e.message + '</p></div>';
+    }
+  }
+
+  function renderOffers() {
+    const search = document.getElementById('searchInput').value.toLowerCase();
+    const statusF = document.getElementById('statusFilter').value;
+    let list = allOffers;
+    if (search) {
+      list = list.filter(function(o) {
+        return (o.OfferNumber || '').toLowerCase().includes(search) ||
+               (o.ClientName || '').toLowerCase().includes(search) ||
+               (o.CreatedByName || '').toLowerCase().includes(search);
+      });
+    }
+    if (statusF) list = list.filter(function(o) { return o.Status === statusF; });
+
+    const container = document.getElementById('offersContainer');
+    document.getElementById('offersCount').textContent = list.length + ' КП';
+
+    if (!list.length) {
+      container.innerHTML = '<div class="empty-state"><div class="empty-icon">📄</div><h3>КП не найдены</h3><p>Создайте первое коммерческое предложение</p></div>';
+      return;
+    }
+
+    var html = list.map(function(o) {
+      var dealInfo = o.DealTitle ? ' · 🤝 ' + esc(o.DealTitle) : '';
+      var deleteBtn = o.Status !== 'used' ? '<button class="btn btn-ghost btn-sm" onclick="deleteOffer(' + o.OfferID + ')" style="color:#dc2626">🗑</button>' : '';
+      var addPosBtn = o.Status === 'active' ? '<button class="btn btn-outline btn-sm" onclick="openAddOfferItemModal(' + o.OfferID + ')">➕ Позиция</button>' : '';
+      var notes = o.Notes ? '<div style="font-size:.82rem;color:#64748b;margin-bottom:8px;padding:8px;background:#f8fafc;border-radius:6px">' + esc(o.Notes) + '</div>' : '';
+      return '<div class="offer-card">' +
+        '<div class="offer-card-header">' +
+          '<div>' +
+            '<div class="offer-number">' + esc(o.OfferNumber) + '</div>' +
+            '<div class="offer-meta">👤 ' + esc(o.ClientName) + (o.ClientCompany ? ' (' + esc(o.ClientCompany) + ')' : '') + dealInfo + '</div>' +
+          '</div>' +
+          '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">' +
+            statusBadgeOffer(o.Status) +
+            '<span style="font-size:.75rem;color:#64748b">до ' + fmt.date(o.ExpiresAt) + '</span>' +
+            addPosBtn +
+            deleteBtn +
+          '</div>' +
+        '</div>' +
+        '<div style="font-size:.75rem;color:#94a3b8;margin-bottom:8px">Создал: ' + esc(o.CreatedByName) + ' · ' + fmt.datetime(o.CreatedAt) + '</div>' +
+        notes +
+        '<div id="offer-items-' + o.OfferID + '">' +
+          '<button class="btn btn-ghost btn-sm" onclick="toggleOfferItems(' + o.OfferID + ')">📋 Показать позиции</button>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+
+    container.innerHTML = html;
+  }
+
+  async function toggleOfferItems(offerId) {
+    var wrap = document.getElementById('offer-items-' + offerId);
+    if (wrap.dataset.loaded) {
+      wrap.innerHTML = '<button class="btn btn-ghost btn-sm" onclick="toggleOfferItems(' + offerId + ')">📋 Показать позиции</button>';
+      delete wrap.dataset.loaded;
+      return;
+    }
+    wrap.innerHTML = '<div class="spinner" style="width:20px;height:20px"></div>';
+    try {
+      var offer = await api.getOffer(offerId);
+      var items = offer.items || [];
+      if (!items.length) {
+        wrap.innerHTML = '<p style="font-size:.8rem;color:#94a3b8">Нет позиций · <button class="btn btn-ghost btn-sm" onclick="toggleOfferItems(' + offerId + ')">Скрыть</button></p>';
+      } else {
+        var thAction = offer.Status === 'active' ? '<th></th>' : '';
+        var rows = items.map(function(i) {
+          var delBtn = offer.Status === 'active' ? '<td><button class="btn btn-ghost btn-sm" onclick="deleteOfferItem(' + i.ItemID + ',' + offerId + ')">🗑</button></td>' : '<td></td>';
+          return '<tr>' +
+            '<td style="font-family:monospace;font-size:.78rem;color:#64748b">' + esc(i.SKU || '—') + '</td>' +
+            '<td>' + esc(i.ProductName) + '</td>' +
+            '<td style="text-align:right">' + fmt.money(i.BasePrice) + '</td>' +
+            '<td style="text-align:right;color:#d97706;font-weight:700">' + parseFloat(i.DiscountPct) + '%</td>' +
+            '<td style="text-align:right;color:#16a34a;font-weight:700">' + fmt.money(i.DiscountedPrice) + '</td>' +
+            delBtn +
+          '</tr>';
+        }).join('');
+        wrap.innerHTML = '<table class="offer-items-table"><thead><tr><th>Артикул</th><th>Товар</th><th style="text-align:right">Цена (BYN)</th><th style="text-align:right">Скидка %</th><th style="text-align:right">Цена со скидкой (BYN)</th>' + thAction + '</tr></thead><tbody>' + rows + '</tbody></table><button class="btn btn-ghost btn-sm" style="margin-top:6px" onclick="toggleOfferItems(' + offerId + ')">Скрыть</button>';
+      }
+      wrap.dataset.loaded = '1';
+    } catch(e) {
+      wrap.innerHTML = '<p style="color:#ef4444;font-size:.8rem">Ошибка: ' + e.message + '</p>';
+    }
+  }
+
+  async function deleteOffer(offerId) {
+    if (!confirm('Удалить КП?')) return;
+    try {
+      await api.deleteOffer(offerId);
+      toast.success('КП удалено');
+      await loadOffers();
+    } catch(e) { toast.error(e.message); }
+  }
+
+  async function deleteOfferItem(itemId, offerId) {
+    if (!confirm('Удалить позицию?')) return;
+    try {
+      await api.deleteOfferItem(itemId);
+      toast.success('Позиция удалена');
+      var wrap = document.getElementById('offer-items-' + offerId);
+      if (wrap) { delete wrap.dataset.loaded; }
+      await loadOffers();
+    } catch(e) { toast.error(e.message); }
+  }
+
+  // ── Создание КП ──────────────────────────────────────────────────────────
+  async function openCreateOfferModal() {
+    document.getElementById('coError').classList.add('hidden');
+    document.getElementById('co_notes').value = '';
+
+    // Min date = today
+    var today = new Date();
+    document.getElementById('co_expires').value = today.toISOString().split('T')[0];
+    document.getElementById('co_expires').min = today.toISOString().split('T')[0];
+
+    // Load clients
+    var sel = document.getElementById('co_client');
+    sel.innerHTML = '<option value="">Загрузка...</option>';
+    try {
+      allClients = await api.getClients();
+      sel.innerHTML = '<option value="">Выберите клиента...</option>';
+      allClients.forEach(function(c) {
+        var opt = document.createElement('option');
+        opt.value = c.ClientID;
+        opt.textContent = c.FullName + (c.CompanyName ? ' (' + c.CompanyName + ')' : '');
+        sel.appendChild(opt);
+      });
+    } catch(e) {
+      sel.innerHTML = '<option value="">Ошибка загрузки</option>';
+    }
+
+    modal.open('modalCreateOffer');
+  }
+
+  function onClientSelectForOffer() {
+    // placeholder function
+  }
+
+  async function saveOffer() {
+    var btn = document.getElementById('saveOfferBtn');
+    var errEl = document.getElementById('coError');
+    errEl.classList.add('hidden');
+    var clientId = document.getElementById('co_client').value;
+    var expires  = document.getElementById('co_expires').value;
+    if (!clientId) { errEl.textContent='Выберите клиента'; errEl.classList.remove('hidden'); return; }
+    if (!expires)  { errEl.textContent='Укажите срок действия'; errEl.classList.remove('hidden'); return; }
+    var today = new Date(); today.setHours(0,0,0,0);
+    var expDate = new Date(expires); expDate.setHours(0,0,0,0);
+    if (expDate < today) { errEl.textContent='Срок действия не может быть раньше сегодняшнего дня'; errEl.classList.remove('hidden'); return; }
+    btn.disabled = true; btn.textContent = 'Создание...';
+    try {
+      var res = await api.createOffer({
+        client_id:  parseInt(clientId),
+        expires_at: expires,
+        notes:      document.getElementById('co_notes').value.trim() || null,
+      });
+      toast.success('КП создано: ' + res.offer_number);
+      modal.close('modalCreateOffer');
+      await loadOffers();
+    } catch(e) {
+      errEl.textContent = e.message;
+      errEl.classList.remove('hidden');
+    } finally {
+      btn.disabled = false; btn.textContent = 'Создать КП';
+    }
+  }
+
+  // ── Добавление позиции в КП ───────────────────────────────────────────────
+  async function openAddOfferItemModal(offerId) {
+    currentOfferId = offerId;
+    document.getElementById('oiError').classList.add('hidden');
+    document.getElementById('oi_discount').value = '0';
+    document.getElementById('oi_base_price').value = '';
+    document.getElementById('oi_discounted_price').value = '';
+
+    var sel = document.getElementById('oi_product');
+    sel.innerHTML = '<option value="">Выберите товар...</option>';
+    try {
+      if (!allProducts.length) allProducts = await api.getProducts();
+      sel.innerHTML = '<option value="">Выберите товар...</option>';
+      allProducts.forEach(function(p) {
+        var opt = document.createElement('option');
+        opt.value = p.ProductID;
+        opt.dataset.price = p.Price;
+        opt.textContent = (p.SKU ? '[' + p.SKU + '] ' : '') + p.ProductName;
+        sel.appendChild(opt);
+      });
+    } catch(e) {
+      sel.innerHTML = '<option value="">Ошибка</option>';
+    }
+    modal.open('modalAddOfferItem');
+  }
+
+  function onOfferProductSelect() {
+    var sel = document.getElementById('oi_product');
+    var opt = sel.options[sel.selectedIndex];
+    if (!opt || !opt.value) return;
+    var price = parseFloat(opt.dataset.price || 0);
+    document.getElementById('oi_base_price').value = fmt.money(price);
+    onOfferDiscountInput();
+  }
+
+  function onOfferDiscountInput() {
+    var sel = document.getElementById('oi_product');
+    var opt = sel.options[sel.selectedIndex];
+    if (!opt || !opt.value) return;
+    var price = parseFloat(opt.dataset.price || 0);
+    var disc  = parseFloat(document.getElementById('oi_discount').value || 0);
+    var discounted = price * (1 - disc / 100);
+    document.getElementById('oi_discounted_price').value = fmt.money(discounted);
+  }
+
+  async function saveOfferItem() {
+    var btn = document.getElementById('saveOfferItemBtn');
+    var errEl = document.getElementById('oiError');
+    errEl.classList.add('hidden');
+    var productId = parseInt(document.getElementById('oi_product').value);
+    var disc = parseFloat(document.getElementById('oi_discount').value || 0);
+    if (!productId) { errEl.textContent='Выберите товар'; errEl.classList.remove('hidden'); return; }
+    if (disc < 1 || disc > 100) { errEl.textContent='Скидка должна быть от 1 до 100%'; errEl.classList.remove('hidden'); return; }
+    btn.disabled = true; btn.textContent = 'Сохранение...';
+    try {
+      await api.addOfferItem(currentOfferId, { product_id: productId, discount_pct: disc });
+      toast.success('Позиция добавлена в КП');
+      modal.close('modalAddOfferItem');
+      await loadOffers();
+    } catch(e) {
+      errEl.textContent = e.message;
+      errEl.classList.remove('hidden');
+    } finally {
+      btn.disabled = false; btn.textContent = 'Добавить';
+    }
+  }
+
+  function resetFilters() {
+    document.getElementById('searchInput').value = '';
+    document.getElementById('statusFilter').value = '';
+    renderOffers();
+  }
+
+  document.getElementById('searchInput').addEventListener('input', renderOffers);
+  document.getElementById('statusFilter').addEventListener('change', renderOffers);
+
+  loadOffers();
+  api.getProducts().then(function(p) { allProducts = p; }).catch(function() {});
+
+  // Проверяем параметры URL для создания КП из карточки клиента
+  (function checkCreateOfferParams() {
+    var urlParams = new URLSearchParams(window.location.search);
+    var shouldCreate = urlParams.get('create');
+    var preselectedClientId = urlParams.get('client');
+
+    if (shouldCreate === '1' && preselectedClientId) {
+      // Убираем параметры из URL чтобы при обновлении не открывалось снова
+      // Для менеджеров и админов с my=1 оставляем ?my=1, для админов на "Все КП" - без параметра
+      var cleanUrl = window.location.pathname + (isMyOffers ? '?my=1' : '');
+      window.history.replaceState({}, '', cleanUrl);
+
+      // Открываем модал и подставляем клиента
+      openCreateOfferModal().then(function() {
+        var sel = document.getElementById('co_client');
+        sel.value = preselectedClientId;
+        // Триггерим change для обновления UI если нужно
+        sel.dispatchEvent(new Event('change'));
+      });
+    }
+  })();
+</script>
+</body>
+</html>

@@ -1,0 +1,491 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Сделки — FSN GALLERY CRM</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .kanban-board {
+      display: flex;
+      gap: 12px;
+      overflow-x: auto;
+      padding-bottom: 16px;
+      align-items: flex-start;
+    }
+    .kanban-column {
+      min-width: 220px;
+      max-width: 220px;
+      background: #f8fafc;
+      border-radius: 12px;
+      border: 1px solid #e2e8f0;
+      flex-shrink: 0;
+    }
+    .kanban-col-header {
+      padding: 10px 12px;
+      font-weight: 700;
+      font-size: .8rem;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-radius: 12px 12px 0 0;
+      background: #f1f5f9;
+    }
+    .kanban-col-header.completed { background: #f0fdf4; }
+    .kanban-col-count {
+      background: #e2e8f0;
+      border-radius: 12px;
+      padding: 1px 8px;
+      font-size: .75rem;
+      font-weight: 700;
+    }
+    .kanban-cards {
+      padding: 8px;
+      min-height: 80px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .deal-card {
+      background: #fff;
+      border-radius: 8px;
+      padding: 10px 12px;
+      border: 1px solid #e2e8f0;
+      cursor: pointer;
+      transition: box-shadow .15s, transform .1s;
+      position: relative;
+    }
+    .deal-card:hover {
+      box-shadow: 0 4px 12px rgba(0,0,0,.1);
+      transform: translateY(-1px);
+    }
+    .deal-card .priority-bar {
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 4px;
+      border-radius: 8px 0 0 8px;
+    }
+    .priority-1 { background: #94a3b8; }
+    .priority-2 { background: #f59e0b; }
+    .priority-3 { background: #ef4444; }
+    .deal-card-title {
+      font-weight: 600;
+      font-size: .85rem;
+      margin-left: 6px;
+      margin-bottom: 4px;
+      color: #1e293b;
+    }
+    .deal-card-client {
+      font-size: .75rem;
+      color: #64748b;
+      margin-left: 6px;
+      margin-bottom: 4px;
+    }
+    .deal-card-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-left: 6px;
+      font-size: .72rem;
+      color: #94a3b8;
+    }
+    .deal-card-budget {
+      font-weight: 700;
+      color: #16a34a;
+      font-size: .78rem;
+    }
+    .deadline-overdue { color: #dc2626 !important; font-weight: 600; }
+    .deadline-soon    { color: #d97706 !important; }
+    .deal-type-badge {
+      font-size: .68rem;
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+    .deal-type-retail  { background: #dbeafe; color: #2563eb; }
+    .deal-type-wholesale { background: #d1fae5; color: #065f46; }
+    .priority-legend {
+      display: flex;
+      gap: 12px;
+      font-size: .78rem;
+      color: #64748b;
+    }
+    .priority-legend span { display: flex; align-items: center; gap: 4px; }
+    .priority-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+  </style>
+</head>
+<body>
+<div class="app-layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">🏠</div>
+      <div>
+        <div class="logo-text">FSN GALLERY</div>
+        <div class="logo-sub">Керамическая плитка</div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-title">Менеджер</div>
+      <button class="nav-item" data-page="dashboard" onclick="navigate('dashboard.html')">
+        <span class="nav-icon">📊</span> Личный кабинет
+      </button>
+      <button class="nav-item" data-page="clients" onclick="navigate('clients.html')">
+        <span class="nav-icon">👥</span> Мои клиенты
+      </button>
+      <button class="nav-item" data-page="deals" onclick="navigate('deals.html')">
+        <span class="nav-icon">🤝</span> Мои сделки
+      </button>
+      <button class="nav-item" data-page="my-offers" id="navMyOffers" onclick="navigate('offers.html?my=1')"><span class="nav-icon">📄</span> Мои КП</button>
+      <div class="nav-section-title" data-role="admin" style="display:none">Администратор</div>
+      <button class="nav-item" data-page="admin" data-role="admin" style="display:none" onclick="navigate('admin.html')">
+        <span class="nav-icon">🏢</span> Панель управления
+      </button>
+      <button class="nav-item" data-page="managers" data-role="admin" style="display:none" onclick="navigate('managers.html')">
+        <span class="nav-icon">👤</span> Менеджеры
+      </button>
+      <button class="nav-item" data-page="all-clients" data-role="admin" style="display:none" onclick="navigate('all-clients.html')">
+        <span class="nav-icon">📋</span> Все клиенты
+      </button>
+      <button class="nav-item" data-page="all-deals" data-role="admin" style="display:none" onclick="navigate('all-deals.html')">
+        <span class="nav-icon">📁</span> Все сделки
+      </button>
+      <button class="nav-item" data-page="offers" data-role="admin" style="display:none" onclick="navigate('offers.html')">
+        <span class="nav-icon">📄</span> Все КП
+      </button>
+      <button class="nav-item" data-page="reports" data-role="admin" style="display:none" onclick="navigate('reports.html')">
+        <span class="nav-icon">📈</span> Отчёты
+      </button>
+      <button class="nav-item" data-page="references" data-role="admin" style="display:none" onclick="navigate('references.html')">
+        <span class="nav-icon">📚</span> Справочники
+      </button>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="avatar" id="sidebarAvatar">?</div>
+        <div class="user-info">
+          <div class="user-name" id="sidebarUserName">—</div>
+          <div class="user-role" id="sidebarUserRole">—</div>
+        </div>
+      </div>
+      <button class="btn-logout" id="logoutBtn">🚪 Выйти</button>
+    </div>
+  </aside>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <!-- Main -->
+  <div class="main-content">
+    <header class="top-header">
+      <button class="sidebar-toggle" id="sidebarToggle">☰</button>
+      <span class="header-title">Сделки</span>
+      <div class="header-actions">
+        <button class="btn btn-primary btn-sm" onclick="openNewDealModal()">➕ Новая сделка</button>
+      </div>
+    </header>
+
+    <main class="page-content">
+      <div class="page-header">
+        <div class="page-header-left">
+          <h1>🤝 Воронка продаж</h1>
+          <p id="dealsCount">Загрузка...</p>
+        </div>
+      </div>
+
+      <!-- Легенда приоритетов -->
+      <div class="card mb-3">
+        <div class="card-body" style="padding:12px 16px">
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+            <div class="priority-legend">
+              <span><span class="priority-dot" style="background:#94a3b8"></span>Низкий приоритет</span>
+              <span><span class="priority-dot" style="background:#f59e0b"></span>Средний приоритет</span>
+              <span><span class="priority-dot" style="background:#ef4444"></span>Высокий приоритет</span>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center">
+              <span style="font-size:.8rem;color:#64748b">Фильтр:</span>
+              <select class="form-control" id="filterStage" style="width:220px" onchange="renderBoard()">
+                <option value="">Все этапы</option>
+              </select>
+              <select class="form-control" id="filterPriority" style="width:180px" onchange="renderBoard()">
+                <option value="">Все приоритеты</option>
+                <option value="3">Высокий</option>
+                <option value="2">Средний</option>
+                <option value="1">Низкий</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Канбан-доска -->
+      <div id="kanbanWrap">
+        <div class="spinner"></div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- Модал: Новая сделка (упрощённый) -->
+<div class="modal-overlay" id="modalDeal">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <span class="modal-title">➕ Новая сделка</span>
+      <button class="modal-close" onclick="modal.close('modalDeal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <form id="dealForm" novalidate>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Название <span class="required">*</span></label>
+            <input type="text" class="form-control" id="df_title" placeholder="Ремонт квартиры, ЖК Северный..." required maxlength="300">
+            <div class="form-hint">Максимум 300 символов</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Клиент <span class="required">*</span></label>
+            <select class="form-control" id="df_client" required>
+              <option value="">Выберите клиента...</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Дата сделки</label>
+            <input type="date" class="form-control" id="df_date">
+          </div>
+        </div>
+        <p style="font-size:.8rem;color:#64748b;margin-top:8px">
+          Сделка будет создана на этапе "Новый контакт". Тип сделки, приоритет и бюджет можно указать в карточке сделки.
+        </p>
+        <div class="form-error hidden" id="dfError" style="padding:10px;background:#fee2e2;border-radius:6px;"></div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="modal.close('modalDeal')">Отмена</button>
+      <button class="btn btn-primary" id="saveDealBtn" onclick="saveDeal()">Создать сделку</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/utils.js"></script>
+<script>
+  if (!auth.requireAuth()) throw new Error('not auth');
+  initSidebar('deals');
+
+  let allDeals  = [];
+  let allStages = [];
+  let clients   = [];
+
+  const PRIORITY_LABELS = { 1: 'Низкий', 2: 'Средний', 3: 'Высокий' };
+  const today = new Date(); today.setHours(0,0,0,0);
+
+  function deadlineClass(dl) {
+    if (!dl) return '';
+    const d = new Date(dl); d.setHours(0,0,0,0);
+    const diff = (d - today) / 86400000;
+    if (diff < 0)  return 'deadline-overdue';
+    if (diff <= 3) return 'deadline-soon';
+    return '';
+  }
+
+  function escHtml(s) {
+    return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  async function init() {
+    [allStages, clients] = await Promise.all([
+      api.getDealStages(),
+      api.getClients(),
+    ]);
+
+    const fs = document.getElementById('filterStage');
+    allStages.forEach(s => {
+      const o = document.createElement('option');
+      o.value = s.StageID;
+      o.textContent = s.StageName;
+      fs.appendChild(o);
+    });
+
+    const dc = document.getElementById('df_client');
+    clients.forEach(c => {
+      const o = document.createElement('option');
+      o.value = c.ClientID;
+      o.textContent = c.FullName + (c.CompanyName ? ` (${c.CompanyName})` : '');
+      dc.appendChild(o);
+    });
+
+    // Если пришли с параметром client= — подставляем клиента и сразу открываем форму
+    const presetClient = new URLSearchParams(location.search).get('client');
+    if (presetClient) {
+      document.getElementById('df_client').value = presetClient;
+    }
+
+    await loadDeals();
+    // Сигнализируем что init завершён
+    window.dispatchEvent(new Event('_initDone'));
+  }
+
+  async function loadDeals() {
+    try {
+      // Для страницы "Мои сделки" — всегда фильтруем по текущему пользователю (включая admin)
+      const user = auth.getUser();
+      allDeals = await api.getDeals({ manager_id: user.user_id });
+      document.getElementById('dealsCount').textContent =
+        `Всего сделок: ${allDeals.length}`;
+      renderBoard();
+    } catch(e) {
+      document.getElementById('kanbanWrap').innerHTML =
+        `<div class="empty-state"><p>Ошибка: ${e.message}</p></div>`;
+    }
+  }
+
+  function renderBoard() {
+    const wrap          = document.getElementById('kanbanWrap');
+    const filterStage   = document.getElementById('filterStage').value;
+    const filterPriority = document.getElementById('filterPriority').value;
+
+    let filtered = allDeals;
+    if (filterStage)    filtered = filtered.filter(d => String(d.StageID) === filterStage);
+    if (filterPriority) filtered = filtered.filter(d => String(d.Priority) === filterPriority);
+
+    let stagesToShow = filterStage
+      ? allStages.filter(s => String(s.StageID) === filterStage)
+      : allStages;
+
+    let html = '<div class="kanban-board">';
+    stagesToShow.forEach(stage => {
+      const deals = filtered.filter(d => d.StageID === stage.StageID);
+      html += `
+        <div class="kanban-column">
+          <div class="kanban-col-header ${stage.IsCompleted ? 'completed' : ''}">
+            <span>${stage.StageName}</span>
+            <span class="kanban-col-count">${deals.length}</span>
+          </div>
+          <div class="kanban-cards">
+            ${deals.map(d => renderDealCard(d, stage.StageOrder)).join('')}
+            ${deals.length === 0 ? '<div style="text-align:center;color:#cbd5e1;font-size:.75rem;padding:12px">Нет сделок</div>' : ''}
+          </div>
+        </div>`;
+    });
+    html += '</div>';
+    wrap.innerHTML = html;
+  }
+
+  function renderDealCard(d, stageOrder) {
+    const dlClass = deadlineClass(d.Deadline);
+    const typeClass = d.DealType === 'опт' ? 'deal-type-wholesale' : 'deal-type-retail';
+    let cardBorder = '';
+    if (d.Deadline) {
+      const dc = deadlineClass(d.Deadline);
+      if (dc === 'deadline-overdue') cardBorder = 'border-color:#fca5a5';
+      else if (dc === 'deadline-soon') cardBorder = 'border-color:#fde68a';
+    }
+
+    // Базовая информация для всех этапов
+    let extraHtml = '';
+
+    if (stageOrder === 1) {
+      // Новый контакт: название, номер, клиент, компания
+      extraHtml = '';
+    } else if (stageOrder === 2) {
+      // Выявление потребностей: + тип, приоритет, бюджет
+      extraHtml = `
+        <div class="deal-card-meta" style="margin-top:4px">
+          <span class="deal-type-badge ${typeClass}">${d.DealType}</span>
+          ${d.Budget ? `<span class="deal-card-budget">${fmt.money(d.Budget)}</span>` : ''}
+        </div>`;
+    } else if (stageOrder >= 3) {
+      // Подбор и расчёт и далее: + тип, приоритет, сумма (или бюджет), срок этапа / дата завершения
+      const sumDisplay = d.Budget ? fmt.money(d.Budget) : '—';
+      let dateDisplay = '';
+      if (d.IsCompleted && d.CompletedAt) {
+        dateDisplay = `<div style="font-size:.72rem;margin-top:4px;margin-left:6px;color:#16a34a">✅ ${fmt.date(d.CompletedAt)}</div>`;
+      } else if (d.Deadline) {
+        dateDisplay = `<div style="font-size:.72rem;margin-top:4px;margin-left:6px" class="${dlClass}">📅 ${fmt.date(d.Deadline)}</div>`;
+      }
+      extraHtml = `
+        <div class="deal-card-meta" style="margin-top:4px">
+          <span class="deal-type-badge ${typeClass}">${d.DealType}</span>
+          <span class="deal-card-budget">${sumDisplay}</span>
+        </div>
+        ${dateDisplay}`;
+    }
+
+    return `
+      <div class="deal-card" style="${cardBorder}" onclick="navigate('deal.html?id=${d.DealID}')">
+        <div class="priority-bar priority-${d.Priority}"></div>
+        <div class="deal-card-title">${escHtml(d.Title)}</div>
+        <div style="font-size:.72rem;color:#94a3b8;margin-left:6px;margin-bottom:2px">#${d.DealID}</div>
+        <div class="deal-card-client">
+          👤 ${escHtml(d.ClientName)}
+          ${d.ClientCompany ? `<br><small>${escHtml(d.ClientCompany)}</small>` : ''}
+        </div>
+        ${extraHtml}
+      </div>`;
+  }
+
+  function openNewDealModal() {
+    document.getElementById('dealForm').reset();
+    document.getElementById('df_date').value = new Date().toISOString().split('T')[0];
+    document.getElementById('dfError').classList.add('hidden');
+    document.getElementById('saveDealBtn').textContent = 'Создать сделку';
+
+    // Подставляем клиента если есть в URL или в select (установлен в init)
+    const clientId = new URLSearchParams(location.search).get('client');
+    if (clientId) document.getElementById('df_client').value = clientId;
+
+    modal.open('modalDeal');
+  }
+
+  async function saveDeal() {
+    const btn   = document.getElementById('saveDealBtn');
+    const errEl = document.getElementById('dfError');
+    errEl.classList.add('hidden');
+
+    const title    = document.getElementById('df_title').value.trim();
+    const clientId = document.getElementById('df_client').value;
+    if (!title)    { errEl.textContent = 'Введите название сделки'; errEl.classList.remove('hidden'); return; }
+    if (title.length > 300) { errEl.textContent = 'Название не может превышать 300 символов'; errEl.classList.remove('hidden'); return; }
+    if (!clientId) { errEl.textContent = 'Выберите клиента'; errEl.classList.remove('hidden'); return; }
+
+    const data = {
+      client_id:  parseInt(clientId),
+      title,
+      deal_date:  document.getElementById('df_date').value || null,
+    };
+
+    btn.disabled = true;
+    btn.textContent = 'Создание...';
+    try {
+      const result = await api.createDeal(data);
+      toast.success('Сделка создана!');
+      modal.close('modalDeal');
+      // Переходим на карточку сделки
+      navigate('deal.html?id=' + result.deal_id);
+    } catch(e) {
+      errEl.textContent = e.message;
+      errEl.classList.remove('hidden');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Создать сделку';
+    }
+  }
+
+  // Если пришли с параметром ?new=1 — открываем форму создания после init()
+  const _params = new URLSearchParams(location.search);
+  if (_params.get('new') === '1') {
+    // Ждём init() перед открытием модала (клиенты должны быть загружены)
+    window.addEventListener('_initDone', () => openNewDealModal());
+  }
+
+  init();
+</script>
+</body>
+</html>

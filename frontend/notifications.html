@@ -1,0 +1,235 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Уведомления — FSN GALLERY CRM</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="app-layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">🏠</div>
+      <div>
+        <div class="logo-text">FSN GALLERY</div>
+        <div class="logo-sub">Керамическая плитка</div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-title">Менеджер</div>
+      <button class="nav-item" data-page="dashboard" onclick="navigate('dashboard.html')">
+        <span class="nav-icon">📊</span> Личный кабинет
+      </button>
+      <button class="nav-item" data-page="clients" onclick="navigate('clients.html')">
+        <span class="nav-icon">👥</span> Мои клиенты
+      </button>
+      <button class="nav-item" data-page="deals" onclick="navigate('deals.html')">
+        <span class="nav-icon">🤝</span> Мои сделки
+      </button>
+      <button class="nav-item" data-page="my-offers" id="navMyOffers" onclick="navigate('offers.html?my=1')"><span class="nav-icon">📄</span> Мои КП</button>
+      <div class="nav-section-title" data-role="admin" style="display:none">Администратор</div>
+      <button class="nav-item" data-page="admin" data-role="admin" style="display:none" onclick="navigate('admin.html')">
+        <span class="nav-icon">🏢</span> Панель управления
+      </button>
+      <button class="nav-item" data-page="managers" data-role="admin" style="display:none" onclick="navigate('managers.html')">
+        <span class="nav-icon">👤</span> Менеджеры
+      </button>
+      <button class="nav-item" data-page="all-clients" data-role="admin" style="display:none" onclick="navigate('all-clients.html')">
+        <span class="nav-icon">📋</span> Все клиенты
+      </button>
+      <button class="nav-item" data-page="all-deals" data-role="admin" style="display:none" onclick="navigate('all-deals.html')">
+        <span class="nav-icon">📁</span> Все сделки
+      </button>
+      <button class="nav-item" data-page="offers" data-role="admin" style="display:none" onclick="navigate('offers.html')">
+        <span class="nav-icon">📄</span> Все КП
+      </button>
+      <button class="nav-item" data-page="reports" data-role="admin" style="display:none" onclick="navigate('reports.html')">
+        <span class="nav-icon">📈</span> Отчёты
+      </button>
+      <button class="nav-item" data-page="references" data-role="admin" style="display:none" onclick="navigate('references.html')">
+        <span class="nav-icon">📚</span> Справочники
+      </button>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="avatar" id="sidebarAvatar">?</div>
+        <div class="user-info">
+          <div class="user-name" id="sidebarUserName">—</div>
+          <div class="user-role" id="sidebarUserRole">—</div>
+        </div>
+      </div>
+      <button class="btn-logout" id="logoutBtn">🚪 Выйти</button>
+    </div>
+  </aside>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <!-- Main -->
+  <div class="main-content">
+    <header class="top-header">
+      <button class="sidebar-toggle" id="sidebarToggle">☰</button>
+      <span class="header-title">Уведомления</span>
+      <div class="header-actions">
+        <button class="btn btn-outline btn-sm" onclick="loadNotifications()">🔄 Обновить</button>
+      </div>
+    </header>
+
+    <main class="page-content">
+      <div style="margin-bottom:24px">
+        <h1>🔔 Мои уведомления</h1>
+        <p id="notifSubtitle">Загрузка...</p>
+      </div>
+
+      <div id="notificationsWrap">
+        <div class="spinner"></div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/utils.js"></script>
+<script>
+  if (!auth.requireAuth()) throw new Error('not auth');
+  initSidebar('notifications');
+
+  const TASK_ICONS = { call: '📞', meeting: '🤝', letter: '✉️' };
+
+  function renderTaskCard(n, colorClass, borderColor) {
+    const icon = TASK_ICONS[n.task_type] || '📌';
+    const typeLabel = n.task_type_label || n.task_type;
+    const isDeal = n.task_source === 'deal';
+    return `
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;padding:10px 0;border-bottom:1px solid ${borderColor}">
+        <div style="display:flex;align-items:flex-start;gap:10px;flex:1">
+          <span style="font-size:1.3rem;flex-shrink:0">${icon}</span>
+          <div>
+            <div style="font-weight:600;color:${colorClass}">${n.title}</div>
+            <div style="font-size:.78rem;color:#64748b">
+              ${typeLabel} · Клиент: <a href="client.html?id=${n.client_id}" style="color:#2563eb">${n.client_name}</a>
+              ${isDeal && n.deal_id ? ` · <a href="deal.html?id=${n.deal_id}" style="color:#7c3aed">Сделка: ${n.deal_title || '#' + n.deal_id}</a>` : ''}
+            </div>
+            <div style="font-size:.75rem;color:#94a3b8;margin-top:2px">${fmt.datetime(n.scheduled_at)}</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;margin-left:8px">
+          <button class="btn btn-success btn-sm" onclick="doCompleteTask(${n.task_id}, '${n.task_source}', this)" title="Выполнить">✓ Выполнено</button>
+          ${isDeal && n.deal_id ? `<a href="deal.html?id=${n.deal_id}" class="btn btn-outline btn-sm" title="Открыть сделку">🤝</a>` : `<a href="client.html?id=${n.client_id}" class="btn btn-outline btn-sm" title="Открыть клиента">👤</a>`}
+        </div>
+      </div>`;
+  }
+
+  async function loadNotifications() {
+    const wrap = document.getElementById('notificationsWrap');
+    wrap.innerHTML = '<div class="spinner"></div>';
+    try {
+      const notifications = await api.getNotifications();
+      const subtitle = document.getElementById('notifSubtitle');
+
+      const overdueItems  = notifications.filter(n => n.type === 'overdue');
+      const todayItems    = notifications.filter(n => n.type === 'today');
+      const birthdayItems = notifications.filter(n => n.type === 'birthday');
+      const taskCount = overdueItems.length + todayItems.length;
+      const total = notifications.length;
+
+      subtitle.textContent = taskCount > 0
+        ? `Задач: ${taskCount} · Дней рождения: ${birthdayItems.length}`
+        : 'Нет активных уведомлений по задачам';
+
+      if (!total) {
+        wrap.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">🔔</div>
+            <h3>Нет уведомлений</h3>
+            <p>Все задачи выполнены, просрочек нет</p>
+          </div>`;
+        return;
+      }
+
+      let html = '';
+
+      if (overdueItems.length) {
+        html += `
+          <div class="card mb-3" style="border-left:4px solid #dc2626">
+            <div class="card-header" style="background:#fef2f2">
+              <span class="card-title" style="color:#dc2626">🔴 Просроченные задачи (${overdueItems.length})</span>
+            </div>
+            <div class="card-body">
+              ${overdueItems.map(n => renderTaskCard(n, '#dc2626', '#fee2e2')).join('')}
+            </div>
+          </div>`;
+      }
+
+      if (todayItems.length) {
+        html += `
+          <div class="card mb-3" style="border-left:4px solid #d97706">
+            <div class="card-header" style="background:#fffbeb">
+              <span class="card-title" style="color:#d97706">🟡 Задачи на сегодня (${todayItems.length})</span>
+            </div>
+            <div class="card-body">
+              ${todayItems.map(n => renderTaskCard(n, '#d97706', '#fef3c7')).join('')}
+            </div>
+          </div>`;
+      }
+
+      if (birthdayItems.length) {
+        html += `
+          <div class="card mb-3" style="border-left:4px solid #2563eb">
+            <div class="card-header" style="background:#eff6ff">
+              <span class="card-title" style="color:#2563eb">🎂 Дни рождения (${birthdayItems.length})</span>
+            </div>
+            <div class="card-body">
+              ${birthdayItems.map(n => `
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #dbeafe">
+                  <div style="display:flex;align-items:center;gap:10px">
+                    <span style="font-size:1.3rem">🎂</span>
+                    <div>
+                      <div style="font-weight:600;color:#2563eb">
+                        <a href="client.html?id=${n.client_id}" style="color:#2563eb">${n.client_name}</a>
+                        ${n.is_today ? '<span style="font-size:.75rem;background:#2563eb;color:#fff;border-radius:4px;padding:1px 8px;margin-left:6px">Сегодня!</span>' : ''}
+                      </div>
+                      <div style="font-size:.78rem;color:#64748b">День рождения</div>
+                    </div>
+                  </div>
+                  <span style="font-size:.85rem;color:#2563eb;font-weight:600">${fmt.date(n.birthday_this_year)}</span>
+                </div>
+              `).join('')}
+            </div>
+          </div>`;
+      }
+
+      wrap.innerHTML = html;
+    } catch(e) {
+      wrap.innerHTML = `<div class="empty-state"><p>Ошибка загрузки: ${e.message}</p></div>`;
+    }
+  }
+
+  async function doCompleteTask(taskId, source, btn) {
+    btn.disabled = true;
+    btn.textContent = '...';
+    try {
+      if (source === 'deal') {
+        await api.completeDealTask(taskId);
+      } else {
+        await api.completeTask(taskId);
+      }
+      toast.success('Задача выполнена');
+      // Перезагружаем список уведомлений
+      await loadNotifications();
+      // Обновляем счётчик в sidebar (живое обновление без перехода на другую страницу)
+      refreshNotifBadge();
+    } catch(e) {
+      toast.error(e.message);
+      btn.disabled = false;
+      btn.textContent = '✓ Выполнено';
+    }
+  }
+
+  loadNotifications();
+</script>
+</body>
+</html>

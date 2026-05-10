@@ -1,0 +1,1243 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Карточка сделки — FSN GALLERY CRM</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .stage-pipeline {
+      display: flex;
+      gap: 0;
+      margin-bottom: 20px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+    .stage-pill {
+      flex: 1;
+      min-width: 100px;
+      padding: 8px 6px;
+      text-align: center;
+      font-size: .7rem;
+      font-weight: 600;
+      background: #f1f5f9;
+      border: 1px solid #e2e8f0;
+      cursor: pointer;
+      transition: background .15s;
+      position: relative;
+    }
+    .stage-pill:first-child { border-radius: 8px 0 0 8px; }
+    .stage-pill:last-child  { border-radius: 0 8px 8px 0; }
+    .stage-pill.active { background: #2563eb; color: #fff; border-color: #2563eb; }
+    .stage-pill.completed-stage { background: #dcfce7; color: #166534; border-color: #86efac; }
+    .stage-pill:hover:not(.active) { background: #e2e8f0; }
+    .deal-type-badge {
+      font-size: .75rem;
+      padding: 3px 10px;
+      border-radius: 4px;
+      font-weight: 700;
+    }
+    .deal-type-retail    { background: #dbeafe; color: #2563eb; }
+    .deal-type-wholesale { background: #d1fae5; color: #065f46; }
+    .items-table { width: 100%; border-collapse: collapse; font-size: .85rem; }
+    .items-table th { background: #f8fafc; padding: 8px 10px; text-align: left; font-weight: 600; font-size: .78rem; color: #64748b; border-bottom: 1px solid #e2e8f0; }
+    .items-table td { padding: 8px 10px; border-bottom: 1px solid #f1f5f9; }
+    .items-table tr:last-child td { border-bottom: none; }
+    .items-table .total-row td { font-weight: 700; background: #f8fafc; }
+    .event-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .event-item:last-child { border-bottom: none; }
+    .event-dot {
+      width: 10px; height: 10px; border-radius: 50%;
+      flex-shrink: 0; margin-top: 5px;
+    }
+  </style>
+</head>
+<body>
+<div class="app-layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">🏠</div>
+      <div>
+        <div class="logo-text">FSN GALLERY</div>
+        <div class="logo-sub">Керамическая плитка</div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-title">Менеджер</div>
+      <button class="nav-item" data-page="dashboard" onclick="navigate('dashboard.html')">
+        <span class="nav-icon">📊</span> Личный кабинет
+      </button>
+      <button class="nav-item" data-page="clients" onclick="navigate('clients.html')">
+        <span class="nav-icon">👥</span> Мои клиенты
+      </button>
+      <button class="nav-item" data-page="deals" onclick="navigate('deals.html')">
+        <span class="nav-icon">🤝</span> Мои сделки
+      </button>
+      <button class="nav-item" data-page="my-offers" id="navMyOffers" onclick="navigate('offers.html?my=1')"><span class="nav-icon">📄</span> Мои КП</button>
+      <div class="nav-section-title" data-role="admin" style="display:none">Администратор</div>
+      <button class="nav-item" data-page="admin" data-role="admin" style="display:none" onclick="navigate('admin.html')">
+        <span class="nav-icon">🏢</span> Панель управления
+      </button>
+      <button class="nav-item" data-page="managers" data-role="admin" style="display:none" onclick="navigate('managers.html')">
+        <span class="nav-icon">👤</span> Менеджеры
+      </button>
+      <button class="nav-item" data-page="all-clients" data-role="admin" style="display:none" onclick="navigate('all-clients.html')">
+        <span class="nav-icon">📋</span> Все клиенты
+      </button>
+      <button class="nav-item" data-page="all-deals" data-role="admin" style="display:none" onclick="navigate('all-deals.html')">
+        <span class="nav-icon">📁</span> Все сделки
+      </button>
+      <button class="nav-item" data-page="offers" data-role="admin" style="display:none" onclick="navigate('offers.html')">
+        <span class="nav-icon">📄</span> Все КП
+      </button>
+      <button class="nav-item" data-page="reports" data-role="admin" style="display:none" onclick="navigate('reports.html')">
+        <span class="nav-icon">📈</span> Отчёты
+      </button>
+      <button class="nav-item" data-page="references" data-role="admin" style="display:none" onclick="navigate('references.html')">
+        <span class="nav-icon">📚</span> Справочники
+      </button>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="avatar" id="sidebarAvatar">?</div>
+        <div class="user-info">
+          <div class="user-name" id="sidebarUserName">—</div>
+          <div class="user-role" id="sidebarUserRole">—</div>
+        </div>
+      </div>
+      <button class="btn-logout" id="logoutBtn">🚪 Выйти</button>
+    </div>
+  </aside>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <!-- Main -->
+  <div class="main-content">
+    <header class="top-header">
+      <button class="sidebar-toggle" id="sidebarToggle">☰</button>
+      <span class="header-title" id="headerTitle">Карточка сделки</span>
+      <div class="header-actions">
+        <button class="btn btn-outline btn-sm" id="btnBack" onclick="history.back()">← Назад</button>
+        <button class="btn btn-primary btn-sm" id="btnEdit" onclick="openEditDealModal()">✏️ Редактировать</button>
+      </div>
+    </header>
+
+    <main class="page-content">
+      <div class="breadcrumb">
+        <a href="deals.html">Сделки</a>
+        <span class="sep">›</span>
+        <span id="breadcrumbName">Загрузка...</span>
+      </div>
+
+      <div id="pageContent">
+        <div class="spinner"></div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- Модал: Редактирование сделки -->
+<div class="modal-overlay" id="modalEditDeal">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <span class="modal-title">✏️ Редактирование сделки</span>
+      <button class="modal-close" onclick="modal.close('modalEditDeal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <form id="editDealForm" novalidate>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Название <span class="required">*</span></label>
+            <input type="text" class="form-control" id="ed_title" required maxlength="300">
+            <div class="form-hint">Максимум 300 символов</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Тип сделки</label>
+            <select class="form-control" id="ed_type" onchange="onDealTypeChange(this.value)">
+              <option value="розница">Розница</option>
+              <option value="опт">Опт</option>
+            </select>
+            <div class="form-hint" id="ed_type_hint" style="color:#d97706"></div>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Приоритет</label>
+            <select class="form-control" id="ed_priority">
+              <option value="1">Низкий</option>
+              <option value="2">Средний</option>
+              <option value="3">Высокий</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Бюджет клиента (BYN)</label>
+            <input type="number" class="form-control" id="ed_budget" placeholder="Ориентировочная сумма" min="1" max="999999999" step="0.01">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Дата сделки</label>
+            <input type="date" class="form-control" id="ed_date">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Примечание</label>
+          <textarea class="form-control" id="ed_notes" rows="3" maxlength="2000"></textarea>
+          <div class="form-hint">Максимум 2000 символов</div>
+        </div>
+        <div class="form-error hidden" id="edError" style="padding:10px;background:#fee2e2;border-radius:6px;"></div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="modal.close('modalEditDeal')">Отмена</button>
+      <button class="btn btn-primary" id="saveEditDealBtn" onclick="saveEditDeal()">Сохранить</button>
+    </div>
+  </div>
+</div>
+
+<!-- Модал: Добавить позицию -->
+<div class="modal-overlay" id="modalAddItem">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <span class="modal-title">➕ Добавить позицию</span>
+      <button class="modal-close" onclick="modal.close('modalAddItem')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Товар <span class="required">*</span></label>
+        <select class="form-control" id="ai_product" onchange="onProductSelect()">
+          <option value="">Выберите товар...</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Площадь одной плитки (м²)</label>
+          <input type="text" class="form-control" id="ai_tile_area" placeholder="—" readonly style="background:#f8fafc;cursor:not-allowed">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Цена за шт. (BYN)</label>
+          <input type="number" class="form-control" id="ai_price" placeholder="0.00" min="0.01" step="0.01" readonly style="background:#f8fafc;cursor:not-allowed">
+          <div class="form-hint" id="ai_price_hint">Устанавливается автоматически по каталогу</div>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Количество (шт.) <span class="required">*</span></label>
+          <input type="number" class="form-control" id="ai_qty" placeholder="1" min="1" max="999999" step="1" oninput="onQtyInput()">
+          <div class="form-hint">Целое количество штук</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Общий объём (м²)</label>
+          <input type="text" class="form-control" id="ai_total_vol" placeholder="—" readonly style="background:#f8fafc;cursor:not-allowed">
+        </div>
+      </div>
+      <div class="form-error hidden" id="aiError" style="padding:10px;background:#fee2e2;border-radius:6px;"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="modal.close('modalAddItem')">Отмена</button>
+      <button class="btn btn-primary" id="saveItemBtn" onclick="saveItem()">Добавить</button>
+    </div>
+  </div>
+</div>
+
+<!-- Модал: Перенос этапа (с датой) -->
+<div class="modal-overlay" id="modalStageMove">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="stageMoveTitle">🔄 Перенос этапа</span>
+      <button class="modal-close" onclick="modal.close('modalStageMove')">✕</button>
+    </div>
+    <div class="modal-body">
+      <p id="stageMoveDesc" style="color:#64748b;margin-bottom:16px"></p>
+      <div class="form-group" id="stageMoveDeadlineGroup">
+        <label class="form-label">Конечный срок выполнения этапа <span class="required">*</span></label>
+        <input type="date" class="form-control" id="stageMoveDeadline">
+        <div class="form-hint">Дата, до которой должен быть завершён данный этап</div>
+      </div>
+      <div class="form-error hidden" id="stageMoveError" style="padding:8px;background:#fee2e2;border-radius:6px"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="modal.close('modalStageMove')">Отмена</button>
+      <button class="btn btn-primary" id="stageMoveConfirmBtn" onclick="confirmStageMove()">Перенести</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/utils.js"></script>
+<script>
+  if (!auth.requireAuth()) throw new Error('not auth');
+
+  const dealId = parseInt(new URLSearchParams(location.search).get('id'));
+  if (!dealId) { navigate('deals.html'); throw new Error('no id'); }
+
+  initSidebar('deals');
+
+  let dealData = null;
+  let allStages = [];
+  let allProducts = [];
+  let pendingStageId = null;
+  const currentUser = auth.getUser();
+  const isManager = currentUser?.role === 'manager';
+
+  const PRIORITY_LABELS = { 1: 'Низкий', 2: 'Средний', 3: 'Высокий' };
+  const PRIORITY_COLORS = { 1: '#94a3b8', 2: '#f59e0b', 3: '#ef4444' };
+  const EVENT_LABELS = {
+    'stage_change':     '🔄 Переход этапа',
+    'item_added':       '📦 Позиция добавлена',
+    'payment_received': '💰 Оплата получена',
+    'closed':           '✅ Сделка закрыта',
+    'created':          '🆕 Сделка создана',
+    'task_completed':   '✅ Задача выполнена',
+    'doc_added':        '📎 Документ добавлен',
+    'doc_deleted':      '🗑 Документ удалён',
+  };
+  const EVENT_COLORS = {
+    'stage_change':     '#2563eb',
+    'item_added':       '#7c3aed',
+    'payment_received': '#16a34a',
+    'closed':           '#16a34a',
+    'created':          '#64748b',
+    'task_completed':   '#16a34a',
+    'doc_added':        '#0891b2',
+    'doc_deleted':      '#dc2626',
+  };
+
+  function esc(s) {
+    return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  async function loadDeal() {
+    try {
+      [dealData, allStages, allProducts] = await Promise.all([
+        api.getDealFull(dealId),
+        api.getDealStages(),
+        api.getProducts(),
+      ]);
+      document.getElementById('breadcrumbName').textContent = dealData.Title;
+      document.getElementById('headerTitle').textContent = dealData.Title;
+
+    const isOwner = currentUser.role === 'admin' || dealData.ManagerID === currentUser.user_id;
+    const isDoneNow = !!dealData.IsCompleted;
+    if (!isOwner || isDoneNow) document.getElementById('btnEdit').style.display = 'none';
+
+      renderDeal();
+    } catch(e) {
+      document.getElementById('pageContent').innerHTML =
+        `<div class="empty-state"><p>Ошибка загрузки: ${e.message}</p></div>`;
+    }
+  }
+
+  function renderDeal() {
+    const d = dealData;
+    const typeClass = d.DealType === 'опт' ? 'deal-type-wholesale' : 'deal-type-retail';
+    const pColor = PRIORITY_COLORS[d.Priority] || '#94a3b8';
+    // Базовое право редактирования (свой/admin)
+    const isOwner = currentUser.role === 'admin' || d.ManagerID === currentUser.user_id;
+    // На этапе "Выполнено" менеджер не может ничего редактировать
+    const isDone = !!d.IsCompleted;
+    const canEdit = isOwner && !isDone;
+
+    const currentStageOrder = allStages.find(s => s.StageID === d.StageID)?.StageOrder || 1;
+    // Состав заказа заблокирован начиная с этапа "Счёт выставлен" (order=5) для менеджера
+    const canEditItems = isOwner && !isDone && (currentUser.role === 'admin' || currentStageOrder < 5);
+
+    // Воронка этапов
+    const pipelineHtml = allStages.map(s => {
+      let cls = '';
+      if (s.StageID === d.StageID) cls = 'active';
+      else if (s.StageOrder < currentStageOrder) cls = 'completed-stage';
+
+      // Определяем можно ли кликать на этот этап
+      const canMoveToThisStage = canEdit && s.StageID !== d.StageID
+        && s.StageOrder === currentStageOrder + 1; // Только следующий этап
+
+      return `<div class="stage-pill ${cls}"
+        ${canMoveToThisStage ? `onclick="moveToStage(${s.StageID})" style="cursor:pointer"` : 'style="cursor:default"'}
+        title="${s.StageName}${canMoveToThisStage ? ' (нажмите для перехода)' : ''}">${s.StageName}</div>`;
+    }).join('');
+
+    const totalItems = (d.items || []).reduce((s, i) => s + parseFloat(i.LineTotal || 0), 0);
+    const totalQty   = (d.items || []).reduce((s, i) => s + parseFloat(i.Quantity || 0), 0);
+    const totalVol   = (d.items || []).reduce((s, i) => {
+      const tw = parseFloat(i.TileWidth || 0);
+      const tl = parseFloat(i.TileLength || 0);
+      return s + (tw && tl ? parseFloat(i.Quantity || 0) * tw * tl / 1000000 : 0);
+    }, 0);
+
+    // Дата конечного срока текущего этапа или дата завершения
+    let deadlineHtml = '';
+    if (d.IsCompleted && d.CompletedAt) {
+      deadlineHtml = `<div style="padding:14px 20px;text-align:center">
+        <div style="font-size:1rem;font-weight:700;color:#16a34a">${fmt.date(d.CompletedAt)}</div>
+        <div style="font-size:.72rem;color:#64748b;margin-top:2px">Дата завершения</div>
+      </div>`;
+    } else if (d.Deadline) {
+      const isOverdue = new Date(d.Deadline) < new Date();
+      deadlineHtml = `<div style="padding:14px 20px;text-align:center">
+        <div style="font-size:1rem;font-weight:700;color:${isOverdue ? '#dc2626' : '#1e293b'}">${fmt.date(d.Deadline)}</div>
+        <div style="font-size:.72rem;color:#64748b;margin-top:2px">Срок этапа${isOverdue ? ' (просрочен)' : ''}</div>
+      </div>`;
+    }
+
+    document.getElementById('pageContent').innerHTML = `
+      <!-- Шапка сделки -->
+      <div class="card mb-3" style="overflow:visible">
+        <div class="client-card-header" style="background:linear-gradient(135deg,#1e40af,#7c3aed)">
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <div style="color:rgba(255,255,255,.7);font-size:.75rem">Сделка #${d.DealID}</div>
+            <div style="color:#fff;font-size:1.3rem;font-weight:800">${esc(d.Title)}</div>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+              <span class="deal-type-badge ${typeClass}">${d.DealType}</span>
+              <span style="background:rgba(255,255,255,.2);color:#fff;padding:2px 8px;border-radius:4px;font-size:.75rem;font-weight:600">
+                <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${pColor};margin-right:4px"></span>
+                ${PRIORITY_LABELS[d.Priority] || '—'}
+              </span>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end">
+            <div style="color:rgba(255,255,255,.7);font-size:.75rem">Клиент</div>
+            <a href="client.html?id=${d.ClientID}" style="color:#fff;font-weight:700;font-size:1rem">${esc(d.ClientName)}</a>
+            ${d.ClientCompany ? `<div style="color:rgba(255,255,255,.7);font-size:.78rem">${esc(d.ClientCompany)}</div>` : ''}
+            <div style="color:rgba(255,255,255,.7);font-size:.75rem;margin-top:4px">Менеджер: ${esc(d.ManagerName)}</div>
+          </div>
+        </div>
+
+        <!-- Финансовая сводка -->
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:0;border-top:1px solid #e2e8f0">
+          <div style="padding:14px 20px;border-right:1px solid #e2e8f0;text-align:center">
+            <div style="font-size:1.2rem;font-weight:800;color:#16a34a">${fmt.money(totalItems || d.Budget)}</div>
+            <div style="font-size:.72rem;color:#64748b;margin-top:2px">${totalItems ? 'Сумма заказа' : 'Бюджет'}</div>
+          </div>
+          <div style="padding:14px 20px;border-right:1px solid #e2e8f0;text-align:center">
+            <div style="font-size:1.2rem;font-weight:800;color:#7c3aed">${totalVol.toFixed(4)} м²</div>
+            <div style="font-size:.72rem;color:#64748b;margin-top:2px">Объём</div>
+          </div>
+          <div style="padding:14px 20px;border-right:1px solid #e2e8f0;text-align:center">
+            <div style="font-size:1rem;font-weight:700;color:#1e293b">${fmt.date(d.DealDate)}</div>
+            <div style="font-size:.72rem;color:#64748b;margin-top:2px">Дата сделки</div>
+          </div>
+          ${deadlineHtml}
+        </div>
+      </div>
+
+      <!-- Воронка этапов -->
+      <div class="stage-pipeline">${pipelineHtml}</div>
+      ${canEdit ? `<p style="font-size:.75rem;color:#94a3b8;margin-top:-12px;margin-bottom:12px">Нажмите на следующий этап для перехода</p>` : ''}
+
+      <!-- Вкладки -->
+      <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('info')">📋 Основная информация</button>
+        <button class="tab-btn" onclick="switchTab('items')" id="tabItems">
+          📦 Состав заказа (${(d.items||[]).length})
+        </button>
+        <button class="tab-btn" onclick="switchTab('events')">📅 Лента событий</button>
+        <button class="tab-btn" onclick="switchTab('tasks')">📌 Задачи (${(d.tasks||[]).length})</button>
+        <button class="tab-btn" onclick="switchTab('docs')">📎 Документы (${(d.documents||[]).length})</button>
+      </div>
+
+      <!-- Вкладка: Информация -->
+      <div class="tab-panel active" id="tab-info">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">📋 Основная информация</span>
+            ${canEdit ? `<button class="btn btn-outline btn-sm" onclick="openEditDealModal()">✏️ Редактировать</button>` : ''}
+          </div>
+          <div class="card-body">
+            <div class="info-grid">
+              <div class="info-item">
+                <div class="info-label">Номер сделки</div>
+                <div class="info-value">#${d.DealID}</div>
+              </div>
+              <div class="info-item">
+                <div class="info-label">Дата создания</div>
+                <div class="info-value">${fmt.datetime(d.CreatedAt)}</div>
+              </div>
+              <div class="info-item">
+                <div class="info-label">Клиент</div>
+                <div class="info-value"><a href="client.html?id=${d.ClientID}" style="color:#2563eb">${esc(d.ClientName)}</a></div>
+              </div>
+              <div class="info-item">
+                <div class="info-label">Тип сделки</div>
+                <div class="info-value"><span class="deal-type-badge ${typeClass}">${d.DealType}</span></div>
+              </div>
+              <div class="info-item">
+                <div class="info-label">Бюджет клиента</div>
+                <div class="info-value">${d.Budget ? fmt.money(d.Budget) : '—'}</div>
+              </div>
+              <div class="info-item">
+                <div class="info-label">Приоритет</div>
+                <div class="info-value">
+                  <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${pColor};margin-right:6px"></span>
+                  ${PRIORITY_LABELS[d.Priority] || '—'}
+                </div>
+              </div>
+              ${d.Deadline && !d.IsCompleted ? `
+              <div class="info-item">
+                <div class="info-label">Срок выполнения этапа</div>
+                <div class="info-value" style="color:${new Date(d.Deadline) < new Date() ? '#dc2626' : 'inherit'}">${fmt.date(d.Deadline)}</div>
+              </div>` : ''}
+              <div class="info-item">
+                <div class="info-label">Текущий этап</div>
+                <div class="info-value"><span class="badge">${d.StageName}</span></div>
+              </div>
+              <div class="info-item">
+                <div class="info-label">Менеджер</div>
+                <div class="info-value">${esc(d.ManagerName)}</div>
+              </div>
+            </div>
+            ${d.DealNotes ? `
+              <hr class="divider">
+              <div class="info-item">
+                <div class="info-label">Примечание</div>
+                <div class="info-value" style="white-space:pre-wrap;margin-top:6px">${esc(d.DealNotes)}</div>
+              </div>` : ''}
+          </div>
+        </div>
+      </div>
+
+      <!-- Вкладка: Состав заказа -->
+      <div class="tab-panel" id="tab-items">
+        ${canEditItems ? `
+        <div class="card mb-3">
+          <div class="card-header">
+            <span class="card-title">📄 Коммерческое предложение</span>
+          </div>
+          <div class="card-body">
+            ${d.applied_offer ? `
+              <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+                <span style="background:#dbeafe;color:#1e40af;padding:4px 12px;border-radius:6px;font-weight:600">
+                  ✅ Применено КП: <strong>${esc(d.applied_offer.OfferNumber)}</strong>
+                </span>
+                <span style="font-size:.82rem;color:#64748b">Действует до: ${fmt.date(d.applied_offer.ExpiresAt)}</span>
+                <button class="btn btn-ghost btn-sm" onclick="removeAppliedOffer()" style="color:#dc2626">✕ Открепить</button>
+              </div>
+            ` : `
+              <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+                <select class="form-control" id="offerSelect" style="max-width:300px">
+                  <option value="">— Выберите КП для применения —</option>
+                </select>
+                <button class="btn btn-outline btn-sm" onclick="applySelectedOffer()">Применить КП</button>
+                <button class="btn btn-ghost btn-sm" onclick="navigate('offers.html')">📄 Создать КП</button>
+              </div>
+            `}
+          </div>
+        </div>` : ''}
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">📦 Состав заказа</span>
+            ${canEditItems ? `<button class="btn btn-primary btn-sm" onclick="openAddItemModal()">➕ Добавить позицию</button>` : ''}
+            ${isDone ? '<span style="font-size:.78rem;color:#94a3b8;margin-left:8px">Сделка завершена — редактирование недоступно</span>' : (!canEditItems && isOwner ? '<span style="font-size:.78rem;color:#94a3b8;margin-left:8px">Состав заказа заблокирован начиная со «Счёт выставлен»</span>' : '')}
+          </div>
+          <div class="card-body">
+            <div id="itemsTableWrap">
+              ${renderItemsTable(d.items, canEditItems)}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Вкладка: Лента событий -->
+      <div class="tab-panel" id="tab-events">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">📅 Лента событий</span>
+          </div>
+          <div class="card-body" id="eventsContainer">
+            ${renderDealEvents(d.events)}
+          </div>
+        </div>
+      </div>
+
+      <!-- Вкладка: Задачи -->
+      <div class="tab-panel" id="tab-tasks">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">📌 Задачи</span>
+            ${canEdit ? `<button class="btn btn-outline btn-sm" onclick="openAddTaskModal()">📞 Запланировать</button>` : ''}
+          </div>
+          <div class="card-body" id="tasksContainer">
+            ${renderDealTasks(d.tasks, canEdit, isDone)}
+          </div>
+        </div>
+      </div>
+
+      <!-- Вкладка: Документы -->
+      <div class="tab-panel" id="tab-docs">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">📎 Документы</span>
+            ${canEdit ? `<button class="btn btn-primary btn-sm" onclick="openUploadDocModal()">📤 Загрузить</button>` : (isDone ? '<span style="font-size:.78rem;color:#94a3b8">Сделка завершена</span>' : '')}
+          </div>
+          <div class="card-body" id="docsContainer">
+            ${renderDealDocs(d.documents)}
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderItemsTable(items, canEdit) {
+    if (!items || !items.length) {
+      return `<div class="empty-state"><div class="empty-icon">📦</div><h3>Нет позиций</h3><p>Добавьте товары в заказ</p></div>`;
+    }
+    const totalQty  = items.reduce((s, i) => s + parseFloat(i.Quantity || 0), 0);
+    const totalSum  = items.reduce((s, i) => s + parseFloat(i.LineTotal || 0), 0);
+    const totalVol  = items.reduce((s, i) => {
+      const tw = parseFloat(i.TileWidth || 0);
+      const tl = parseFloat(i.TileLength || 0);
+      return s + (tw && tl ? parseFloat(i.Quantity || 0) * tw * tl / 1000000 : 0);
+    }, 0);
+    return `
+      <div class="table-wrapper">
+        <table class="items-table">
+          <thead>
+            <tr>
+              <th>Артикул</th>
+              <th>Название плитки</th>
+              <th>Ед. изм.</th>
+              <th style="text-align:right">Количество (шт.)</th>
+              <th style="text-align:right">Объём (м²)</th>
+              <th style="text-align:right">Цена за шт.</th>
+              <th style="text-align:right">Сумма</th>
+              ${canEdit ? '<th></th>' : ''}
+            </tr>
+          </thead>
+          <tbody>
+            ${items.map(i => {
+              const tw = parseFloat(i.TileWidth || 0);
+              const tl = parseFloat(i.TileLength || 0);
+              const qty = parseFloat(i.Quantity || 0);
+              const vol = (tw && tl) ? (qty * tw * tl / 1000000) : null;
+              return `
+              <tr>
+                <td style="font-family:monospace;font-size:.8rem;color:#64748b">${esc(i.SKU || '—')}</td>
+                <td><strong>${esc(i.ProductName)}</strong></td>
+                <td>${esc(i.Unit || 'шт.')}</td>
+                <td style="text-align:right">${qty.toFixed(0)}</td>
+                <td style="text-align:right;color:#7c3aed">${vol !== null ? vol.toFixed(4) : '—'}</td>
+                <td style="text-align:right">${fmt.money(i.UnitPrice)}</td>
+                <td style="text-align:right;font-weight:700;color:#16a34a">${fmt.money(i.LineTotal)}</td>
+                ${canEdit ? `<td><button class="btn btn-ghost btn-sm" onclick="deleteItem(${i.DealItemID})">🗑</button></td>` : '<td></td>'}
+              </tr>`;}).join('')}
+          </tbody>
+          <tfoot>
+            <tr class="total-row">
+              <td colspan="3" style="text-align:right;font-size:.8rem;color:#64748b">Итого:</td>
+              <td style="text-align:right">${totalQty.toFixed(0)} шт.</td>
+              <td style="text-align:right;color:#7c3aed">${totalVol.toFixed(4)} м²</td>
+              <td></td>
+              <td style="text-align:right;color:#16a34a">${fmt.money(totalSum)}</td>
+              ${canEdit ? '<td></td>' : ''}
+            </tr>
+          </tfoot>
+        </table>
+      </div>`;
+  }
+
+  function renderDealEvents(events) {
+    if (!events || !events.length) {
+      return `<div class="empty-state"><div class="empty-icon">📅</div><h3>Нет событий</h3><p>События появятся автоматически</p></div>`;
+    }
+    return events.map(e => {
+      const color = EVENT_COLORS[e.EventType] || '#64748b';
+      const label = EVENT_LABELS[e.EventType] || e.EventType;
+      return `
+        <div class="event-item">
+          <div class="event-dot" style="background:${color}"></div>
+          <div style="flex:1">
+            <div style="font-weight:600;font-size:.85rem;color:${color}">${label}</div>
+            <div style="font-size:.82rem;color:#1e293b;margin-top:2px">${esc(e.Description)}</div>
+            <div style="font-size:.75rem;color:#94a3b8;margin-top:2px">${fmt.datetime(e.EventDate)}</div>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  function renderDealTasks(tasks, canEdit, isDone) {
+    if (!tasks || !tasks.length) {
+      return `<div class="empty-state"><div class="empty-icon">📌</div><h3>Нет задач</h3><p>${isDone ? 'Сделка завершена' : 'Запланируйте звонок, встречу или письмо'}</p></div>`;
+    }
+    const today = new Date(); today.setHours(0,0,0,0);
+    return tasks.map(t => {
+      const sd = new Date(t.ScheduledAt); sd.setHours(0,0,0,0);
+      const diff = (sd - today) / 86400000;
+      const color = t.IsCompleted ? '#16a34a' : diff < 0 ? '#dc2626' : diff === 0 ? '#d97706' : '#2563eb';
+      const bg = t.IsCompleted ? '#f0fdf4' : diff < 0 ? '#fef2f2' : diff === 0 ? '#fffbeb' : '#eff6ff';
+      const taskIcon = t.TaskType === 'call' ? '📞' : t.TaskType === 'letter' ? '✉️' : '🤝';
+      const taskLabel = t.TaskType === 'call' ? 'Звонок' : t.TaskType === 'letter' ? 'Письмо' : 'Встреча';
+      return `
+        <div style="display:flex;align-items:center;gap:10px;padding:10px;background:${bg};border-radius:8px;margin-bottom:8px">
+          <span style="font-size:1.2rem">${taskIcon}</span>
+          <div style="flex:1">
+            <div style="font-weight:600;color:${color}">${esc(t.Title)}</div>
+            <div style="font-size:.75rem;color:#64748b">${fmt.datetime(t.ScheduledAt)} · ${taskLabel}</div>
+            ${t.Description ? `<div style="font-size:.78rem;color:#64748b;margin-top:2px">${esc(t.Description)}</div>` : ''}
+          </div>
+          ${canEdit ? `
+            <div style="display:flex;gap:6px">
+              ${!t.IsCompleted
+                ? `<button class="btn btn-success btn-sm" onclick="completeDealTask(${t.TaskID})">✓</button>`
+                : '<span class="badge badge-success" style="font-size:.7rem">Готово</span>'}
+              ${!t.IsCompleted ? `<button class="btn btn-ghost btn-sm" onclick="deleteDealTask(${t.TaskID})">🗑</button>` : ''}
+            </div>` : ''}
+        </div>`;
+    }).join('');
+  }
+
+  function renderDealDocs(docs) {
+    if (!docs || !docs.length) {
+      return `<div class="empty-state"><div class="empty-icon">📎</div><h3>Нет документов</h3><p>Загрузите счёт, договор или акт</p></div>`;
+    }
+    return docs.map(d => {
+      const kb = (d.FileSize / 1024).toFixed(1);
+      const mb = (d.FileSize / 1048576).toFixed(1);
+      const size = d.FileSize > 1048576 ? mb + ' МБ' : kb + ' КБ';
+      const ext = d.OriginalName.split('.').pop().toLowerCase();
+      const icon = ['jpg','jpeg','png'].includes(ext) ? '🖼' : ext === 'pdf' ? '📄' : ['doc','docx'].includes(ext) ? '📝' : ['xls','xlsx'].includes(ext) ? '📊' : ext === 'html' ? '🧾' : '📎';
+      const canDelete = currentUser.role === 'admin' || dealData.ManagerID === currentUser.user_id;
+      return `
+        <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #f1f5f9">
+          <span style="font-size:1.5rem">${icon}</span>
+          <div style="flex:1">
+            <div style="font-weight:600;font-size:.9rem">${esc(d.OriginalName)}</div>
+            <div style="font-size:.75rem;color:#64748b">${size} · ${d.UploaderName} · ${fmt.datetime(d.UploadedAt)}</div>
+          </div>
+          <div style="display:flex;gap:6px">
+            <a href="/api/deal-documents/${d.DocID}/download" target="_blank" class="btn btn-outline btn-sm">⬇ Скачать</a>
+            ${canDelete ? `<button class="btn btn-ghost btn-sm" onclick="deleteDoc(${d.DocID})">🗑</button>` : ''}
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  function switchTab(name) {
+    const tabs = ['info', 'items', 'events', 'tasks', 'docs'];
+    document.querySelectorAll('.tab-btn').forEach((b, i) => {
+      b.classList.toggle('active', tabs[i] === name);
+    });
+    document.querySelectorAll('.tab-panel').forEach(p => {
+      p.classList.toggle('active', p.id === 'tab-' + name);
+    });
+  }
+
+  // ── Переход по этапам ──────────────────────────────────────────────────────
+  function moveToStage(stageId) {
+    if (stageId === dealData.StageID) return;
+
+    const currentStageOrder = allStages.find(s => s.StageID === dealData.StageID)?.StageOrder || 1;
+    const newStage = allStages.find(s => s.StageID === stageId);
+    if (!newStage) return;
+
+    // Для финального этапа ("Выполнено") — не требуем дату, подтверждаем
+    if (newStage.IsCompleted) {
+      if (!confirm(`Перенести сделку на этап "${newStage.StageName}"?\n\nВнимание: при переносе на этот этап обновится финансовая информация. Убедитесь что состав заказа заполнен верно.`)) return;
+      doStageMove(stageId, null);
+      return;
+    }
+
+    // Для этапов 1→2 (Новый контакт → Выявление потребностей) — без окна
+    if (currentStageOrder === 1 && newStage.StageOrder === 2) {
+      doStageMove(stageId, null);
+      return;
+    }
+
+    // Для остальных этапов (требуется дата конечного срока)
+    pendingStageId = stageId;
+    document.getElementById('stageMoveTitle').textContent = `🔄 Перенос: → ${newStage.StageName}`;
+    document.getElementById('stageMoveDesc').textContent =
+      `Укажите конечный срок выполнения этапа "${newStage.StageName}"`;
+
+    // Устанавливаем минимальную дату = завтра
+    const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1);
+    document.getElementById('stageMoveDeadline').min = tomorrow.toISOString().split('T')[0];
+    document.getElementById('stageMoveDeadline').value = '';
+    document.getElementById('stageMoveError').classList.add('hidden');
+    modal.open('modalStageMove');
+  }
+
+  async function confirmStageMove() {
+    const btn = document.getElementById('stageMoveConfirmBtn');
+    const errEl = document.getElementById('stageMoveError');
+    const deadline = document.getElementById('stageMoveDeadline').value;
+    errEl.classList.add('hidden');
+
+    if (!deadline) {
+      errEl.textContent = 'Укажите конечный срок выполнения этапа';
+      errEl.classList.remove('hidden');
+      return;
+    }
+
+    btn.disabled = true; btn.textContent = 'Перенос...';
+    try {
+      modal.close('modalStageMove');
+      await doStageMove(pendingStageId, deadline);
+    } catch(e) {
+      errEl.textContent = e.message;
+      errEl.classList.remove('hidden');
+    } finally {
+      btn.disabled = false; btn.textContent = 'Перенести';
+    }
+  }
+
+  async function doStageMove(stageId, deadline) {
+    try {
+      await api.request('POST', `/deals/${dealId}/stage`, { stage_id: stageId, stage_deadline: deadline });
+      toast.success('Этап обновлён');
+      await loadDeal();
+    } catch(e) { toast.error(e.message); }
+  }
+
+  // ── Перерасчёт цен при смене типа сделки ─────────────────────────────────
+  let _pendingDealType = null;
+
+  function onDealTypeChange(newType) {
+    if (!dealData.items || !dealData.items.length) return;
+    if (newType === dealData.DealType) {
+      document.getElementById('ed_type_hint').textContent = '';
+      return;
+    }
+    const label = newType === 'опт' ? 'оптовые (скидка 5%)' : 'розничные';
+    document.getElementById('ed_type_hint').textContent =
+      `⚠️ При сохранении все цены в составе заказа будут пересчитаны на ${label}`;
+    _pendingDealType = newType;
+  }
+
+  async function recalcItemPrices(newType) {
+    if (!dealData.items || !dealData.items.length) return;
+    // Для каждой позиции пересчитываем цену на основе каталога
+    // Если применено КП и тип="опт", КП имеет приоритет (оптовая скидка 5% не применяется)
+    const appliedOffer = dealData.applied_offer;
+    for (const item of dealData.items) {
+      const product = allProducts.find(p => p.ProductID === item.ProductID);
+      if (!product) continue;
+      let newPrice = parseFloat(product.Price);
+      // KP has priority over wholesale discount
+      if (appliedOffer && appliedOffer.items) {
+        const kpItem = appliedOffer.items.find(ki => ki.ProductID === item.ProductID);
+        if (kpItem) {
+          newPrice = kpItem.DiscountedPrice;
+        } else if (newType === 'опт') {
+          newPrice = +(newPrice * 0.95).toFixed(2);
+        }
+      } else if (newType === 'опт') {
+        newPrice = +(newPrice * 0.95).toFixed(2);
+      }
+      // Обновляем позицию (удалить + добавить с новой ценой)
+      try {
+        await api.deleteDealItem(item.DealItemID);
+        await api.addDealItem(dealId, {
+          product_id: item.ProductID,
+          quantity: parseFloat(item.Quantity),
+          unit_price: newPrice,
+          product_name: item.ProductName,
+        });
+      } catch(e) { /* игнорируем ошибки отдельных позиций */ }
+    }
+  }
+
+  // ── Редактирование сделки ─────────────────────────────────────────────────
+  function openEditDealModal() {
+    const d = dealData;
+    document.getElementById('ed_title').value    = d.Title || '';
+    document.getElementById('ed_type').value     = d.DealType || 'розница';
+    document.getElementById('ed_priority').value = d.Priority || 2;
+    document.getElementById('ed_date').value     = d.DealDate ? d.DealDate.split('T')[0] : '';
+    document.getElementById('ed_budget').value   = d.Budget || '';
+    document.getElementById('ed_notes').value    = d.DealNotes || '';
+    document.getElementById('edError').classList.add('hidden');
+    modal.open('modalEditDeal');
+  }
+
+  async function saveEditDeal() {
+    const btn = document.getElementById('saveEditDealBtn');
+    const errEl = document.getElementById('edError');
+    errEl.classList.add('hidden');
+    const title = document.getElementById('ed_title').value.trim();
+    if (!title) { errEl.textContent='Введите название'; errEl.classList.remove('hidden'); return; }
+    if (title.length > 300) { errEl.textContent='Название не может превышать 300 символов'; errEl.classList.remove('hidden'); return; }
+    const budgetRaw = document.getElementById('ed_budget').value;
+    if (budgetRaw !== '' && budgetRaw !== null) {
+      const budgetVal = parseFloat(budgetRaw);
+      if (isNaN(budgetVal) || budgetVal < 1) { errEl.textContent='Бюджет не может быть меньше 1'; errEl.classList.remove('hidden'); return; }
+      if (budgetVal > 999999999) { errEl.textContent='Бюджет не может превышать 999 999 999'; errEl.classList.remove('hidden'); return; }
+    }
+    const newType = document.getElementById('ed_type').value;
+    const typeChanged = newType !== dealData.DealType;
+    btn.disabled = true; btn.textContent = 'Сохранение...';
+    try {
+      await api.updateDeal(dealId, {
+        title,
+        deal_type: newType,
+        priority: parseInt(document.getElementById('ed_priority').value),
+        deal_date: document.getElementById('ed_date').value || null,
+        budget: parseFloat(document.getElementById('ed_budget').value) || null,
+        notes: document.getElementById('ed_notes').value.trim() || null,
+      });
+      // Если тип изменился — пересчитываем цены позиций
+      if (typeChanged && dealData.items && dealData.items.length) {
+        btn.textContent = 'Пересчёт цен...';
+        await recalcItemPrices(newType);
+      }
+      toast.success('Сделка обновлена!');
+      modal.close('modalEditDeal');
+      _pendingDealType = null;
+      await loadDeal();
+    } catch(e) {
+      errEl.textContent = e.message;
+      errEl.classList.remove('hidden');
+    } finally {
+      btn.disabled = false; btn.textContent = 'Сохранить';
+    }
+  }
+
+  // ── Позиции заказа ────────────────────────────────────────────────────────
+  function openAddItemModal() {
+    const sel = document.getElementById('ai_product');
+    sel.innerHTML = '<option value="">Выберите товар...</option>';
+    allProducts.forEach(p => {
+      const opt = document.createElement('option');
+      opt.value = p.ProductID;
+      opt.dataset.price  = p.Price;
+      opt.dataset.name   = p.ProductName;
+      opt.dataset.sku    = p.SKU || '';
+      opt.dataset.width  = p.TileWidth  || 0;
+      opt.dataset.length = p.TileLength || 0;
+      // Check if KP discount applies
+      let displayPrice = p.Price;
+      if (dealData.applied_offer && dealData.applied_offer.items) {
+        const kpItem = dealData.applied_offer.items.find(ki => ki.ProductID === p.ProductID);
+        if (kpItem) displayPrice = kpItem.DiscountedPrice;
+        else if (dealData.DealType === 'опт') displayPrice = +(p.Price * 0.95).toFixed(2);
+      } else if (dealData.DealType === 'опт') {
+        displayPrice = +(p.Price * 0.95).toFixed(2);
+      }
+      opt.textContent = `${p.SKU ? '[' + p.SKU + '] ' : ''}${p.ProductName} — ${fmt.money(displayPrice)}`;
+      sel.appendChild(opt);
+    });
+    document.getElementById('ai_qty').value = '';
+    document.getElementById('ai_price').value = '';
+    document.getElementById('ai_tile_area').value = '';
+    document.getElementById('ai_total_vol').value = '';
+    document.getElementById('aiError').classList.add('hidden');
+    modal.open('modalAddItem');
+  }
+
+  function onProductSelect() {
+    const sel = document.getElementById('ai_product');
+    const opt = sel.options[sel.selectedIndex];
+    if (!opt || !opt.value) return;
+    let price = parseFloat(opt.dataset.price || 0);
+    const tw = parseFloat(opt.dataset.width || 0);
+    const tl = parseFloat(opt.dataset.length || 0);
+
+    // KP priority over wholesale 5%
+    if (dealData.applied_offer && dealData.applied_offer.items) {
+      const kpItem = dealData.applied_offer.items.find(ki => ki.ProductID == opt.value);
+      if (kpItem) {
+        price = kpItem.DiscountedPrice;
+        document.getElementById('ai_price_hint').textContent =
+          `КП цена (скидка ${kpItem.DiscountPct}%): ${fmt.money(price)}`;
+      } else {
+        document.getElementById('ai_price_hint').textContent = `Цена по каталогу: ${fmt.money(price)}`;
+      }
+    } else if (dealData.DealType === 'опт') {
+      price = +(price * 0.95).toFixed(2);
+      document.getElementById('ai_price_hint').textContent = `Цена опт (скидка 5%): ${fmt.money(price)}`;
+    } else {
+      document.getElementById('ai_price_hint').textContent = `Цена розница: ${fmt.money(price)}`;
+    }
+
+    document.getElementById('ai_price').value = price.toFixed(2);
+
+    // Tile area
+    if (tw && tl) {
+      const area = tw * tl / 1000000;
+      document.getElementById('ai_tile_area').value = area.toFixed(4) + ' м²';
+    } else {
+      document.getElementById('ai_tile_area').value = '—';
+    }
+    onQtyInput();
+  }
+
+  function onQtyInput() {
+    const qtyInput = document.getElementById('ai_qty');
+    let qty = parseFloat(qtyInput.value || 0);
+    
+    // Ограничиваем значение от 1 до 999999
+    if (qty < 1) qty = 1;
+    if (qty > 999999) qty = 999999;
+    qtyInput.value = qty;
+    
+    const sel = document.getElementById('ai_product');
+    const opt = sel.options[sel.selectedIndex];
+    if (!opt || !opt.value || !qty) {
+      document.getElementById('ai_total_vol').value = '';
+      return;
+    }
+    const tw = parseFloat(opt.dataset.width || 0);
+    const tl = parseFloat(opt.dataset.length || 0);
+    if (tw && tl) {
+      const vol = qty * tw * tl / 1000000;
+      document.getElementById('ai_total_vol').value = vol.toFixed(4) + ' м²';
+    } else {
+      document.getElementById('ai_total_vol').value = '—';
+    }
+  }
+
+  async function saveItem() {
+    const btn = document.getElementById('saveItemBtn');
+    const errEl = document.getElementById('aiError');
+    errEl.classList.add('hidden');
+    const sel = document.getElementById('ai_product');
+    const productId = parseInt(sel.value);
+    const qty = parseFloat(document.getElementById('ai_qty').value);
+    const price = parseFloat(document.getElementById('ai_price').value);
+    const opt = sel.options[sel.selectedIndex];
+    const productName = opt?.dataset?.name || '';
+
+    if (!productId) { errEl.textContent='Выберите товар'; errEl.classList.remove('hidden'); return; }
+    if (!qty || qty <= 0) { errEl.textContent='Укажите количество (больше 0)'; errEl.classList.remove('hidden'); return; }
+    if (qty > 999999) { errEl.textContent='Максимальное количество — 999 999 шт.'; errEl.classList.remove('hidden'); return; }
+    if (!price || price <= 0) { errEl.textContent='Выберите товар для автоматического заполнения цены'; errEl.classList.remove('hidden'); return; }
+
+    btn.disabled = true; btn.textContent = 'Сохранение...';
+    try {
+      await api.addDealItem(dealId, { product_id: productId, quantity: qty, unit_price: price, product_name: productName });
+      toast.success('Позиция добавлена!');
+      modal.close('modalAddItem');
+      await loadDeal();
+      switchTab('items');
+    } catch(e) {
+      errEl.textContent = e.message;
+      errEl.classList.remove('hidden');
+    } finally {
+      btn.disabled = false; btn.textContent = 'Добавить';
+    }
+  }
+
+  async function deleteItem(itemId) {
+    if (!confirm('Удалить позицию?')) return;
+    try {
+      await api.deleteDealItem(itemId);
+      toast.success('Позиция удалена');
+      await loadDeal();
+      switchTab('items');
+    } catch(e) { toast.error(e.message); }
+  }
+
+  // ── Задачи по сделке ──────────────────────────────────────────────────────
+  function openAddTaskModal() {
+    const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate()+1);
+    const dts = tomorrow.toISOString().slice(0,16);
+    const minDate = new Date().toISOString().slice(0,16);
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay open';
+    overlay.innerHTML = `
+      <div class="modal">
+        <div class="modal-header">
+          <span class="modal-title">📞 Запланировать задачу</span>
+          <button class="modal-close" onclick="this.closest('.modal-overlay').remove();document.body.style.overflow=''">✕</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Тип <span class="required">*</span></label>
+            <select class="form-control" id="dtk_type">
+              <option value="call">📞 Звонок</option>
+              <option value="meeting">🤝 Встреча</option>
+              <option value="letter">✉️ Письмо</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Тема <span class="required">*</span></label>
+            <input type="text" class="form-control" id="dtk_title" placeholder="Уточнить условия..." maxlength="200">
+            <div class="form-hint">Максимум 200 символов</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Дата и время <span class="required">*</span></label>
+            <input type="datetime-local" class="form-control" id="dtk_sched" value="${dts}" min="${minDate}">
+            <div class="form-hint">Нельзя выбрать дату в прошлом</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Описание</label>
+            <textarea class="form-control" id="dtk_desc" rows="2" maxlength="1000"></textarea>
+            <div class="form-hint">Максимум 1000 символов</div>
+          </div>
+          <div class="form-error hidden" id="dtkError" style="padding:8px;background:#fee2e2;border-radius:6px"></div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline" onclick="this.closest('.modal-overlay').remove();document.body.style.overflow=''">Отмена</button>
+          <button class="btn btn-primary" onclick="saveDealTask(this)">Запланировать</button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+    document.body.style.overflow = 'hidden';
+    overlay.addEventListener('click', e => { if (e.target === overlay) { overlay.remove(); document.body.style.overflow = ''; } });
+  }
+
+  async function saveDealTask(btn) {
+    const overlay = btn.closest('.modal-overlay');
+    const errEl = overlay.querySelector('#dtkError');
+    const title = overlay.querySelector('#dtk_title').value.trim();
+    const sched = overlay.querySelector('#dtk_sched').value;
+    if (!title) { errEl.textContent='Введите тему'; errEl.classList.remove('hidden'); return; }
+    if (title.length > 200) { errEl.textContent='Тема не может превышать 200 символов'; errEl.classList.remove('hidden'); return; }
+    if (!sched) { errEl.textContent='Укажите время'; errEl.classList.remove('hidden'); return; }
+
+    // Проверяем что дата не в прошлом
+    const schedDate = new Date(sched);
+    const today = new Date(); today.setHours(0,0,0,0);
+    if (schedDate < today) {
+      errEl.textContent = 'Нельзя планировать задачу на прошедшую дату';
+      errEl.classList.remove('hidden');
+      return;
+    }
+
+    const description = overlay.querySelector('#dtk_desc').value.trim();
+    if (description && description.length > 1000) {
+      errEl.textContent = 'Описание не может превышать 1000 символов';
+      errEl.classList.remove('hidden');
+      return;
+    }
+
+    btn.disabled = true;
+    try {
+      await api.createDealTask(dealId, {
+        task_type: overlay.querySelector('#dtk_type').value,
+        title,
+        scheduled_at: sched,
+        description: description || null,
+      });
+      toast.success('Задача запланирована!');
+      overlay.remove(); document.body.style.overflow = '';
+      await loadDeal(); switchTab('tasks');
+    } catch(e) { errEl.textContent=e.message; errEl.classList.remove('hidden'); btn.disabled=false; }
+  }
+
+  async function completeDealTask(taskId) {
+    try { await api.completeDealTask(taskId); toast.success('Задача выполнена'); await loadDeal(); switchTab('tasks'); }
+    catch(e) { toast.error(e.message); }
+  }
+
+  async function deleteDealTask(taskId) {
+    if (!confirm('Удалить задачу?')) return;
+    try { await api.deleteDealTask(taskId); toast.success('Задача удалена'); await loadDeal(); switchTab('tasks'); }
+    catch(e) { toast.error(e.message); }
+  }
+
+  // ── Документы ────────────────────────────────────────────────────────────
+  function openUploadDocModal() {
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay open';
+    overlay.innerHTML = `
+      <div class="modal">
+        <div class="modal-header">
+          <span class="modal-title">📤 Загрузить документ</span>
+          <button class="modal-close" onclick="this.closest('.modal-overlay').remove();document.body.style.overflow=''">✕</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Файл <span class="required">*</span></label>
+            <input type="file" class="form-control" id="ddoc_file" accept=".pdf,.doc,.docx,.xls,.xlsx,.txt,.jpg,.jpeg,.png,.zip,.rar">
+            <div class="form-hint">Счёт, договор, акт... Макс. 20 МБ.</div>
+          </div>
+          <div class="form-error hidden" id="ddocError" style="padding:8px;background:#fee2e2;border-radius:6px"></div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline" onclick="this.closest('.modal-overlay').remove();document.body.style.overflow=''">Отмена</button>
+          <button class="btn btn-primary" onclick="uploadDoc(this)">Загрузить</button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+    document.body.style.overflow = 'hidden';
+    overlay.addEventListener('click', e => { if (e.target === overlay) { overlay.remove(); document.body.style.overflow = ''; } });
+  }
+
+  async function uploadDoc(btn) {
+    const overlay = btn.closest('.modal-overlay');
+    const errEl = overlay.querySelector('#ddocError');
+    const fi = overlay.querySelector('#ddoc_file');
+    if (!fi.files.length) { errEl.textContent='Выберите файл'; errEl.classList.remove('hidden'); return; }
+    const file = fi.files[0];
+    if (file.size > 20*1024*1024) { errEl.textContent='Файл > 20 МБ'; errEl.classList.remove('hidden'); return; }
+    btn.disabled = true; btn.textContent = 'Загрузка...';
+    const fd = new FormData();
+    fd.append('file', file);
+    try {
+      const res = await fetch(`/api/deals/${dealId}/documents`, { method:'POST', credentials:'include', body: fd });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Ошибка загрузки');
+      toast.success('Документ загружен!');
+      overlay.remove(); document.body.style.overflow = '';
+      await loadDeal(); switchTab('docs');
+    } catch(e) { errEl.textContent=e.message; errEl.classList.remove('hidden'); btn.disabled=false; btn.textContent='Загрузить'; }
+  }
+
+  async function deleteDoc(docId) {
+    if (!confirm('Удалить документ?')) return;
+    try { await api.deleteDealDocument(docId); toast.success('Документ удалён'); await loadDeal(); switchTab('docs'); }
+    catch(e) { toast.error(e.message); }
+  }
+
+  // ── КП: Загрузка активных КП для применения ─────────────────────────────
+  async function loadActiveOffersForDeal() {
+    const sel = document.getElementById('offerSelect');
+    if (!sel) return;
+    try {
+      const offers = await api.getOffers({ client_id: dealData.ClientID });
+      const active = offers.filter(o => o.Status === 'active');
+      sel.innerHTML = '<option value="">— Выберите КП для применения —</option>';
+      active.forEach(o => {
+        const opt = document.createElement('option');
+        opt.value = o.OfferID;
+        opt.textContent = `${o.OfferNumber} (до ${fmt.date(o.ExpiresAt)})`;
+        sel.appendChild(opt);
+      });
+    } catch(e) { /* not critical */ }
+  }
+
+  async function applySelectedOffer() {
+    const sel = document.getElementById('offerSelect');
+    if (!sel || !sel.value) { toast.warning('Выберите КП'); return; }
+    try {
+      await api.applyOffer(dealId, parseInt(sel.value));
+      toast.success('КП применено! Цены пересчитаны.');
+      await loadDeal();
+      switchTab('items');
+    } catch(e) { toast.error(e.message); }
+  }
+
+  async function removeAppliedOffer() {
+    if (!confirm('Открепить КП от сделки?')) return;
+    try {
+      await api.removeOffer(dealId);
+      toast.success('КП откреплено');
+      await loadDeal();
+      switchTab('items');
+    } catch(e) { toast.error(e.message); }
+  }
+
+  const _origSwitchTab = switchTab;
+  // Load offers when switching to items tab
+  const _origRenderDeal = renderDeal;
+  renderDeal = function() {
+    _origRenderDeal.call(this, ...arguments);
+    // Auto-load offers after render
+    setTimeout(() => {
+      if (!dealData.applied_offer) loadActiveOffersForDeal();
+    }, 100);
+  };
+
+  loadDeal();
+</script>
+</body>
+</html>

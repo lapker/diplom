@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Справочники — FSN GALLERY CRM</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .ref-table { width:100%;border-collapse:collapse;font-size:.85rem }
+    .ref-table th { background:#f8fafc;padding:8px 12px;text-align:left;font-weight:600;font-size:.78rem;color:#64748b;border-bottom:1px solid #e2e8f0 }
+    .ref-table td { padding:8px 12px;border-bottom:1px solid #f1f5f9;vertical-align:middle }
+    .ref-table tr:last-child td { border-bottom:none }
+    .inline-edit { display:none;gap:6px;align-items:center }
+    .inline-edit.active { display:flex }
+  </style>
+</head>
+<body>
+<div class="app-layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">🏠</div>
+      <div>
+        <div class="logo-text">FSN GALLERY</div>
+        <div class="logo-sub">Керамическая плитка</div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-title">Менеджер</div>
+      <button class="nav-item" data-page="dashboard" onclick="navigate('dashboard.html')">
+        <span class="nav-icon">📊</span> Личный кабинет
+      </button>
+      <button class="nav-item" data-page="clients" onclick="navigate('clients.html')">
+        <span class="nav-icon">👥</span> Мои клиенты
+      </button>
+      <button class="nav-item" data-page="deals" onclick="navigate('deals.html')">
+        <span class="nav-icon">🤝</span> Мои сделки
+      </button>
+      <button class="nav-item" data-page="my-offers" id="navMyOffers" onclick="navigate('offers.html?my=1')">
+        <span class="nav-icon">📄</span> Мои КП
+      </button>
+      <div class="nav-section-title" data-role="admin" style="display:none">Администратор</div>
+      <button class="nav-item" data-page="admin" data-role="admin" style="display:none" onclick="navigate('admin.html')">
+        <span class="nav-icon">🏢</span> Панель управления
+      </button>
+      <button class="nav-item" data-page="managers" data-role="admin" style="display:none" onclick="navigate('managers.html')">
+        <span class="nav-icon">👤</span> Менеджеры
+      </button>
+      <button class="nav-item" data-page="all-clients" data-role="admin" style="display:none" onclick="navigate('all-clients.html')">
+        <span class="nav-icon">📋</span> Все клиенты
+      </button>
+      <button class="nav-item" data-page="all-deals" data-role="admin" style="display:none" onclick="navigate('all-deals.html')">
+        <span class="nav-icon">📁</span> Все сделки
+      </button>
+      <button class="nav-item" data-page="offers" data-role="admin" style="display:none" onclick="navigate('offers.html')">
+        <span class="nav-icon">📄</span> Все КП
+      </button>
+      <button class="nav-item" data-page="reports" onclick="navigate('reports.html')">
+        <span class="nav-icon">📈</span> Отчёты
+      </button>
+      <button class="nav-item" data-page="references" onclick="navigate('references.html')">
+        <span class="nav-icon">📚</span> Справочники
+      </button>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="avatar" id="sidebarAvatar">?</div>
+        <div class="user-info">
+          <div class="user-name" id="sidebarUserName">—</div>
+          <div class="user-role" id="sidebarUserRole">—</div>
+        </div>
+      </div>
+      <button class="btn-logout" id="logoutBtn">🚪 Выйти</button>
+    </div>
+  </aside>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <!-- Main -->
+  <div class="main-content">
+    <header class="top-header">
+      <button class="sidebar-toggle" id="sidebarToggle">☰</button>
+      <span class="header-title">Справочники</span>
+    </header>
+
+    <main class="page-content">
+      <div style="margin-bottom:20px">
+        <h1>📚 Справочники</h1>
+        <p style="color:#64748b">Управление справочными данными системы</p>
+      </div>
+
+      <div class="tabs" style="margin-bottom:16px">
+        <button class="tab-btn active" onclick="switchRefTab('sources')">🔗 Источники привлечения</button>
+        <button class="tab-btn" onclick="switchRefTab('statuses')">🏷 Статусы клиентов</button>
+        <button class="tab-btn" onclick="switchRefTab('categories')">📂 Категории товаров</button>
+        <button class="tab-btn" onclick="switchRefTab('products')">🧱 Товары / Плитка</button>
+      </div>
+
+      <!-- Источники привлечения -->
+      <div id="ref-tab-sources">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">🔗 Источники привлечения клиентов</span>
+            <button class="btn btn-primary btn-sm" onclick="openAddRefModal('sources')">➕ Добавить</button>
+          </div>
+          <div class="card-body" id="sourcesRefContent"><div class="spinner"></div></div>
+        </div>
+      </div>
+
+      <!-- Статусы клиентов -->
+      <div id="ref-tab-statuses" style="display:none">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">🏷 Статусы клиентов</span>
+            <button class="btn btn-primary btn-sm" onclick="openAddRefModal('statuses')">➕ Добавить</button>
+          </div>
+          <div class="card-body" id="statusesRefContent"><div class="spinner"></div></div>
+        </div>
+      </div>
+
+      <!-- Категории товаров -->
+      <div id="ref-tab-categories" style="display:none">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">📂 Категории товаров</span>
+            <button class="btn btn-primary btn-sm" onclick="openAddRefModal('categories')">➕ Добавить</button>
+          </div>
+          <div class="card-body" id="categoriesRefContent"><div class="spinner"></div></div>
+        </div>
+      </div>
+
+      <!-- Товары -->
+      <div id="ref-tab-products" style="display:none">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">🧱 Товары / Плитка</span>
+            <button class="btn btn-primary btn-sm" onclick="openAddProductModal()">➕ Добавить товар</button>
+          </div>
+          <div class="card-body" id="productsRefContent"><div class="spinner"></div></div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- Модал добавления простого справочника -->
+<div class="modal-overlay" id="modalAddRef">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="addRefTitle">Добавить</span>
+      <button class="modal-close" onclick="modal.close('modalAddRef')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Название <span class="required">*</span></label>
+        <input type="text" class="form-control" id="refName" placeholder="Введите название..." maxlength="100">
+      </div>
+      <div class="form-error hidden" id="refError" style="padding:8px;background:#fee2e2;border-radius:6px"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="modal.close('modalAddRef')">Отмена</button>
+      <button class="btn btn-primary" id="saveRefBtn" onclick="saveRef()">Сохранить</button>
+    </div>
+  </div>
+</div>
+
+<!-- Модал добавления/редактирования товара -->
+<div class="modal-overlay" id="modalAddProduct">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <span class="modal-title" id="addProductTitle">Добавить товар</span>
+      <button class="modal-close" onclick="modal.close('modalAddProduct')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Название <span class="required">*</span></label>
+        <input type="text" class="form-control" id="pr_name" placeholder="Плитка настенная..." maxlength="200">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Артикул (SKU)</label>
+        <input type="text" class="form-control" id="pr_sku" placeholder="WL-XX-0000" maxlength="50">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Категория <span class="required">*</span></label>
+        <select class="form-control" id="pr_category">
+          <option value="">Выберите категорию...</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Цена за шт. (BYN) <span class="required">*</span></label>
+        <input type="number" class="form-control" id="pr_price" placeholder="0.00" min="0.01" max="999999999" step="0.01">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Ширина (мм)</label>
+        <input type="number" class="form-control" id="pr_width" placeholder="600" min="1" max="99999" step="1">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Длина (мм)</label>
+        <input type="number" class="form-control" id="pr_length" placeholder="600" min="1" max="99999" step="1">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Толщина (мм)</label>
+        <input type="number" class="form-control" id="pr_thickness" placeholder="10" min="1" max="99999" step="0.5">
+      </div>
+      </div>
+      <div class="form-group">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+          <input type="checkbox" id="pr_active" checked> Активный товар
+        </label>
+      </div>
+      <div class="form-error hidden" id="prError" style="padding:8px;background:#fee2e2;border-radius:6px"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="modal.close('modalAddProduct')">Отмена</button>
+      <button class="btn btn-primary" id="saveProductBtn" onclick="saveProduct()">Сохранить</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/utils.js"></script>
+<script>
+  if (!auth.requireAdmin()) throw new Error('not admin');
+
+  initSidebar('references');
+
+  let currentRefType = 'sources';
+  let editingRefId   = null;
+  let editingProductId = null;
+  let allCategories  = [];
+
+  // Ограничения длин полей для справочников (макс. по БД)
+  const REF_MAX_LENGTH = 100;
+
+  function switchRefTab(tab) {
+    currentRefType = tab;
+    const tabs = ['sources', 'statuses', 'categories', 'products'];
+    document.querySelectorAll('.tab-btn').forEach((b, i) => b.classList.toggle('active', tabs[i] === tab));
+    tabs.forEach(t => { document.getElementById(`ref-tab-${t}`).style.display = t === tab ? '' : 'none'; });
+    loadRefTab(tab);
+  }
+
+  async function loadRefTab(tab) {
+    if (tab === 'sources')     loadSources();
+    else if (tab === 'statuses')    loadStatuses();
+    else if (tab === 'categories')  loadCategories();
+    else loadProducts();
+  }
+
+  // ── Источники ──────────────────────────────────────────────────────────────
+  async function loadSources() {
+    const el = document.getElementById('sourcesRefContent');
+    el.innerHTML = '<div class="spinner"></div>';
+    try {
+      const data = await api.refGetLeadSources();
+      el.innerHTML = renderSimpleRefTable(data, 'LeadSourceID', 'SourceName', 'sources');
+    } catch(e) { el.innerHTML = `<p style="color:#ef4444">Ошибка: ${e.message}</p>`; }
+  }
+
+  // ── Статусы ────────────────────────────────────────────────────────────────
+  async function loadStatuses() {
+    const el = document.getElementById('statusesRefContent');
+    el.innerHTML = '<div class="spinner"></div>';
+    try {
+      const data = await api.refGetClientStatuses();
+      el.innerHTML = renderSimpleRefTable(data, 'StatusID', 'StatusName', 'statuses');
+    } catch(e) { el.innerHTML = `<p style="color:#ef4444">Ошибка: ${e.message}</p>`; }
+  }
+
+  // ── Категории ──────────────────────────────────────────────────────────────
+  async function loadCategories() {
+    const el = document.getElementById('categoriesRefContent');
+    el.innerHTML = '<div class="spinner"></div>';
+    try {
+      const data = await api.refGetProductCategories();
+      allCategories = data;
+      el.innerHTML = renderSimpleRefTable(data, 'CategoryID', 'CategoryName', 'categories');
+    } catch(e) { el.innerHTML = `<p style="color:#ef4444">Ошибка: ${e.message}</p>`; }
+  }
+
+  function renderSimpleRefTable(data, idKey, nameKey, type) {
+    if (!data.length) return `<div class="empty-state"><p>Нет записей</p></div>`;
+    return `<div class="table-wrapper"><table class="ref-table">
+      <thead><tr><th>ID</th><th>Название</th><th></th></tr></thead>
+      <tbody>
+        ${data.map(r => `
+          <tr id="ref-row-${type}-${r[idKey]}">
+            <td style="color:#94a3b8;width:60px">#${r[idKey]}</td>
+            <td>
+              <span class="ref-name-${type}-${r[idKey]}">${r[nameKey]}</span>
+              <div class="inline-edit" id="ref-edit-${type}-${r[idKey]}">
+                <input type="text" class="form-control" style="max-width:240px" value="${r[nameKey]}" maxlength="100"
+                  onkeydown="if(event.key==='Enter')saveRefEdit('${type}',${r[idKey]},this.value)">
+                <button class="btn btn-success btn-sm" onclick="saveRefEdit('${type}',${r[idKey]},this.previousElementSibling.value)">✓</button>
+                <button class="btn btn-ghost btn-sm" onclick="cancelRefEdit('${type}',${r[idKey]})">✕</button>
+              </div>
+            </td>
+            <td style="text-align:right;white-space:nowrap">
+              <button class="btn btn-outline btn-sm" onclick="startRefEdit('${type}',${r[idKey]})">✏️</button>
+              <button class="btn btn-ghost btn-sm" onclick="deleteRef('${type}',${r[idKey]})" style="color:#dc2626">🗑</button>
+            </td>
+          </tr>`).join('')}
+      </tbody>
+    </table></div>`;
+  }
+
+  function startRefEdit(type, id) {
+    document.querySelector(`.ref-name-${type}-${id}`).style.display = 'none';
+    const editDiv = document.getElementById(`ref-edit-${type}-${id}`);
+    editDiv.classList.add('active');
+    const input = editDiv.querySelector('input');
+    input.focus();
+    // Ограничиваем ввод в реальном времени
+    input.oninput = function() {
+      if (this.value.length > REF_MAX_LENGTH) {
+        this.value = this.value.substring(0, REF_MAX_LENGTH);
+      }
+    };
+  }
+
+  function cancelRefEdit(type, id) {
+    document.querySelector(`.ref-name-${type}-${id}`).style.display = '';
+    document.getElementById(`ref-edit-${type}-${id}`).classList.remove('active');
+  }
+
+  async function saveRefEdit(type, id, name) {
+    if (!name.trim()) { toast.warning('Название не может быть пустым'); return; }
+    if (name.length > REF_MAX_LENGTH) { toast.warning('Название слишком длинное (максимум ' + REF_MAX_LENGTH + ' символов)'); return; }
+    try {
+      if (type === 'sources')    await api.refUpdateLeadSource(id, { name: name.trim() });
+      else if (type === 'statuses')   await api.refUpdateClientStatus(id, { name: name.trim() });
+      else                            await api.refUpdateProductCategory(id, { name: name.trim() });
+      toast.success('Сохранено');
+      loadRefTab(currentRefType);
+    } catch(e) { toast.error(e.message); }
+  }
+
+  async function deleteRef(type, id) {
+    if (!confirm('Удалить запись? Если она используется — удаление будет запрещено.')) return;
+    try {
+      if (type === 'sources')    await api.refDeleteLeadSource(id);
+      else if (type === 'statuses')   await api.refDeleteClientStatus(id);
+      else                            await api.refDeleteProductCategory(id);
+      toast.success('Удалено');
+      loadRefTab(currentRefType);
+    } catch(e) { toast.error(e.message); }
+  }
+
+  // ── Модал добавления простого справочника ───────────────────────────────
+  let _currentAddType = '';
+  function openAddRefModal(type) {
+    _currentAddType = type;
+    const titles = { sources: '🔗 Добавить источник', statuses: '🏷 Добавить статус', categories: '📂 Добавить категорию' };
+    document.getElementById('addRefTitle').textContent = titles[type] || 'Добавить';
+    document.getElementById('refName').value = '';
+    document.getElementById('refError').classList.add('hidden');
+    modal.open('modalAddRef');
+  }
+
+  async function saveRef() {
+    const btn = document.getElementById('saveRefBtn');
+    const errEl = document.getElementById('refError');
+    errEl.classList.add('hidden');
+    const name = document.getElementById('refName').value.trim();
+    if (!name) { errEl.textContent='Введите название'; errEl.classList.remove('hidden'); return; }
+    if (name.length > REF_MAX_LENGTH) { errEl.textContent='Название слишком длинное (максимум ' + REF_MAX_LENGTH + ' символов)'; errEl.classList.remove('hidden'); return; }
+    btn.disabled = true; btn.textContent = 'Сохранение...';
+    try {
+      if (_currentAddType === 'sources')   await api.refCreateLeadSource({ name });
+      else if (_currentAddType === 'statuses')  await api.refCreateClientStatus({ name });
+      else                                      await api.refCreateProductCategory({ name });
+      toast.success('Добавлено');
+      modal.close('modalAddRef');
+      loadRefTab(currentRefType);
+    } catch(e) {
+      errEl.textContent = e.message;
+      errEl.classList.remove('hidden');
+    } finally {
+      btn.disabled = false; btn.textContent = 'Сохранить';
+    }
+  }
+
+  // ── Товары ────────────────────────────────────────────────────────────────
+  async function loadProducts() {
+    const el = document.getElementById('productsRefContent');
+    el.innerHTML = '<div class="spinner"></div>';
+    try {
+      const data = await api.refGetProducts();
+      if (!data.length) { el.innerHTML = '<div class="empty-state"><p>Нет товаров</p></div>'; return; }
+      el.innerHTML = `<div class="table-wrapper"><table class="ref-table">
+        <thead><tr>
+          <th>Артикул</th><th>Название</th><th>Категория</th>
+          <th style="text-align:right">Цена (BYN)</th>
+          <th style="text-align:center">Размер (мм)</th>
+          <th style="text-align:center">Площадь (м²)</th>
+          <th style="text-align:center">Активен</th>
+          <th></th>
+        </tr></thead>
+        <tbody>
+          ${data.map(p => {
+            const w = p.TileWidth, l = p.TileLength;
+            const area = (w && l) ? (w*l/1000000).toFixed(4) : '—';
+            return `<tr>
+              <td style="font-family:monospace;font-size:.78rem;color:#64748b">${p.SKU || '—'}</td>
+              <td><strong>${p.ProductName}</strong></td>
+              <td><span class="badge badge-secondary">${p.CategoryName}</span></td>
+              <td style="text-align:right;font-weight:700">${fmt.money(p.Price)}</td>
+              <td style="text-align:center;font-size:.78rem;color:#64748b">${w||'—'}×${l||'—'}×${p.TileThickness||'—'}</td>
+              <td style="text-align:center;font-size:.78rem;color:#7c3aed">${area}</td>
+              <td style="text-align:center">${p.IsActive ? '<span class="badge badge-success">Да</span>' : '<span class="badge badge-secondary">Нет</span>'}</td>
+              <td style="text-align:right;white-space:nowrap">
+                <button class="btn btn-outline btn-sm" onclick="openEditProductModal(${p.ProductID})">✏️</button>
+                <button class="btn btn-ghost btn-sm" onclick="deleteProduct(${p.ProductID})" style="color:#dc2626">🗑</button>
+              </td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table></div>`;
+    } catch(e) { el.innerHTML = `<p style="color:#ef4444">Ошибка: ${e.message}</p>`; }
+  }
+
+  async function openAddProductModal() {
+    editingProductId = null;
+    document.getElementById('addProductTitle').textContent = '➕ Добавить товар';
+    document.getElementById('pr_name').value = '';
+    document.getElementById('pr_sku').value = '';
+    document.getElementById('pr_price').value = '';
+    document.getElementById('pr_width').value = '';
+    document.getElementById('pr_length').value = '';
+    document.getElementById('pr_thickness').value = '';
+    document.getElementById('pr_active').checked = true;
+    document.getElementById('prError').classList.add('hidden');
+    await fillCategorySelect();
+    modal.open('modalAddProduct');
+  }
+
+  async function openEditProductModal(productId) {
+    editingProductId = productId;
+    document.getElementById('addProductTitle').textContent = '✏️ Редактировать товар';
+    document.getElementById('prError').classList.add('hidden');
+    await fillCategorySelect();
+    try {
+      const prods = await api.refGetProducts();
+      const p = prods.find(x => x.ProductID === productId);
+      if (!p) { toast.error('Товар не найден'); return; }
+      document.getElementById('pr_name').value = p.ProductName;
+      document.getElementById('pr_sku').value  = p.SKU || '';
+      document.getElementById('pr_category').value = p.CategoryID;
+      document.getElementById('pr_price').value = p.Price;
+      document.getElementById('pr_width').value = p.TileWidth || '';
+      document.getElementById('pr_length').value = p.TileLength || '';
+      document.getElementById('pr_thickness').value = p.TileThickness || '';
+      document.getElementById('pr_active').checked = !!p.IsActive;
+      modal.open('modalAddProduct');
+    } catch(e) { toast.error(e.message); }
+  }
+
+  async function fillCategorySelect() {
+    const sel = document.getElementById('pr_category');
+    try {
+      if (!allCategories.length) allCategories = await api.refGetProductCategories();
+      sel.innerHTML = '<option value="">Выберите категорию...</option>';
+      allCategories.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c.CategoryID;
+        opt.textContent = c.CategoryName;
+        sel.appendChild(opt);
+      });
+    } catch(e) { sel.innerHTML = '<option value="">Ошибка загрузки</option>'; }
+  }
+
+  async function saveProduct() {
+    const btn = document.getElementById('saveProductBtn');
+    const errEl = document.getElementById('prError');
+    errEl.classList.add('hidden');
+    const name     = document.getElementById('pr_name').value.trim();
+    const sku      = document.getElementById('pr_sku').value.trim();
+    const catId    = document.getElementById('pr_category').value;
+    const priceVal = document.getElementById('pr_price').value;
+    const widthVal  = document.getElementById('pr_width').value;
+    const lengthVal = document.getElementById('pr_length').value;
+    const thickVal  = document.getElementById('pr_thickness').value;
+    
+    if (!name || !catId || !priceVal) { errEl.textContent='Заполните обязательные поля'; errEl.classList.remove('hidden'); return; }
+    if (name.length > 200) { errEl.textContent='Название слишком длинное (максимум 200 символов)'; errEl.classList.remove('hidden'); return; }
+    if (sku && sku.length > 50) { errEl.textContent='Артикул слишком длинный (максимум 50 символов)'; errEl.classList.remove('hidden'); return; }
+    
+    const price = parseFloat(priceVal);
+    if (isNaN(price) || price < 0.01 || price > 999999999) { errEl.textContent='Цена должна быть от 0.01 до 999 999 999'; errEl.classList.remove('hidden'); return; }
+    
+    if (widthVal) {
+      const w = parseFloat(widthVal);
+      if (isNaN(w) || w < 1 || w > 99999) { errEl.textContent='Ширина должна быть от 1 до 99999 мм'; errEl.classList.remove('hidden'); return; }
+    }
+    if (lengthVal) {
+      const l = parseFloat(lengthVal);
+      if (isNaN(l) || l < 1 || l > 99999) { errEl.textContent='Длина должна быть от 1 до 99999 мм'; errEl.classList.remove('hidden'); return; }
+    }
+    if (thickVal) {
+      const t = parseFloat(thickVal);
+      if (isNaN(t) || t < 1 || t > 99999) { errEl.textContent='Толщина должна быть от 1 до 99999 мм'; errEl.classList.remove('hidden'); return; }
+    }
+    
+    const payload = {
+      name,
+      sku:           sku || null,
+      category_id:   parseInt(catId),
+      price:         price,
+      tile_width:    parseFloat(widthVal) || null,
+      tile_length:   parseFloat(lengthVal) || null,
+      tile_thickness:parseFloat(thickVal) || null,
+      is_active:     document.getElementById('pr_active').checked ? 1 : 0,
+    };
+    btn.disabled = true; btn.textContent = 'Сохранение...';
+    try {
+      if (editingProductId) {
+        await api.refUpdateProduct(editingProductId, payload);
+        toast.success('Товар обновлён');
+      } else {
+        await api.refCreateProduct(payload);
+        toast.success('Товар создан');
+      }
+      modal.close('modalAddProduct');
+      loadProducts();
+    } catch(e) {
+      errEl.textContent = e.message;
+      errEl.classList.remove('hidden');
+    } finally {
+      btn.disabled = false; btn.textContent = 'Сохранить';
+    }
+  }
+
+  async function deleteProduct(productId) {
+    if (!confirm('Удалить товар? Если он используется в сделках или КП — удаление будет запрещено.')) return;
+    try {
+      await api.refDeleteProduct(productId);
+      toast.success('Товар удалён');
+      loadProducts();
+    } catch(e) { toast.error(e.message); }
+  }
+
+  // Init
+  loadSources();
+</script>
+</body>
+</html>

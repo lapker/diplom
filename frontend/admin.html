@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Панель администратора — FSN GALLERY CRM</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="app-layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">🏠</div>
+      <div>
+        <div class="logo-text">FSN GALLERY</div>
+        <div class="logo-sub">Керамическая плитка</div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-title">Менеджер</div>
+      <button class="nav-item" data-page="dashboard" onclick="navigate('dashboard.html')">
+        <span class="nav-icon">📊</span> Личный кабинет
+      </button>
+      <button class="nav-item" data-page="clients" onclick="navigate('clients.html')">
+        <span class="nav-icon">👥</span> Мои клиенты
+      </button>
+      <button class="nav-item" data-page="deals" onclick="navigate('deals.html')">
+        <span class="nav-icon">🤝</span> Мои сделки
+      </button>
+      <button class="nav-item" data-page="my-offers" id="navMyOffers" onclick="navigate('offers.html?my=1')">
+        <span class="nav-icon">📄</span> Мои КП
+      </button>
+      <div class="nav-section-title" data-role="admin">Администратор</div>
+      <button class="nav-item" data-page="admin" data-role="admin" onclick="navigate('admin.html')">
+        <span class="nav-icon">🏢</span> Панель управления
+      </button>
+      <button class="nav-item" data-page="managers" data-role="admin" onclick="navigate('managers.html')">
+        <span class="nav-icon">👤</span> Менеджеры
+      </button>
+      <button class="nav-item" data-page="all-clients" data-role="admin" onclick="navigate('all-clients.html')">
+        <span class="nav-icon">📋</span> Все клиенты
+      </button>
+      <button class="nav-item" data-page="all-deals" data-role="admin" onclick="navigate('all-deals.html')">
+        <span class="nav-icon">📁</span> Все сделки
+      </button>
+      <button class="nav-item" data-page="offers" data-role="admin" onclick="navigate('offers.html')">
+        <span class="nav-icon">📄</span> Все КП
+      </button>
+      <button class="nav-item" data-page="reports" data-role="admin" onclick="navigate('reports.html')">
+        <span class="nav-icon">📈</span> Отчёты
+      </button>
+      <button class="nav-item" data-page="references" data-role="admin" onclick="navigate('references.html')">
+        <span class="nav-icon">📚</span> Справочники
+      </button>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="avatar" id="sidebarAvatar">?</div>
+        <div class="user-info">
+          <div class="user-name" id="sidebarUserName">—</div>
+          <div class="user-role" id="sidebarUserRole">—</div>
+        </div>
+      </div>
+      <button class="btn-logout" id="logoutBtn">🚪 Выйти</button>
+    </div>
+  </aside>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <!-- Main -->
+  <div class="main-content">
+    <header class="top-header">
+      <button class="sidebar-toggle" id="sidebarToggle">☰</button>
+      <span class="header-title">Панель администратора</span>
+      <div class="header-actions">
+        <button class="btn btn-primary btn-sm" onclick="navigate('managers.html')">
+          👤 Управление менеджерами
+        </button>
+      </div>
+    </header>
+
+    <main class="page-content">
+      <div style="margin-bottom:24px">
+        <h1>🏢 Панель управления</h1>
+        <p id="adminSubtitle">Общая статистика компании</p>
+      </div>
+
+      <!-- Общая статистика -->
+      <div style="margin-bottom:8px;font-size:.8rem;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.05em">Общая статистика</div>
+      <div class="stats-grid" id="statsGridTotal" style="margin-bottom:24px">
+        <div class="stat-card">
+          <div class="stat-icon blue">👥</div>
+          <div class="stat-info">
+            <div class="stat-value" id="statTotalClients">—</div>
+            <div class="stat-label">Всего клиентов</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon green">💰</div>
+          <div class="stat-info">
+            <div class="stat-value" id="statTotalSales">—</div>
+            <div class="stat-label">Общая сумма продаж</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Статистика за текущий месяц -->
+      <div style="margin-bottom:8px;font-size:.8rem;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.05em" id="labelMonthSection">За текущий месяц</div>
+      <div class="stats-grid" id="statsGridMonthly">
+        <div class="stat-card">
+          <div class="stat-icon orange">🛒</div>
+          <div class="stat-info">
+            <div class="stat-value" id="statMonthlyDeals">—</div>
+            <div class="stat-label" id="labelMonthlyDeals">Сделок за текущий месяц</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon cyan">📅</div>
+          <div class="stat-info">
+            <div class="stat-value" id="statMonthlySales">—</div>
+            <div class="stat-label" id="labelMonthlySales">Продажи за текущий месяц</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ожидают назначения роли -->
+      <div id="pendingAlert" style="display:none;margin-bottom:16px">
+        <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between">
+          <span>⏳ Есть менеджеры, ожидающие назначения роли: <strong id="pendingCount">0</strong></span>
+          <button class="btn btn-warning btn-sm" onclick="navigate('managers.html')">Перейти к менеджерам →</button>
+        </div>
+      </div>
+
+      <!-- Быстрые действия -->
+      <div class="card mb-3">
+        <div class="card-header">
+          <span class="card-title">⚡ Быстрые действия</span>
+        </div>
+        <div class="card-body">
+          <div style="display:flex;gap:12px;flex-wrap:wrap">
+            <button class="btn btn-primary" onclick="navigate('managers.html')">
+              👤 Управление менеджерами
+            </button>
+            <button class="btn btn-outline" onclick="navigate('all-clients.html')">
+              📋 Все клиенты
+            </button>
+            <button class="btn btn-outline" onclick="navigate('managers.html?new=1')">
+              ➕ Добавить менеджера
+            </button>
+            <button class="btn btn-success" onclick="openPlanModal()">
+              🎯 Установить план продаж
+            </button>
+            <button class="btn btn-outline" onclick="openQuotaModal()">
+              📊 Установить квоту
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Текущий план продаж -->
+      <div class="card mb-3">
+        <div class="card-header">
+          <span class="card-title">🎯 Планы продаж</span>
+          <button class="btn btn-primary btn-sm" onclick="openPlanModal()">➕ Новый план</button>
+        </div>
+        <div id="plansWrap"><div class="spinner"></div></div>
+      </div>
+
+      <!-- Квоты менеджеров -->
+      <div class="card mb-3">
+        <div class="card-header">
+          <span class="card-title">📊 Квоты менеджеров</span>
+          <button class="btn btn-outline btn-sm" onclick="openQuotaModal()">➕ Новая квота</button>
+        </div>
+        <div id="quotasWrap"><div class="spinner"></div></div>
+      </div>
+
+      <!-- Менеджеры -->
+      <div class="card mb-3">
+        <div class="card-header">
+          <span class="card-title">👤 Менеджеры компании</span>
+          <a href="managers.html" class="btn btn-ghost btn-sm">Все менеджеры →</a>
+        </div>
+        <div id="managersWrap">
+          <div class="spinner"></div>
+        </div>
+      </div>
+
+      <!-- Последние клиенты -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">🕐 Последние клиенты</span>
+          <a href="all-clients.html" class="btn btn-ghost btn-sm">Все клиенты →</a>
+        </div>
+        <div id="recentClientsWrap">
+          <div class="spinner"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/utils.js"></script>
+<script>
+  if (!auth.requireAdmin()) throw new Error('not admin');
+  initSidebar('admin');
+
+  const now = new Date();
+  const monthsGen = ['января','февраля','марта','апреля','мая','июня',
+                     'июля','августа','сентября','октября','ноября','декабря'];
+  const monthsNom = ['январь','февраль','март','апрель','май','июнь',
+                     'июль','август','сентябрь','октябрь','ноябрь','декабрь'];
+  const curMonthName = monthsNom[now.getMonth()];
+  const curMonthGen  = monthsGen[now.getMonth()];
+  const curYear      = now.getFullYear();
+
+  document.getElementById('adminSubtitle').textContent =
+    `Данные за ${curMonthName} ${curYear} года`;
+
+  // Обновляем подписи карточек с текущим месяцем (именительный падеж)
+  document.getElementById('labelMonthSection').textContent =
+    `За ${curMonthName} ${curYear}`;
+  document.getElementById('labelMonthlyDeals').textContent =
+    `Сделок за ${curMonthName} ${curYear}`;
+  document.getElementById('labelMonthlySales').textContent =
+    `Продажи за ${curMonthName} ${curYear}`;
+
+  async function loadStats() {
+    try {
+      const s = await api.companyStats();
+      document.getElementById('statTotalClients').textContent  = s.TotalClients;
+      document.getElementById('statTotalSales').textContent    = fmt.money(s.TotalSales);
+      document.getElementById('statMonthlyDeals').textContent  = s.MonthlyDeals;
+      document.getElementById('statMonthlySales').textContent  = fmt.money(s.MonthlySales);
+    } catch (e) {
+      toast.error('Ошибка загрузки статистики: ' + e.message);
+    }
+  }
+
+  async function loadManagers() {
+    const wrap = document.getElementById('managersWrap');
+    try {
+      const managers = await api.getManagers();
+      if (!managers.length) {
+        wrap.innerHTML = `<div class="empty-state"><p>Нет менеджеров</p></div>`;
+        return;
+      }
+      wrap.innerHTML = `
+        <div class="table-wrapper">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Менеджер</th>
+                <th>Логин</th>
+                <th>Клиентов</th>
+                <th>Продажи за месяц</th>
+                <th>Последний вход</th>
+                <th>Статус</th>
+                <th>Действия</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${managers.map(m => `
+                <tr>
+                  <td>
+                    <div style="display:flex;align-items:center;gap:10px">
+                      <div style="width:36px;height:36px;background:${m.IsActive ? '#dbeafe' : '#f1f5f9'};border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;color:${m.IsActive ? '#2563eb' : '#94a3b8'};font-size:.8rem;flex-shrink:0">
+                        ${fmt.initials(m.FullName)}
+                      </div>
+                      <div>
+                        <div style="font-weight:600">${m.FullName}</div>
+                        <div style="font-size:.75rem;color:#64748b">${m.Email || '—'}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td style="font-family:monospace;font-size:.85rem">${m.Login}</td>
+                  <td style="font-weight:600">${m.ClientCount}</td>
+                  <td style="font-weight:600;color:#16a34a">${fmt.money(m.MonthlySales)}</td>
+                  <td style="font-size:.82rem;color:#64748b">${fmt.datetime(m.LastLoginAt)}</td>
+                  <td>
+                    ${m.IsActive
+                      ? '<span class="badge badge-success">Активен</span>'
+                      : '<span class="badge badge-danger">Заблокирован</span>'}
+                  </td>
+                  <td>
+                    <div class="actions">
+                      <button class="btn btn-outline btn-sm" onclick="navigate('managers.html')">
+                        Управление
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+    } catch (e) {
+      wrap.innerHTML = `<div class="empty-state"><p>Ошибка: ${e.message}</p></div>`;
+    }
+  }
+
+  async function loadRecentClients() {
+    const wrap = document.getElementById('recentClientsWrap');
+    try {
+      const clients = await api.getClients();
+      const recent = clients.slice(0, 6);
+      if (!recent.length) {
+        wrap.innerHTML = `<div class="empty-state"><p>Нет клиентов</p></div>`;
+        return;
+      }
+      wrap.innerHTML = `
+        <div class="table-wrapper">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Клиент</th>
+                <th>Менеджер</th>
+                <th>Статус</th>
+                <th>Сумма покупок</th>
+                <th>Последняя покупка</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              ${recent.map(c => `
+                <tr>
+                  <td>
+                    <div style="font-weight:600">${c.FullName}</div>
+                    ${c.CompanyName ? `<div style="font-size:.75rem;color:#64748b">${c.CompanyName}</div>` : ''}
+                  </td>
+                  <td style="font-size:.85rem">${c.ManagerName || '—'}</td>
+                  <td>${statusBadge(c.Status)}</td>
+                  <td style="font-weight:700">${fmt.money(c.TotalPurchases)}</td>
+                  <td style="font-size:.85rem">${fmt.date(c.LastPurchaseDate)}</td>
+                  <td>
+                    <button class="btn btn-outline btn-sm" onclick="navigate('client.html?id=${c.ClientID}')">
+                      Открыть
+                    </button>
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+    } catch (e) {
+      wrap.innerHTML = `<div class="empty-state"><p>Ошибка: ${e.message}</p></div>`;
+    }
+  }
+
+  const MONTHS_NOM = ['январь','февраль','март','апрель','май','июнь',
+                      'июль','август','сентябрь','октябрь','ноябрь','декабрь'];
+  const QUOTA_LABELS = {
+    'sales_amount': 'Сумма продаж (BYN)',
+    'deals_count':  'Кол-во сделок',
+    'new_clients':  'Новых клиентов',
+    'plan_percent': 'Выполнение плана (%)',
+  };
+  let allManagersList = [];
+
+  async function loadPending() {
+    try {
+      const pending = await api.getPendingManagers();
+      const alert   = document.getElementById('pendingAlert');
+      if (pending.length) {
+        alert.style.display = '';
+        document.getElementById('pendingCount').textContent = pending.length;
+      } else {
+        alert.style.display = 'none';
+      }
+    } catch(e) {}
+  }
+
+  async function loadPlans() {
+    const wrap = document.getElementById('plansWrap');
+    try {
+      const plans = await api.getSalesPlans();
+      if (!plans.length) { wrap.innerHTML = '<div style="padding:16px;color:#64748b;font-size:.85rem">Нет планов продаж</div>'; return; }
+      wrap.innerHTML = `
+        <div class="table-wrapper">
+          <table class="table">
+            <thead><tr><th>Год</th><th>Месяц</th><th>Целевая сумма</th><th>Создан</th><th></th></tr></thead>
+            <tbody>
+              ${plans.map(p => `
+                <tr>
+                  <td>${p.PlanYear}</td>
+                  <td>${MONTHS_NOM[p.PlanMonth - 1] || p.PlanMonth}</td>
+                  <td style="font-weight:700;color:#16a34a">${fmt.money(p.TargetAmount)}</td>
+                  <td style="font-size:.8rem;color:#64748b">${p.CreatedByName} · ${fmt.date(p.CreatedAt)}</td>
+                  <td><button class="btn btn-danger btn-sm" onclick="deletePlan(${p.PlanID})">🗑</button></td>
+                </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>`;
+    } catch(e) { wrap.innerHTML = `<div style="padding:16px;color:#dc2626">${e.message}</div>`; }
+  }
+
+  async function loadQuotas() {
+    const wrap = document.getElementById('quotasWrap');
+    try {
+      const quotas = await api.getQuotas();
+      if (!quotas.length) { wrap.innerHTML = '<div style="padding:16px;color:#64748b;font-size:.85rem">Нет квот</div>'; return; }
+      wrap.innerHTML = `
+        <div class="table-wrapper">
+          <table class="table">
+            <thead><tr><th>Менеджер</th><th>Месяц</th><th>Тип квоты</th><th>Цель</th><th></th></tr></thead>
+            <tbody>
+              ${quotas.map(q => `
+                <tr>
+                  <td>${q.ManagerName}</td>
+                  <td>${MONTHS_NOM[q.QuotaMonth - 1] || q.QuotaMonth} ${q.QuotaYear}</td>
+                  <td>${QUOTA_LABELS[q.QuotaType] || q.QuotaType}</td>
+                  <td style="font-weight:700">${q.QuotaType === 'sales_amount' ? fmt.money(q.TargetValue) : q.TargetValue}</td>
+                  <td><button class="btn btn-danger btn-sm" onclick="deleteQuota(${q.QuotaID})">🗑</button></td>
+                </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>`;
+    } catch(e) { wrap.innerHTML = `<div style="padding:16px;color:#dc2626">${e.message}</div>`; }
+  }
+
+  async function deletePlan(id) {
+    if (!confirm('Удалить план продаж?')) return;
+    try { await api.deleteSalesPlan(id); toast.success('План удалён'); loadPlans(); }
+    catch(e) { toast.error(e.message); }
+  }
+
+  async function deleteQuota(id) {
+    if (!confirm('Удалить квоту?')) return;
+    try { await api.deleteQuota(id); toast.success('Квота удалена'); loadQuotas(); }
+    catch(e) { toast.error(e.message); }
+  }
+
+  function openPlanModal() {
+    const now = new Date();
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay open';
+    let monthOptions = '';
+    // Только текущий и будущие месяцы (текущий год + следующий)
+    const curYear = now.getFullYear();
+    const curMonth = now.getMonth() + 1;
+    for (let y = curYear; y <= curYear + 1; y++) {
+      for (let m = 1; m <= 12; m++) {
+        if (y === curYear && m < curMonth) continue;
+        monthOptions += `<option value="${y}-${m}" ${y===curYear&&m===curMonth?'selected':''}>${MONTHS_NOM[m-1]} ${y}</option>`;
+      }
+    }
+    overlay.innerHTML = `
+      <div class="modal">
+        <div class="modal-header">
+          <span class="modal-title">🎯 Установить план продаж</span>
+          <button class="modal-close" onclick="this.closest('.modal-overlay').remove();document.body.style.overflow=''">✕</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Месяц <span class="required">*</span></label>
+            <select class="form-control" id="pl_month">${monthOptions}</select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Целевая сумма (BYN) <span class="required">*</span></label>
+            <input type="number" class="form-control" id="pl_amount" placeholder="150000" min="1" max="999999999" step="0.01">
+          </div>
+          <div class="form-error hidden" id="plError" style="padding:8px;background:#fee2e2;border-radius:6px"></div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline" onclick="this.closest('.modal-overlay').remove();document.body.style.overflow=''">Отмена</button>
+          <button class="btn btn-primary" onclick="savePlan(this)">Сохранить план</button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+    document.body.style.overflow = 'hidden';
+    overlay.addEventListener('click', e => { if (e.target === overlay) { overlay.remove(); document.body.style.overflow = ''; } });
+  }
+
+  async function savePlan(btn) {
+    const overlay = btn.closest('.modal-overlay');
+    const errEl   = overlay.querySelector('#plError');
+    const ym      = overlay.querySelector('#pl_month').value.split('-');
+    const amount  = parseFloat(overlay.querySelector('#pl_amount').value);
+    if (!amount || amount < 1) { errEl.textContent='Сумма не может быть меньше 1'; errEl.classList.remove('hidden'); return; }
+    if (amount > 999999999) { errEl.textContent='Сумма не может превышать 999 999 999'; errEl.classList.remove('hidden'); return; }
+    btn.disabled = true;
+    try {
+      await api.createSalesPlan({ plan_year: parseInt(ym[0]), plan_month: parseInt(ym[1]), target_amount: amount });
+      toast.success('План продаж сохранён!');
+      overlay.remove(); document.body.style.overflow = '';
+      loadPlans();
+    } catch(e) { errEl.textContent=e.message; errEl.classList.remove('hidden'); btn.disabled=false; }
+  }
+
+  function openQuotaModal() {
+    const now = new Date();
+    const curYear = now.getFullYear();
+    const curMonth = now.getMonth() + 1;
+    let monthOptions = '';
+    for (let y = curYear; y <= curYear + 1; y++) {
+      for (let m = 1; m <= 12; m++) {
+        if (y === curYear && m < curMonth) continue;
+        monthOptions += `<option value="${y}-${m}" ${y===curYear&&m===curMonth?'selected':''}>${MONTHS_NOM[m-1]} ${y}</option>`;
+      }
+    }
+    const managerOptions = allManagersList.map(m => `<option value="${m.UserID}">${m.FullName}</option>`).join('');
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay open';
+    overlay.innerHTML = `
+      <div class="modal">
+        <div class="modal-header">
+          <span class="modal-title">📊 Установить квоту</span>
+          <button class="modal-close" onclick="this.closest('.modal-overlay').remove();document.body.style.overflow=''">✕</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Менеджер <span class="required">*</span></label>
+            <select class="form-control" id="qt_manager"><option value="">Выберите менеджера...</option>${managerOptions}</select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Месяц <span class="required">*</span></label>
+            <select class="form-control" id="qt_month">${monthOptions}</select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Тип квоты <span class="required">*</span></label>
+            <select class="form-control" id="qt_type" onchange="onQuotaTypeChange(this)">
+              <option value="sales_amount">Сумма продаж (BYN)</option>
+              <option value="deals_count">Количество сделок</option>
+              <option value="new_clients">Новых клиентов</option>
+              <option value="plan_percent">Выполнение плана (%)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Целевое значение <span class="required">*</span></label>
+            <input type="number" class="form-control" id="qt_value" placeholder="50000" min="1" max="999999999" step="0.01">
+            <div class="form-hint" id="qt_value_hint">Максимум: 999 999 999</div>
+          </div>
+          <div class="form-error hidden" id="qtError" style="padding:8px;background:#fee2e2;border-radius:6px"></div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline" onclick="this.closest('.modal-overlay').remove();document.body.style.overflow=''">Отмена</button>
+          <button class="btn btn-primary" onclick="saveQuota(this)">Сохранить квоту</button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+    document.body.style.overflow = 'hidden';
+    overlay.addEventListener('click', e => { if (e.target === overlay) { overlay.remove(); document.body.style.overflow = ''; } });
+  }
+
+  function onQuotaTypeChange(sel) {
+    const overlay = sel.closest('.modal-overlay') || sel.closest('.modal')?.parentElement;
+    const input = overlay ? overlay.querySelector('#qt_value') : document.getElementById('qt_value');
+    const hint  = overlay ? overlay.querySelector('#qt_value_hint') : document.getElementById('qt_value_hint');
+    if (sel.value === 'plan_percent') {
+      input.max = 100;
+      input.step = 1;
+      input.placeholder = '100';
+      if (hint) hint.textContent = 'Максимум: 100 (процент от плана продаж)';
+    } else {
+      input.max = 999999999;
+      input.step = 0.01;
+      input.placeholder = '50000';
+      if (hint) hint.textContent = 'Максимум: 999 999 999';
+    }
+  }
+
+  async function saveQuota(btn) {
+    const overlay    = btn.closest('.modal-overlay');
+    const errEl      = overlay.querySelector('#qtError');
+    const managerId  = overlay.querySelector('#qt_manager').value;
+    const ym         = overlay.querySelector('#qt_month').value.split('-');
+    const quotaType  = overlay.querySelector('#qt_type').value;
+    const targetVal  = parseFloat(overlay.querySelector('#qt_value').value);
+    if (!managerId)               { errEl.textContent='Выберите менеджера'; errEl.classList.remove('hidden'); return; }
+    if (!targetVal || targetVal < 1){ errEl.textContent='Введите корректное значение (минимум 1)'; errEl.classList.remove('hidden'); return; }
+    if (quotaType === 'plan_percent' && targetVal > 100) { errEl.textContent='Для типа "Выполнение плана (%)" значение не может превышать 100'; errEl.classList.remove('hidden'); return; }
+    if (quotaType !== 'plan_percent' && targetVal > 999999999) { errEl.textContent='Значение не может превышать 999 999 999'; errEl.classList.remove('hidden'); return; }
+    btn.disabled = true;
+    try {
+      await api.createQuota({ manager_id: parseInt(managerId), quota_year: parseInt(ym[0]), quota_month: parseInt(ym[1]), quota_type: quotaType, target_value: targetVal });
+      toast.success('Квота сохранена!');
+      overlay.remove(); document.body.style.overflow = '';
+      loadQuotas();
+    } catch(e) { errEl.textContent=e.message; errEl.classList.remove('hidden'); btn.disabled=false; }
+  }
+
+  loadStats();
+  loadManagers();
+  loadRecentClients();
+  loadPending();
+  api.getManagers().then(m => { allManagersList = m; }).catch(()=>{});
+  loadPlans();
+  loadQuotas();
+</script>
+</body>
+</html>

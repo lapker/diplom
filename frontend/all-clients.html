@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Все клиенты — FSN GALLERY CRM</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="app-layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">🏠</div>
+    <div><div class="logo-text">FSN GALLERY</div><div class="logo-sub">Керамическая плитка</div></div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-title">Менеджер</div>
+      <button class="nav-item" data-page="dashboard" onclick="navigate('dashboard.html')"><span class="nav-icon">📊</span> Личный кабинет</button>
+      <button class="nav-item" data-page="clients" onclick="navigate('clients.html')"><span class="nav-icon">👥</span> Мои клиенты</button>
+      <button class="nav-item" data-page="deals" onclick="navigate('deals.html')"><span class="nav-icon">🤝</span> Мои сделки</button>
+      <button class="nav-item" data-page="my-offers" onclick="navigate('offers.html?my=1')"><span class="nav-icon">📄</span> Мои КП</button>
+      <div class="nav-section-title">Администратор</div>
+      <button class="nav-item" data-page="admin" onclick="navigate('admin.html')"><span class="nav-icon">🏢</span> Панель управления</button>
+      <button class="nav-item" data-page="managers" onclick="navigate('managers.html')"><span class="nav-icon">👤</span> Менеджеры</button>
+      <button class="nav-item" data-page="all-clients" onclick="navigate('all-clients.html')"><span class="nav-icon">📋</span> Все клиенты</button>
+      <button class="nav-item" data-page="all-deals" onclick="navigate('all-deals.html')"><span class="nav-icon">📁</span> Все сделки</button>
+      <button class="nav-item" data-page="offers" onclick="navigate('offers.html')"><span class="nav-icon">📄</span> Все КП</button>
+      <button class="nav-item" data-page="reports" onclick="navigate('reports.html')"><span class="nav-icon">📈</span> Отчёты</button>
+      <button class="nav-item" data-page="references" onclick="navigate('references.html')"><span class="nav-icon">📚</span> Справочники</button>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="avatar" id="sidebarAvatar">?</div>
+        <div class="user-info">
+          <div class="user-name" id="sidebarUserName">—</div>
+          <div class="user-role" id="sidebarUserRole">—</div>
+        </div>
+      </div>
+      <button class="btn-logout" id="logoutBtn">🚪 Выйти</button>
+    </div>
+  </aside>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <div class="main-content">
+    <header class="top-header">
+      <button class="sidebar-toggle" id="sidebarToggle">☰</button>
+      <span class="header-title">Все клиенты</span>
+    </header>
+
+    <main class="page-content">
+      <div class="page-header">
+        <div class="page-header-left">
+          <h1>📋 Все клиенты</h1>
+          <p id="clientsCount">Загрузка...</p>
+        </div>
+      </div>
+
+      <!-- Фильтры -->
+      <div class="card mb-3">
+        <div class="card-body" style="padding:16px 20px">
+          <div class="search-bar">
+            <div class="search-input-wrap">
+              <span class="search-icon">🔍</span>
+              <input type="text" class="form-control" id="searchInput" placeholder="Поиск по имени, компании, телефону...">
+            </div>
+            <select class="form-control" id="statusFilter" style="width:160px;flex-shrink:0">
+              <option value="">Все статусы</option>
+            </select>
+            <select class="form-control" id="managerFilter" style="width:200px;flex-shrink:0">
+              <option value="">Все менеджеры</option>
+            </select>
+            <button class="btn btn-outline btn-sm" onclick="resetFilters()">Сбросить</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Таблица -->
+      <div class="card">
+        <div id="clientsTableWrap">
+          <div class="spinner"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- Модал: Перераспределение клиента -->
+<div class="modal-overlay" id="modalReassign">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">🔄 Перераспределение клиента</span>
+      <button class="modal-close" onclick="modal.close('modalReassign')">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="margin-bottom:16px" id="reassignClientName">Клиент: —</p>
+      <div class="form-group">
+        <label class="form-label">Новый менеджер <span class="required">*</span></label>
+        <select class="form-control" id="reassignManagerSelect">
+          <option value="">Выберите менеджера...</option>
+        </select>
+      </div>
+      <div class="form-error hidden" id="reassignError" style="padding:10px;background:#fee2e2;border-radius:6px;"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="modal.close('modalReassign')">Отмена</button>
+      <button class="btn btn-primary" id="saveReassignBtn" onclick="saveReassign()">Перераспределить</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/utils.js"></script>
+<script>
+  if (!auth.requireAdmin()) throw new Error('not admin');
+  initSidebar('all-clients');
+
+  let managers = [];
+  let refs = null;
+  let reassignClientId = null;
+
+  async function init() {
+    [managers, refs] = await Promise.all([api.getManagers(), loadReferences()]);
+
+    // Фильтр по статусу
+    const sf = document.getElementById('statusFilter');
+    refs.statuses.forEach(s => {
+      const opt = document.createElement('option');
+      opt.value = s.StatusID;
+      opt.textContent = s.StatusName;
+      sf.appendChild(opt);
+    });
+
+    // Фильтр по менеджеру
+    const mf = document.getElementById('managerFilter');
+    managers.forEach(m => {
+      const opt = document.createElement('option');
+      opt.value = m.UserID;
+      opt.textContent = m.FullName;
+      mf.appendChild(opt);
+    });
+
+    // Список менеджеров для перераспределения заполняется динамически в openReassign()
+
+    await loadClients();
+  }
+
+  async function loadClients() {
+    const wrap = document.getElementById('clientsTableWrap');
+    wrap.innerHTML = '<div class="spinner"></div>';
+    try {
+      const search    = document.getElementById('searchInput').value.trim() || null;
+      const statusId  = document.getElementById('statusFilter').value || null;
+      const managerId = document.getElementById('managerFilter').value || null;
+      const clients   = await api.getClients({ search, status_id: statusId, manager_id: managerId });
+      document.getElementById('clientsCount').textContent = `Найдено клиентов: ${clients.length}`;
+      renderTable(clients);
+    } catch (e) {
+      wrap.innerHTML = `<div class="empty-state"><p>Ошибка: ${e.message}</p></div>`;
+    }
+  }
+
+  function renderTable(clients) {
+    const wrap = document.getElementById('clientsTableWrap');
+    if (!clients.length) {
+      wrap.innerHTML = `<div class="empty-state"><div class="empty-icon">👥</div><h3>Клиенты не найдены</h3><p>Попробуйте изменить фильтры</p></div>`;
+      return;
+    }
+    wrap.innerHTML = `
+      <div class="table-wrapper">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Клиент</th>
+              <th>Контакты</th>
+              <th>Тип</th>
+              <th>Статус</th>
+              <th>Менеджер</th>
+              <th>Сумма покупок</th>
+              <th>Последняя покупка</th>
+              <th>Действия</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${clients.map(c => `
+              <tr>
+                <td>
+                  <div style="display:flex;align-items:center;gap:10px">
+                    <div style="width:34px;height:34px;background:#dbeafe;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;color:#2563eb;font-size:.78rem;flex-shrink:0">
+                      ${fmt.initials(c.FullName)}
+                    </div>
+                    <div>
+                      <div style="font-weight:600">${c.FullName}</div>
+                      ${c.CompanyName ? `<div style="font-size:.75rem;color:#64748b">${c.CompanyName}</div>` : ''}
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <div>${fmt.phone(c.Phone)}</div>
+                  ${c.Email ? `<div style="font-size:.75rem;color:#64748b">${c.Email}</div>` : ''}
+                </td>
+                <td><span class="badge badge-secondary">${c.ClientType}</span></td>
+                <td>${statusBadge(c.Status)}</td>
+                <td>
+                  <div style="font-size:.85rem;font-weight:500">${c.ManagerName || '—'}</div>
+                </td>
+                <td style="font-weight:700;color:#1e293b">${fmt.money(c.TotalPurchases)}</td>
+                <td style="font-size:.85rem">${fmt.date(c.LastPurchaseDate)}</td>
+                <td>
+                  <div class="actions">
+                    <button class="btn btn-outline btn-sm" onclick="navigate('client.html?id=${c.ClientID}')">
+                      📋
+                    </button>
+                    <button class="btn btn-warning btn-sm"
+                      data-client-id="${c.ClientID}"
+                      data-manager-id="${c.ManagerID || ''}"
+                      data-client-name="${(c.FullName || '').replace(/"/g, '&quot;')}"
+                      onclick="openReassignFromBtn(this)">
+                      🔄 Переназначить
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    `;
+  }
+
+  // Поиск с задержкой
+  let searchTimer;
+  document.getElementById('searchInput').addEventListener('input', () => {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(loadClients, 400);
+  });
+  document.getElementById('statusFilter').addEventListener('change', loadClients);
+  document.getElementById('managerFilter').addEventListener('change', loadClients);
+
+  function resetFilters() {
+    document.getElementById('searchInput').value = '';
+    document.getElementById('statusFilter').value = '';
+    document.getElementById('managerFilter').value = '';
+    loadClients();
+  }
+
+  // Перераспределение
+  function openReassignFromBtn(btn) {
+    const clientId   = parseInt(btn.dataset.clientId);
+    const managerId  = parseInt(btn.dataset.managerId) || null;
+    const clientName = btn.dataset.clientName;
+    openReassign(clientId, clientName, managerId);
+  }
+
+  function openReassign(clientId, clientName, currentManagerId) {
+    reassignClientId = clientId;
+    document.getElementById('reassignClientName').textContent = `Клиент: ${clientName}`;
+    document.getElementById('reassignError').classList.add('hidden');
+
+    // Заполняем список менеджеров, исключая текущего
+    const rs = document.getElementById('reassignManagerSelect');
+    rs.innerHTML = '<option value="">Выберите менеджера...</option>';
+    managers.filter(m => m.IsActive && m.UserID !== currentManagerId).forEach(m => {
+      const opt = document.createElement('option');
+      opt.value = m.UserID;
+      opt.textContent = m.FullName;
+      rs.appendChild(opt);
+    });
+
+    modal.open('modalReassign');
+  }
+
+  async function saveReassign() {
+    const btn    = document.getElementById('saveReassignBtn');
+    const errEl  = document.getElementById('reassignError');
+    const mgr    = document.getElementById('reassignManagerSelect').value;
+    errEl.classList.add('hidden');
+
+    if (!mgr) {
+      errEl.textContent = 'Выберите менеджера';
+      errEl.classList.remove('hidden');
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Сохранение...';
+    try {
+      await api.reassignClient(reassignClientId, parseInt(mgr));
+      toast.success('Клиент перераспределён!');
+      modal.close('modalReassign');
+      loadClients();
+    } catch (e) {
+      errEl.textContent = e.message;
+      errEl.classList.remove('hidden');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Перераспределить';
+    }
+  }
+
+  init();
+</script>
+</body>
+</html>

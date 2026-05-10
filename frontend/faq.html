@@ -1,0 +1,1082 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FAQ — FSN GALLERY CRM</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* ── FAQ layout ── */
+    .faq-layout {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+    @media (max-width: 860px) {
+      .faq-layout { grid-template-columns: 1fr; }
+      .faq-toc    { display: none; }
+    }
+
+    /* ── Table of Contents (sticky) ── */
+    .faq-toc {
+      position: sticky;
+      top: 24px;
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 16px;
+    }
+    .faq-toc-title {
+      font-size: .78rem;
+      font-weight: 700;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      margin-bottom: 10px;
+    }
+    .faq-toc a {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 8px;
+      border-radius: 6px;
+      font-size: .82rem;
+      color: #475569;
+      text-decoration: none;
+      transition: background .12s, color .12s;
+      margin-bottom: 2px;
+    }
+    .faq-toc a:hover { background: #f1f5f9; color: #1e293b; text-decoration: none; }
+    .faq-toc a.active { background: #eff6ff; color: #2563eb; font-weight: 600; }
+
+    /* ── Search ── */
+    .faq-search-wrap {
+      position: relative;
+      margin-bottom: 24px;
+    }
+    .faq-search-wrap .search-icon {
+      position: absolute;
+      left: 14px; top: 50%;
+      transform: translateY(-50%);
+      font-size: 1rem;
+      pointer-events: none;
+    }
+    #faqSearch {
+      width: 100%;
+      padding: 10px 16px 10px 42px;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: .9rem;
+      outline: none;
+      transition: border-color .15s, box-shadow .15s;
+      background: #fff;
+    }
+    #faqSearch:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,.1); }
+    #faqSearchEmpty {
+      display: none;
+      text-align: center;
+      padding: 40px 0;
+      color: #94a3b8;
+      font-size: .9rem;
+    }
+
+    /* ── Section ── */
+    .faq-section { margin-bottom: 32px; scroll-margin-top: 24px; }
+    .faq-section-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #1e293b;
+      margin-bottom: 12px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #e2e8f0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* ── FAQ item ── */
+    .faq-item {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      margin-bottom: 6px;
+      overflow: hidden;
+      transition: border-color .15s;
+    }
+    .faq-item:hover { border-color: #cbd5e1; }
+    .faq-item.highlight { border-color: #2563eb; box-shadow: 0 0 0 2px rgba(37,99,235,.12); }
+    .faq-question {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 13px 16px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: .875rem;
+      color: #1e293b;
+      user-select: none;
+      transition: background .12s;
+      gap: 12px;
+    }
+    .faq-question:hover { background: #f8fafc; }
+    .faq-question.open { background: #eff6ff; color: #2563eb; }
+    .faq-question-text { flex: 1; }
+    .faq-chevron {
+      font-size: .7rem;
+      flex-shrink: 0;
+      transition: transform .2s;
+      color: #94a3b8;
+    }
+    .faq-question.open .faq-chevron { transform: rotate(180deg); color: #2563eb; }
+    .faq-answer {
+      display: none;
+      padding: 2px 16px 14px;
+      font-size: .855rem;
+      color: #475569;
+      line-height: 1.75;
+      border-top: 1px solid #f1f5f9;
+    }
+    .faq-answer.open { display: block; }
+    .faq-answer ul { margin: 8px 0 8px 20px; list-style: disc; }
+    .faq-answer ol { margin: 8px 0 8px 20px; list-style: decimal; }
+    .faq-answer li { margin-bottom: 4px; }
+    .faq-answer strong { color: #1e293b; }
+    .faq-answer p { margin-top: 8px; }
+    .faq-answer code {
+      background: #f1f5f9;
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-family: 'Consolas', monospace;
+      font-size: .82rem;
+      color: #0f172a;
+    }
+    .tip-box {
+      background: #eff6ff;
+      border-left: 3px solid #2563eb;
+      border-radius: 0 6px 6px 0;
+      padding: 10px 14px;
+      margin-top: 10px;
+      font-size: .82rem;
+      color: #1e40af;
+      line-height: 1.6;
+    }
+    .warn-box {
+      background: #fffbeb;
+      border-left: 3px solid #d97706;
+      border-radius: 0 6px 6px 0;
+      padding: 10px 14px;
+      margin-top: 10px;
+      font-size: .82rem;
+      color: #92400e;
+      line-height: 1.6;
+    }
+    .ok-box {
+      background: #f0fdf4;
+      border-left: 3px solid #16a34a;
+      border-radius: 0 6px 6px 0;
+      padding: 10px 14px;
+      margin-top: 10px;
+      font-size: .82rem;
+      color: #166534;
+      line-height: 1.6;
+    }
+
+    /* ── Controls bar ── */
+    .faq-controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .faq-counter { font-size: .82rem; color: #94a3b8; }
+
+    /* ── Mark match ── */
+    mark { background: #fef08a; border-radius: 2px; padding: 0 1px; }
+  </style>
+</head>
+<body>
+<div class="app-layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">🏠</div>
+      <div>
+        <div class="logo-text">FSN GALLERY</div>
+        <div class="logo-sub">Керамическая плитка</div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-title">Менеджер</div>
+      <button class="nav-item" data-page="dashboard" onclick="navigate('dashboard.html')">
+        <span class="nav-icon">📊</span> Личный кабинет
+      </button>
+      <button class="nav-item" data-page="clients" onclick="navigate('clients.html')">
+        <span class="nav-icon">👥</span> Мои клиенты
+      </button>
+      <button class="nav-item" data-page="deals" onclick="navigate('deals.html')">
+        <span class="nav-icon">🤝</span> Мои сделки
+      </button>
+      <button class="nav-item" data-page="my-offers" id="navMyOffers" onclick="navigate('offers.html?my=1')"><span class="nav-icon">📄</span> Мои КП</button>
+      <div class="nav-section-title" data-role="admin" style="display:none">Администратор</div>
+      <button class="nav-item" data-page="admin" data-role="admin" style="display:none" onclick="navigate('admin.html')">
+        <span class="nav-icon">🏢</span> Панель управления
+      </button>
+      <button class="nav-item" data-page="managers" data-role="admin" style="display:none" onclick="navigate('managers.html')">
+        <span class="nav-icon">👤</span> Менеджеры
+      </button>
+      <button class="nav-item" data-page="all-clients" data-role="admin" style="display:none" onclick="navigate('all-clients.html')">
+        <span class="nav-icon">📋</span> Все клиенты
+      </button>
+      <button class="nav-item" data-page="all-deals" data-role="admin" style="display:none" onclick="navigate('all-deals.html')">
+        <span class="nav-icon">📁</span> Все сделки
+      </button>
+      <button class="nav-item" data-page="offers" data-role="admin" style="display:none" onclick="navigate('offers.html')">
+        <span class="nav-icon">📄</span> Все КП
+      </button>
+      <button class="nav-item" data-page="reports" data-role="admin" style="display:none" onclick="navigate('reports.html')">
+        <span class="nav-icon">📈</span> Отчёты
+      </button>
+      <button class="nav-item" data-page="references" data-role="admin" style="display:none" onclick="navigate('references.html')">
+        <span class="nav-icon">📚</span> Справочники
+      </button>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="avatar" id="sidebarAvatar">?</div>
+        <div class="user-info">
+          <div class="user-name" id="sidebarUserName">—</div>
+          <div class="user-role" id="sidebarUserRole">—</div>
+        </div>
+      </div>
+      <button class="btn-logout" id="logoutBtn">🚪 Выйти</button>
+    </div>
+  </aside>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <!-- Main -->
+  <div class="main-content">
+    <header class="top-header">
+      <button class="sidebar-toggle" id="sidebarToggle">☰</button>
+      <span class="header-title">Помощь / FAQ</span>
+      <div class="header-actions"></div>
+    </header>
+
+    <main class="page-content">
+      <!-- Шапка -->
+      <div style="margin-bottom:20px">
+        <h1>❓ Часто задаваемые вопросы</h1>
+        <p>Ответы на наиболее распространённые вопросы по работе с CRM-системой FSN GALLERY.</p>
+      </div>
+
+      <!-- Поиск -->
+      <div class="faq-search-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="faqSearch" placeholder="Поиск по вопросам и ответам..." autocomplete="off">
+      </div>
+
+      <!-- Управление -->
+      <div class="faq-controls">
+        <span class="faq-counter" id="faqCounter"></span>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-outline btn-sm" onclick="expandAll()">Развернуть все</button>
+          <button class="btn btn-outline btn-sm" onclick="collapseAll()">Свернуть все</button>
+        </div>
+      </div>
+
+      <!-- Пустой результат поиска -->
+      <div id="faqSearchEmpty">
+        <div style="font-size:2rem;margin-bottom:8px">🔍</div>
+        Ничего не найдено по вашему запросу.<br>
+        <span style="font-size:.8rem">Попробуйте другие слова или <button class="btn btn-ghost btn-sm" onclick="clearSearch()">сбросить поиск</button></span>
+      </div>
+
+      <!-- Двух-колоночный layout -->
+      <div class="faq-layout" id="faqLayout">
+
+        <!-- Оглавление (sticky) -->
+        <nav class="faq-toc" id="faqToc">
+          <div class="faq-toc-title">Разделы</div>
+          <a href="#sec-clients"        class="toc-link">👥 Клиенты</a>
+          <a href="#sec-deals"          class="toc-link">🤝 Сделки</a>
+          <a href="#sec-stages"         class="toc-link">🔄 Этапы воронки</a>
+          <a href="#sec-tasks"          class="toc-link">📌 Задачи</a>
+          <a href="#sec-notifications"  class="toc-link">🔔 Уведомления</a>
+          <a href="#sec-events"         class="toc-link">📅 Лента событий</a>
+          <a href="#sec-documents"      class="toc-link">📎 Документы</a>
+          <a href="#sec-access"         class="toc-link">🔒 Права доступа</a>
+          <a href="#sec-admin"          class="toc-link">🏢 Администратор</a>
+          <a href="#sec-tech"           class="toc-link">⚙️ Техническое</a>
+        </nav>
+
+        <!-- Контент FAQ -->
+        <div id="faqContent">
+
+          <!-- ═══ КЛИЕНТЫ ═══ -->
+          <div class="faq-section" id="sec-clients">
+            <div class="faq-section-title">👥 Клиенты</div>
+
+            <div class="faq-item">
+              <div class="faq-question" onclick="toggleFaq(this)">
+                <span class="faq-question-text">Как добавить нового клиента?</span>
+                <span class="faq-chevron">▼</span>
+              </div>
+              <div class="faq-answer">
+                Нажмите кнопку <strong>➕ Новый клиент</strong> на странице «Мои клиенты» или в блоке «Быстрые действия» в личном кабинете. Заполните обязательные поля:
+                <ul>
+                  <li><strong>ФИО / Название</strong></li>
+                  <li><strong>Телефон</strong> — белорусский формат: <code>+375291234567</code> или <code>80291234567</code></li>
+                  <li><strong>Тип клиента</strong> — физ. лицо, юр. лицо или ИП</li>
+                  <li><strong>Источник привлечения</strong> — откуда узнал о компании</li>
+                </ul>
+                После создания вы автоматически перейдёте на карточку нового клиента.
+              </div>
+            </div>
+
+            <div class="faq-item">
+              <div class="faq-question" onclick="toggleFaq(this)">
+                <span class="faq-question-text">Какой формат телефонного номера принимается?</span>
+                <span class="faq-chevron">▼</span>
+              </div>
+              <div class="faq-answer">
+                Система работает только с белорусскими номерами в двух форматах:
+                <ul>
+                  <li><code>+375291234567</code> — международный (12 цифр после «+»)</li>
+                  <li><code>80291234567</code> — внутренний (11 цифр, начинается с «80»)</li>
+                </ul>
+                Вводить скобки, пробелы и тире <em>не нужно</em> — система сама отформатирует номер для отображения в виде <code>+375 (29) 123-45-67</code>.
+              </div>
+            </div>
+
+            <div class="faq-item">
+              <div class="faq-question" onclick="toggleFaq(this)">
+                <span class="faq-question-text">Как найти нужного клиента?</span>
+                <span class="faq-chevron">▼</span>
+              </div>
+              <div class="faq-answer">
+                На странице «Мои клиенты» используйте строку поиска — она ищет одновременно по имени, названию компании и номеру телефона (с задержкой 400 мс).
+                Дополнительно можно фильтровать по <strong>статусу клиента</strong> (Новый, Активный, Постоянный, Неактивный, Потерянный).
+              </div>
+            </div>
+
+            <div class="faq-item">
+              <div class="faq-question" onclick="toggleFaq(this)">
+                <span class="faq-question-text">Что означают статусы клиента?</span>
+                <span class="faq-chevron">▼</span>
+              </div>
+              <div class="faq-answer">
+                <ul>
+                  <li><strong>Новый</strong> — первый контакт, ещё не было покупок</li>
+                  <li><strong>Активный</strong> — работает с компанией, есть незавершённые сделки</li>
+                  <li><strong>Постоянный</strong> — сделал несколько покупок, регулярный клиент</li>
+                  <li><strong>Неактивный</strong> — давно не обращался, но не ушёл</li>
+                  <li><strong>Потерянный</strong> — отказался от сотрудничества</li>
+                </ul>
+                Статус меняется вручную в режиме редактирования карточки клиента.
+              </div>
+            </div>
+
+            <div class="faq-item">
+              <div class="faq-question" onclick="toggleFaq(this)">
+                <span class="faq-question-text">Почему в задачах клиента отображаются задачи из сделок?</span>
+                <span class="faq-chevron">▼</span>
+              </div>
+              <div class="faq-answer">
+                Вкладка «Задачи» в карточке клиента объединяет два источника:
+                <ul>
+                  <li><strong>Задачи клиента</strong> — созданные непосредственно в карточке клиента</li>
+                  <li><strong>Задачи по сделкам</strong> — созданные в карточках сделок этого клиента</li>
+                </ul>
+                Задачи из сделок можно выполнить прямо здесь (кнопка ✓), или перейти к сделке по ссылке 🤝.
+                <div class="tip-box">💡 Задачи клиента <em>не</em> отображаются в карточке сделки — только в обратную сторону.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ═══ СДЕЛКИ ═══ -->
+          <div class="faq-section" id="sec-deals">
+            <div class="faq-section-title">🤝 Сделки</div>
+
+            <div class="faq-item">
+              <div class="faq-question" onclick="toggleFaq(this)">
+                <span class="faq-question-text">Как создать новую сделку?</span>
+                <span class="faq-chevron">▼</span>
+              </div>
+              <div class="faq-answer">
+                Способы создания:
+                <ul>
+                  <li>Страница «Мои сделки» → кнопка <strong>➕ Новая сделка</strong></li>
+                  <li>Карточка клиента → кнопка <strong>🤝 Новая сделка</strong> в шапке (клиент подставится автоматически)</li>
+                  <li>Страница «Мои клиенты» → кнопка 🤝 в строке клиента</li>
+                </ul>
+                Обязательные поля при создании: <strong>Название</strong> и <strong>Клиент</strong>. Дата создания проставляется автоматически.
+                Сделка создаётся на этапе «Новый контакт». Тип (розница/опт), приоритет и бюджет заполняются позже в карточке.
+              </div>
+            </div>
+
+            <div class="faq-item">
+              <div class="faq-question" onclick="toggleFaq(this)">
+                <span class="faq-question-text">Что такое тип сделки — розница и опт?</span>
+                <span class="faq-chevron">▼</span>
+              </div>
+              <div class="faq-answer">
+                <ul>
+                  <li><strong>Розница</strong> — стандартная цена из каталога</li>
+                  <li><strong>Опт</strong> — цена со скидкой 5% от розничной</li>
+                </ul>
+                При выборе товара в составе заказа цена подставляется автоматически в зависимости от типа сделки. При смене типа сделки все позиции заказа <em>пересчитываются</em> автоматически.
+                <div class="warn-box">⚠️ Перерасчёт цен необратим. Будьте внимательны при смене типа.</div>
+              </div>
+            </div>
+
+            <div class="faq-item">
+              <div class="faq-question" onclick="toggleFaq(this)">
+                <span class="faq-question-text">Как добавить товары в состав заказа?</span>
+                <span class="faq-chevron">▼</span>
+              </div>
+              <div class="faq-answer">
+                Откройте карточку сделки → вкладка <strong>«Состав заказа»</strong> → кнопка <strong>➕ Добавить позицию</strong>.
+                Выберите товар — цена подставится автоматически из каталога с учётом типа сделки. Укажите количество в м² (максимум 99 999 м²).
+                <div class="warn-box">⚠️ Начиная с этапа «Счёт выставлен» менеджер не может изменять состав заказа. Обратитесь к администратору при необходимости.</div>
+              </div>
+            </div>
+
+            <div class="faq-item">
+              <div class="faq-question" onclick="toggleFaq(this)">
+                <span class="faq-question-text">Что значит «Бюджет клиента» и зачем он нужен?</span>
+                <span class="faq-chevron">▼</span>
+              </div>
+              <div class="faq-answer">
+                Бюджет — это <em>ориентировочная</em> сумма заказа, которую называет клиент на ранних этапах (Выявление потребностей, Подбор и расчёт).
+                Он отображается на карточках канбан-доски до появления реального состава заказа.
+                <br><br>
+                Бюджет <strong>не влияет</strong> на финансовую статистику. При завершении сделки в статистику идёт <em>сумма позиций состава заказа</em>.
+              </div>
+            </div>
+          </div>
+
+          <!-- ═══ ЭТАПЫ ВОРОНКИ ═══ -->
+          <div class="faq-section" id="sec-stages">
+            <div class="faq-section-title">🔄 Этапы воронки продаж</div>
+
+            <div class="faq-item">
+              <div class="faq-question" onclick="toggleFaq(this)">
+                <span class="faq-question-text">Как перевести сделку на следующий этап?</span>
+                <span class="faq-chevron">▼</span>
+              </div>
+              <div class="faq-answer">
+                В карточке сделки нажмите на <strong>следующую таблетку</strong> в полосе прогресса вверху страницы (подсвеченная серым — доступная).
+                <br><br>
+                Общие правила:
+                <ul>
+                  <li>Можно переходить только <strong>на один этап вперёд</strong></li>
+                  <li>Переход <strong>назад запрещён</strong> для менеджеров</li>
+                  <li>Для большинства переходов требуется указать <strong>конечный срок выполнения этапа</strong></li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="faq-item">
+              <div class="faq-question" onclick="toggleFaq(this)">
+                <span class="faq-question-text">Какие условия для каждого этапа?</span>
+                <span class="faq-chevron">▼</span>
+              </div>
+              <div class="faq-answer">
+                <ol>
+                  <li><strong>Новый контакт → Выявление потребностей</strong> — без условий, без указания даты</li>
+                  <li><strong>Выявление потребностей → Подбор и расчёт</strong> — заполнить поля: Тип сделки, Приоритет, Бюджет + указать срок этапа</li>
+                  <li><strong>Подбор и расчёт → Согласование</strong> — добавить хотя бы 1 товар в состав заказа + указать срок этапа</li>
+                  <li><strong>Согласование → Счёт выставлен</strong> — выполнить условия предыдущих этапов + указать срок этапа. <em>Автоматически генерируется счёт на оплату.</em></li>
+                  <li><strong>Счёт выставлен → Оплата получена</strong> — указать срок этапа</li>
+                  <li><strong>Оплата получена → Заказ передан на склад</strong> — указать срок этапа</li>
+                  <li><strong>Заказ передан на склад → Выполнено</strong> — без даты. <em>Финансовая статистика обновляется.</em></li>
+                </ol>
+                <div class="warn-box">⚠️ При переносе на «Выполнено» убедитесь, что состав заказа заполнен корректно — именно по нему считается сумма покупок клиента.</div>
+              </div>
+            </div>
+
+            <div class="faq-item">
+              <div class="faq-question" onclick="toggleFaq(this)">
+                <span class="faq-question-text">Что значит «просроченный этап» на канбан-доске?</span>
+                <span class="faq-chevron">▼</span>
+              </div>
+              <div class="faq-answer">
+                При переносе на этап вы указываете <strong>конечный срок выполнения</strong>. Если этот срок прошёл, а сделка не перешла на следующий этап — карточка помечается красной рамкой на канбан-доске и срок отображается красным.
+                <br><br>
+                Это сигнал для менеджера, что нужно ускорить работу по данной сделке.
+              </div>
+            </div>
+
+            <div class="faq-item">
+              <div class="faq-question" onclick="toggleFaq(this)">
+                <span class="faq-question-text">Что происходит при переводе в «Счёт выставлен»?</span>
+                <span class="faq-chevron">▼</span>
+              </div>
+              <div class="faq-answer">
+                Система автоматически генерирует <strong>счёт на оплату</strong> в формате HTML со всеми позициями заказа и реквизитами компании:
+                <ul>
+                  <li>ООО «Фэшн Галлери»</li>
+                  <li>220040 г. Минск, ул. Богдановича 108, пом. 22</li>
+                  <li>Тел: +375(29)1111176 · УНП: 192697945</li>
+                </ul>
+                Счёт сохраняется в документах сделки и карточки клиента. В лентах событий обоих появляется запись.
+                <div class="ok-box">✅ Состав заказа после этого этапа блокируется — менеджер не может случайно изменить выставленный счёт.</div>
+              </div>
+            </div>
+
+            <div class="faq-item">
+              <div class="faq-question" onclick="toggleFaq(this)">
+                <span class="faq-question-text">Что происходит при переводе в «Выполнено»?</span>
+                <span class="faq-chevron">▼</span>
+              </div>
+              <div class="faq-answer">
+                При переводе в финальный этап:
+                <ul>
+                  <li>Устанавливается <strong>дата завершения</strong> сделки</li>
+                  <li>Сумма позиций состава заказа добавляется к <strong>общей сумме покупок клиента</strong></li>
+                  <li>Обновляется <strong>дата последней покупки</strong> клиента</li>
+                  <li>Сделка учитывается в <strong>статистике и квотах</strong> менеджера за текущий месяц</li>
+                  <li>В ленте событий сделки и клиента появляется запись о завершении</li>
+                </ul>
+                <div class="warn-box">⚠️ После перевода в «Выполнено» редактирование сделки невозможно. Убедитесь, что состав заказа верный.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ═══ ЗАДАЧИ ═══ -->
+          <div class="faq-section" id="sec-tasks">
+            <div class="faq-section-title">📌 Задачи</div>
+
+            <div class="faq-item">
+              <div class="faq-question" onclick="toggleFaq(this)">
+                <span class="faq-question-text">Как создать задачу?</span>
+                <span class="faq-chevron">▼</span>
+              </div>
+              <div class="faq-answer">
+                Задачи создаются в двух местах:
+                <ul>
+                  <li><strong>Карточка клиента</strong> → вкладка «Задачи» → кнопка «📞 Запланировать»</li>
+                  <li><strong>Карточка сделки</strong> → вкладка «Задачи» → кнопка «📞 Запланировать»</li>
+                </ul>
+                Доступные типы задач:
+                <ul>
+                  <li>📞 <strong>Звонок</strong></li>
+                  <li>🤝 <strong>Встреча</strong></li>
+                  <li>✉️ <strong>Письмо</strong></li>
+                </ul>
+                <div class="warn-box">⚠️ Нельзя запланировать задачу на прошедшую дату — только сегодня или будущее.</div>
+              </div>
+            </div>
+
+            <div class="faq-item">
+              <div class="faq-question" onclick="toggleFaq(this)">
+                <span class="faq-question-text">Почему выполненная задача остаётся в списке?</span>
+                <span class="faq-chevron">▼</span>
+              </div>
+              <div class="faq-answer">
+                Выполненные задачи остаются в списке и помечаются статусом <strong>«Готово»</strong> — это позволяет видеть историю.
+                <br><br>
+                При выполнении задачи:
+                <ul>
+                  <li>В ленте событий клиента появляется автоматическое событие «Задача выполнена»</li>
+                  <li>Если задача из сделки — событие дублируется в ленту сделки</li>
+                  <li>Задача исчезает из страницы уведомлений</li>
+                  <li>Счётчик уведомлений в боковой панели уменьшается</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="faq-item">
+              <div class="faq-question" onclick="toggleFaq(this)">
+                <span class="faq-question-text">Можно ли удалить задачу?</span>
+                <span class="faq-chevron">▼</span>
+              </div>
+              <div class="faq-answer">
+                Задачи клиента (из карточки клиента) можно удалить кнопкой 🗑 в списке, пока задача не выполнена.
+                Задачи из сделок удаляются из вкладки «Задачи» в карточке сделки.
+                <br><br>
+                Выполненные задачи удалить нельзя — они остаются как история.
+              </div>
+            </div>
+          </div>
+
+          <!-- ═══ УВЕДОМЛЕНИЯ ═══ -->
+          <div class="faq-section" id="sec-notifications">
+            <div class="faq-section-title">🔔 Уведомления</div>
+
+            <div class="faq-item">
+              <div class="faq-question" onclick="toggleFaq(this)">
+                <span class="faq-question-text">Где находятся уведомления?</span>
+                <span class="faq-chevron">▼</span>
+              </div>
+              <div class="faq-answer">
+                Кнопка <strong>🔔 Уведомления</strong> расположена в нижней части левой панели (над блоком пользователя).
+                Рядом с кнопкой отображается <strong>красный бейдж</strong> с количеством активных задач — он обновляется автоматически при выполнении задач.
+                <br><br>
+                Если бейджа нет — все задачи выполнены или нет просроченных/сегодняшних.
+              </div>
+            </div>
+
+            <div class="faq-item">
+              <div class="faq-question" onclick="toggleFaq(this)">
+                <span class="faq-question-text">Что показывает страница уведомлений?</span>
+                <span class="faq-chevron">▼</span>
+              </div>
+              <div class="faq-answer">
+                Три блока:
+                <ul>
+                  <li>🔴 <strong>Просроченные задачи</strong> — запланированы на прошедшую дату, не выполнены</li>
+                  <li>🟡 <strong>Задачи на сегодня</strong> — запланированы на текущий день</li>
+                  <li>🎂 <strong>Дни рождения</strong> — клиенты, у которых день рождения сегодня или в ближайшие 7 дней</li>
+                </ul>
+                В уведомления попадают задачи <em>из обоих источников</em> — задачи клиентов и задачи по сделкам. Задачи из сделок содержат ссылку на соответствующую сделку.
+              </div>
+            </div>
+
+            <div class="faq-item">
+              <div class="faq-question" onclick="toggleFaq(this)">
+                <span class="faq-question-text">Как выполнить задачу прямо из уведомлений?</span>
+                <span class="faq-chevron">▼</span>
+              </div>
+              <div class="faq-answer">
+                Нажмите кнопку <strong>✓ Выполнено</strong> рядом с задачей на странице уведомлений.
+                Задача исчезнет из списка уведомлений, счётчик обновится автоматически.
+                В карточке клиента/сделки задача будет помечена как «Готово».
+              </div>
+            </div>
+          </div>
+
+          <!-- ═══ ЛЕНТА СОБЫТИЙ ═══ -->
+          <div class="faq-section" id="sec-events">
+            <div class="faq-section-title">📅 Лента событий</div>
+
+            <div class="faq-item">
+              <div class="faq-question" onclick="toggleFaq(this)">
+                <span class="faq-question-text">Чем лента событий клиента отличается от ленты сделки?</span>
+                <span class="faq-chevron">▼</span>
+              </div>
+              <div class="faq-answer">
+                <strong>Лента событий клиента</strong> (вкладка «Лента событий» в карточке клиента):
+                <ul>
+                  <li>Ручные записи: звонки, встречи, письма, заметки</li>
+                  <li>Автоматические события из сделок клиента: смена этапа, выполнение задач, документы, завершение сделки</li>
+                </ul>
+                <strong>Лента событий сделки</strong> (вкладка «Лента событий» в карточке сделки):
+                <ul>
+                  <li>Только автоматические события: создание, смена этапа, добавление позиций, задачи, документы, завершение</li>
+                </ul>
+                <div class="tip-box">💡 Когда задача из сделки выполняется, событие появляется и в ленте сделки, и в ленте клиента.</div>
+              </div>
+            </div>
+
+            <div class="faq-item">
+              <div class="faq-question" onclick="toggleFaq(this)">
+                <span class="faq-question-text">Можно ли удалить событие из ленты?</span>
+                <span class="faq-chevron">▼</span>
+              </div>
+              <div class="faq-answer">
+                <strong>Ручные события</strong> (добавленные менеджером вручную) можно удалить кнопкой 🗑.
+                <br><br>
+                <strong>Автоматические события</strong> (помеченные без кнопки удаления) — нельзя. Они защищены и служат неизменяемым журналом действий.
+              </div>
+            </div>
+
+            <div class="faq-item">
+              <div class="faq-question" onclick="toggleFaq(this)">
+                <span class="faq-question-text">Как добавить событие вручную?</span>
+                <span class="faq-chevron">▼</span>
+              </div>
+              <div class="faq-answer">
+                В карточке клиента, вкладка «Лента событий» → кнопка <strong>➕ Добавить событие</strong>.
+                Доступные типы: Звонок, Встреча, Письмо, Заметка.
+                <br><br>
+                Ручные события добавляются <em>только в ленту клиента</em> — в ленту сделки они не попадают.
+              </div>
+            </div>
+          </div>
+
+          <!-- ═══ ДОКУМЕНТЫ ═══ -->
+          <div class="faq-section" id="sec-documents">
+            <div class="faq-section-title">📎 Документы</div>
+
+            <div class="faq-item">
+              <div class="faq-question" onclick="toggleFaq(this)">
+                <span class="faq-question-text">Как загрузить документ?</span>
+                <span class="faq-chevron">▼</span>
+              </div>
+              <div class="faq-answer">
+                Документы загружаются в двух местах:
+                <ul>
+                  <li><strong>Карточка клиента</strong> → вкладка «Документы» → кнопка «📤 Загрузить»</li>
+                  <li><strong>Карточка сделки</strong> → вкладка «Документы» → кнопка «📤 Загрузить»</li>
+                </ul>
+                Поддерживаемые форматы: <code>PDF, DOC, DOCX, XLS, XLSX, TXT, JPG, JPEG, PNG, ZIP, RAR</code>.
+                Максимальный размер: <strong>20 МБ</strong>.
+              </div>
+            </div>
+
+            <div class="faq-item">
+              <div class="faq-question" onclick="toggleFaq(this)">
+                <span class="faq-question-text">Почему в карточке клиента видны документы из сделок?</span>
+                <span class="faq-chevron">▼</span>
+              </div>
+              <div class="faq-answer">
+                Карточка клиента показывает <em>все</em> документы, связанные с клиентом:
+                <ul>
+                  <li>Загруженные напрямую в карточку клиента — можно скачать и удалить</li>
+                  <li>Документы из сделок этого клиента — только скачать (удалять нужно из карточки сделки)</li>
+                </ul>
+                Документы из сделок помечены значком 🤝 и названием сделки.
+                <div class="tip-box">💡 Обратное правило: документы из карточки клиента не отображаются в карточке сделки.</div>
+              </div>
+            </div>
+
+            <div class="faq-item">
+              <div class="faq-question" onclick="toggleFaq(this)">
+                <span class="faq-question-text">Что происходит при добавлении или удалении документа?</span>
+                <span class="faq-chevron">▼</span>
+              </div>
+              <div class="faq-answer">
+                При загрузке документа в сделку:
+                <ul>
+                  <li>В ленту событий сделки добавляется запись «Документ добавлен»</li>
+                  <li>В ленту событий клиента тоже добавляется запись</li>
+                </ul>
+                При загрузке документа в карточку клиента:
+                <ul>
+                  <li>Запись появляется только в ленте событий клиента</li>
+                </ul>
+                При удалении — аналогично, запись о удалении документа.
+              </div>
+            </div>
+          </div>
+
+          <!-- ═══ ПРАВА ДОСТУПА ═══ -->
+          <div class="faq-section" id="sec-access">
+            <div class="faq-section-title">🔒 Права доступа</div>
+
+            <div class="faq-item">
+              <div class="faq-question" onclick="toggleFaq(this)">
+                <span class="faq-question-text">Что может делать менеджер?</span>
+                <span class="faq-chevron">▼</span>
+              </div>
+              <div class="faq-answer">
+                <strong>Менеджер может:</strong>
+                <ul>
+                  <li>Управлять своими клиентами и сделками</li>
+                  <li>Добавлять задачи (Звонок, Встреча, Письмо)</li>
+                  <li>Добавлять события вручную в ленту клиента</li>
+                  <li>Загружать и скачивать документы</li>
+                  <li>Переводить сделки по этапам вперёд</li>
+                  <li>Просматривать уведомления и выполнять задачи</li>
+                </ul>
+                <strong>Менеджер НЕ может:</strong>
+                <ul>
+                  <li>Видеть клиентов и сделки других менеджеров</li>
+                  <li>Переводить сделку на 2+ этапа вперёд или назад</li>
+                  <li>Удалять автоматические события из лент</li>
+                  <li>Редактировать завершённую сделку (этап «Выполнено»)</li>
+                  <li>Менять состав заказа начиная с этапа «Счёт выставлен»</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="faq-item">
+              <div class="faq-question" onclick="toggleFaq(this)">
+                <span class="faq-question-text">Как зарегистрироваться в системе?</span>
+                <span class="faq-chevron">▼</span>
+              </div>
+              <div class="faq-answer">
+                На странице входа нажмите «Зарегистрироваться». Введите логин (мин. 3 символа), пароль (мин. 6 символов) и ФИО.
+                После регистрации аккаунт ожидает назначения роли администратором — войти нельзя до активации.
+                <div class="tip-box">💡 Обратитесь к администратору, чтобы он назначил вам роль «Менеджер» и активировал аккаунт.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ═══ АДМИНИСТРАТОР ═══ -->
+          <div class="faq-section" id="sec-admin">
+            <div class="faq-section-title">🏢 Администратор</div>
+
+            <div class="faq-item">
+              <div class="faq-question" onclick="toggleFaq(this)">
+                <span class="faq-question-text">Чем раздел «Все сделки» отличается от «Мои сделки»?</span>
+                <span class="faq-chevron">▼</span>
+              </div>
+              <div class="faq-answer">
+                <ul>
+                  <li><strong>Мои сделки</strong> — сделки только текущего пользователя (менеджера или администратора)</li>
+                  <li><strong>Все сделки</strong> (только для администратора) — сделки всех менеджеров компании с возможностью фильтрации по менеджеру</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="faq-item">
+              <div class="faq-question" onclick="toggleFaq(this)">
+                <span class="faq-question-text">Как установить план продаж или квоту?</span>
+                <span class="faq-chevron">▼</span>
+              </div>
+              <div class="faq-answer">
+                В разделе <strong>«Панель управления»</strong> (только для администратора):
+                <ul>
+                  <li><strong>План продаж</strong> — общая цель компании по выручке на месяц. Одна запись на месяц.</li>
+                  <li><strong>Квоты менеджеров</strong> — индивидуальные цели для каждого менеджера: сумма продаж, количество сделок, новых клиентов или % выполнения плана.</li>
+                </ul>
+                Максимальное значение квоты: <strong>999 999 999</strong>.
+                Прогресс отображается в личном кабинете менеджера и в панели администратора.
+              </div>
+            </div>
+
+            <div class="faq-item">
+              <div class="faq-question" onclick="toggleFaq(this)">
+                <span class="faq-question-text">Как переназначить клиента на другого менеджера?</span>
+                <span class="faq-chevron">▼</span>
+              </div>
+              <div class="faq-answer">
+                В разделе <strong>«Все клиенты»</strong> откройте карточку клиента → кнопка «Переназначить менеджера» (доступна только администратору).
+                Выберите нового менеджера из списка и подтвердите.
+              </div>
+            </div>
+
+            <div class="faq-item">
+              <div class="faq-question" onclick="toggleFaq(this)">
+                <span class="faq-question-text">Как заблокировать или активировать менеджера?</span>
+                <span class="faq-chevron">▼</span>
+              </div>
+              <div class="faq-answer">
+                В разделе <strong>«Менеджеры»</strong> найдите нужного сотрудника.
+                <ul>
+                  <li>Кнопка <strong>«Заблокировать»</strong> — запрещает вход в систему</li>
+                  <li>Кнопка <strong>«Разблокировать»</strong> — восстанавливает доступ</li>
+                </ul>
+                Заблокированный менеджер не теряет своих клиентов и сделок — данные сохраняются.
+              </div>
+            </div>
+          </div>
+
+          <!-- ═══ ТЕХНИЧЕСКОЕ ═══ -->
+          <div class="faq-section" id="sec-tech">
+            <div class="faq-section-title">⚙️ Техническое</div>
+
+            <div class="faq-item">
+              <div class="faq-question" onclick="toggleFaq(this)">
+                <span class="faq-question-text">Что делать, если страница не загружается?</span>
+                <span class="faq-chevron">▼</span>
+              </div>
+              <div class="faq-answer">
+                Попробуйте по очереди:
+                <ol>
+                  <li>Обновить страницу (<kbd>F5</kbd> или <kbd>Ctrl+R</kbd>)</li>
+                  <li>Выйти из системы и войти снова</li>
+                  <li>Очистить кэш браузера (<kbd>Ctrl+Shift+Delete</kbd>)</li>
+                  <li>Попробовать другой браузер (Chrome, Firefox, Edge)</li>
+                </ol>
+                Если ничего не помогает — обратитесь к администратору системы или убедитесь, что сервер запущен.
+              </div>
+            </div>
+
+            <div class="faq-item">
+              <div class="faq-question" onclick="toggleFaq(this)">
+                <span class="faq-question-text">Поддерживается ли мобильная версия?</span>
+                <span class="faq-chevron">▼</span>
+              </div>
+              <div class="faq-answer">
+                Да, интерфейс адаптирован для мобильных устройств. На экранах уже 768px боковая панель скрывается и открывается кнопкой <strong>☰</strong> в верхнем левом углу.
+                Канбан-доска сделок прокручивается горизонтально на мобильных.
+              </div>
+            </div>
+
+            <div class="faq-item">
+              <div class="faq-question" onclick="toggleFaq(this)">
+                <span class="faq-question-text">Какие браузеры поддерживаются?</span>
+                <span class="faq-chevron">▼</span>
+              </div>
+              <div class="faq-answer">
+                Система работает во всех современных браузерах:
+                <ul>
+                  <li>Google Chrome (рекомендуется)</li>
+                  <li>Mozilla Firefox</li>
+                  <li>Microsoft Edge</li>
+                  <li>Safari (macOS / iOS)</li>
+                </ul>
+                Устаревший Internet Explorer не поддерживается.
+              </div>
+            </div>
+
+            <div class="faq-item">
+              <div class="faq-question" onclick="toggleFaq(this)">
+                <span class="faq-question-text">Почему данные пользователя пропадают при обновлении?</span>
+                <span class="faq-chevron">▼</span>
+              </div>
+              <div class="faq-answer">
+                Данные профиля хранятся в <code>sessionStorage</code> браузера. При обновлении страницы система автоматически проверяет сессию на сервере и восстанавливает данные.
+                Если этого не происходит — сессия истекла, нужно войти заново.
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /faqContent -->
+      </div><!-- /faq-layout -->
+    </main>
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/utils.js"></script>
+<script>
+  if (!auth.requireAuth()) throw new Error('not auth');
+  initSidebar('faq');
+
+  /* ── Toggle одного вопроса ── */
+  function toggleFaq(questionEl) {
+    const item   = questionEl.closest('.faq-item');
+    const answer = item.querySelector('.faq-answer');
+    const isOpen = questionEl.classList.contains('open');
+
+    // Закрываем все в секции
+    const section = item.closest('.faq-section');
+    section.querySelectorAll('.faq-question.open').forEach(q => {
+      q.classList.remove('open');
+      q.closest('.faq-item').querySelector('.faq-answer').classList.remove('open');
+    });
+
+    if (!isOpen) {
+      questionEl.classList.add('open');
+      answer.classList.add('open');
+    }
+  }
+
+  /* ── Развернуть / свернуть все видимые ── */
+  function expandAll() {
+    document.querySelectorAll('.faq-item:not([style*="display: none"]) .faq-question:not(.open)').forEach(q => {
+      q.classList.add('open');
+      q.closest('.faq-item').querySelector('.faq-answer').classList.add('open');
+    });
+  }
+  function collapseAll() {
+    document.querySelectorAll('.faq-question.open').forEach(q => {
+      q.classList.remove('open');
+      q.closest('.faq-item').querySelector('.faq-answer').classList.remove('open');
+    });
+  }
+
+  /* ── Поиск ── */
+  let searchTimer;
+  const searchInput  = document.getElementById('faqSearch');
+  const emptyMsg     = document.getElementById('faqSearchEmpty');
+  const counterEl    = document.getElementById('faqCounter');
+  const faqLayout    = document.getElementById('faqLayout');
+
+  function clearSearch() {
+    searchInput.value = '';
+    runSearch('');
+  }
+
+  function runSearch(query) {
+    const q = query.trim().toLowerCase();
+
+    // Убираем старые подсветки
+    document.querySelectorAll('.faq-item mark').forEach(m => {
+      m.outerHTML = m.textContent;
+    });
+    document.querySelectorAll('.faq-item.highlight').forEach(i => i.classList.remove('highlight'));
+
+    const sections = document.querySelectorAll('.faq-section');
+    let totalVisible = 0;
+
+    sections.forEach(sec => {
+      let sectionVisible = 0;
+      sec.querySelectorAll('.faq-item').forEach(item => {
+        const questionText = item.querySelector('.faq-question-text').textContent;
+        const answerText   = item.querySelector('.faq-answer').textContent;
+        const matches = !q || questionText.toLowerCase().includes(q) || answerText.toLowerCase().includes(q);
+
+        item.style.display = matches ? '' : 'none';
+        if (matches) {
+          sectionVisible++;
+          totalVisible++;
+          // Подсвечиваем если есть запрос
+          if (q) {
+            item.classList.add('highlight');
+            // Открываем если совпадение в ответе
+            if (answerText.toLowerCase().includes(q)) {
+              item.querySelector('.faq-question').classList.add('open');
+              item.querySelector('.faq-answer').classList.add('open');
+            }
+            // Подсветка в тексте вопроса
+            const qTextEl = item.querySelector('.faq-question-text');
+            qTextEl.innerHTML = qTextEl.textContent.replace(
+              new RegExp(`(${q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi'),
+              '<mark>$1</mark>'
+            );
+          }
+        }
+      });
+
+      // Скрываем секцию если нет совпадений
+      sec.style.display = sectionVisible > 0 ? '' : 'none';
+    });
+
+    // Пустой результат
+    const hasResults = totalVisible > 0;
+    emptyMsg.style.display = (!hasResults && q) ? 'block' : 'none';
+    faqLayout.style.display = hasResults ? '' : 'none';
+
+    // Счётчик
+    if (q) {
+      counterEl.textContent = `Найдено: ${totalVisible} ${pluralize(totalVisible, 'вопрос', 'вопроса', 'вопросов')}`;
+    } else {
+      counterEl.textContent = '';
+      // Свернуть все при сбросе
+      collapseAll();
+    }
+
+    // TOC — скрывать ссылку если секция скрыта
+    document.querySelectorAll('.toc-link').forEach(link => {
+      const href = link.getAttribute('href');
+      const sec  = document.querySelector(href);
+      if (sec) link.style.display = sec.style.display === 'none' ? 'none' : '';
+    });
+  }
+
+  function pluralize(n, one, few, many) {
+    const mod10  = n % 10;
+    const mod100 = n % 100;
+    if (mod10 === 1 && mod100 !== 11) return one;
+    if ([2,3,4].includes(mod10) && ![12,13,14].includes(mod100)) return few;
+    return many;
+  }
+
+  searchInput.addEventListener('input', e => {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => runSearch(e.target.value), 200);
+  });
+
+  // Очистка по Escape
+  searchInput.addEventListener('keydown', e => {
+    if (e.key === 'Escape') clearSearch();
+  });
+
+  /* ── Активная секция в TOC при скролле ── */
+  const tocLinks  = document.querySelectorAll('.toc-link');
+  const faqSections = document.querySelectorAll('.faq-section[id]');
+
+  function updateToc() {
+    let current = '';
+    faqSections.forEach(sec => {
+      if (sec.getBoundingClientRect().top <= 80) current = '#' + sec.id;
+    });
+    tocLinks.forEach(link => {
+      link.classList.toggle('active', link.getAttribute('href') === current);
+    });
+  }
+  document.querySelector('.main-content').addEventListener('scroll', updateToc, { passive: true });
+  updateToc();
+</script>
+</body>
+</html>

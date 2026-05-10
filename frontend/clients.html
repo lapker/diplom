@@ -1,0 +1,431 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Клиентская база — FSN GALLERY CRM</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="app-layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">🏠</div>
+      <div>
+        <div class="logo-text">FSN GALLERY</div>
+        <div class="logo-sub">Керамическая плитка</div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-title">Менеджер</div>
+      <button class="nav-item" data-page="dashboard" onclick="navigate('dashboard.html')">
+        <span class="nav-icon">📊</span> Личный кабинет
+      </button>
+      <button class="nav-item" data-page="clients" onclick="navigate('clients.html')">
+        <span class="nav-icon">👥</span> Мои клиенты
+      </button>
+      <button class="nav-item" data-page="deals" onclick="navigate('deals.html')">
+        <span class="nav-icon">🤝</span> Мои сделки
+      </button>
+      <button class="nav-item" data-page="my-offers" id="navMyOffers" onclick="navigate('offers.html?my=1')">
+        <span class="nav-icon">📄</span> Мои КП
+      </button>
+      <div class="nav-section-title" data-role="admin" style="display:none">Администратор</div>
+      <button class="nav-item" data-page="admin" data-role="admin" style="display:none" onclick="navigate('admin.html')">
+        <span class="nav-icon">🏢</span> Панель управления
+      </button>
+      <button class="nav-item" data-page="managers" data-role="admin" style="display:none" onclick="navigate('managers.html')">
+        <span class="nav-icon">👤</span> Менеджеры
+      </button>
+      <button class="nav-item" data-page="all-clients" data-role="admin" style="display:none" onclick="navigate('all-clients.html')">
+        <span class="nav-icon">📋</span> Все клиенты
+      </button>
+      <button class="nav-item" data-page="all-deals" data-role="admin" style="display:none" onclick="navigate('all-deals.html')">
+        <span class="nav-icon">📁</span> Все сделки
+      </button>
+      <button class="nav-item" data-page="offers" data-role="admin" style="display:none" onclick="navigate('offers.html')">
+        <span class="nav-icon">📄</span> Все КП
+      </button>
+      <button class="nav-item" data-page="reports" data-role="admin" style="display:none" onclick="navigate('reports.html')">
+        <span class="nav-icon">📈</span> Отчёты
+      </button>
+      <button class="nav-item" data-page="references" data-role="admin" style="display:none" onclick="navigate('references.html')">
+        <span class="nav-icon">📚</span> Справочники
+      </button>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="avatar" id="sidebarAvatar">?</div>
+        <div class="user-info">
+          <div class="user-name" id="sidebarUserName">—</div>
+          <div class="user-role" id="sidebarUserRole">—</div>
+        </div>
+      </div>
+      <button class="btn-logout" id="logoutBtn">🚪 Выйти</button>
+    </div>
+  </aside>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <!-- Main -->
+  <div class="main-content">
+    <header class="top-header">
+      <button class="sidebar-toggle" id="sidebarToggle">☰</button>
+      <span class="header-title">Мои клиенты</span>
+      <div class="header-actions">
+        <button class="btn btn-primary btn-sm" onclick="openNewClientModal()">
+          ➕ Новый клиент
+        </button>
+      </div>
+    </header>
+
+    <main class="page-content">
+      <div class="page-header">
+        <div class="page-header-left">
+          <h1>Клиентская база</h1>
+          <p id="clientsCount">Загрузка...</p>
+        </div>
+      </div>
+
+      <!-- Поиск и фильтры -->
+      <div class="card mb-3">
+        <div class="card-body" style="padding:16px 20px">
+          <div class="search-bar">
+            <div class="search-input-wrap">
+              <span class="search-icon">🔍</span>
+              <input type="text" class="form-control" id="searchInput" placeholder="Поиск по имени, компании, телефону...">
+            </div>
+            <select class="form-control" id="statusFilter" style="width:180px;flex-shrink:0">
+              <option value="">Все статусы</option>
+            </select>
+            <button class="btn btn-outline btn-sm" onclick="resetFilters()">Сбросить</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Таблица клиентов -->
+      <div class="card">
+        <div id="clientsTableWrap">
+          <div class="spinner"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- Модал: Новый клиент -->
+<div class="modal-overlay" id="modalNewClient">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <span class="modal-title">➕ Новый клиент</span>
+      <button class="modal-close" onclick="modal.close('modalNewClient')">✕</button>
+    </div>
+    <div class="modal-body">
+      <form id="newClientForm" novalidate>
+        <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">ФИО / Название <span class="required">*</span></label>
+              <input type="text" class="form-control" id="nc_fullname" placeholder="Иванов Иван Иванович" required maxlength="200">
+              <div class="form-hint">Максимум 200 символов</div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Компания</label>
+              <input type="text" class="form-control" id="nc_company" placeholder="ООО «Название»" maxlength="200">
+              <div class="form-hint">Максимум 200 символов</div>
+            </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Телефон <span class="required">*</span></label>
+            <input type="tel" class="form-control" id="nc_phone" placeholder="+375291234567 или 80291234567" required>
+            <div class="form-hint">Формат: +375291234567 или 80291234567</div>
+          </div>
+            <div class="form-group">
+              <label class="form-label">Email</label>
+              <input type="email" class="form-control" id="nc_email" placeholder="email@example.com" maxlength="100">
+              <div class="form-hint">Максимум 100 символов</div>
+            </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Тип клиента <span class="required">*</span></label>
+            <select class="form-control" id="nc_type" required>
+              <option value="">Выберите тип...</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Источник привлечения <span class="required">*</span></label>
+            <select class="form-control" id="nc_source" required>
+              <option value="">Выберите источник...</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Дата первого контакта</label>
+            <input type="date" class="form-control" id="nc_date">
+          </div>
+          <div class="form-group">
+            <label class="form-label">День рождения</label>
+            <input type="date" class="form-control" id="nc_birthday">
+            <div class="form-hint">Необязательное поле</div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Адрес</label>
+          <input type="text" class="form-control" id="nc_address" placeholder="г. Минск, ул. ..." maxlength="500">
+          <div class="form-hint">Максимум 500 символов</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Заметка</label>
+          <textarea class="form-control" id="nc_notes" rows="3" placeholder="Дополнительная информация..." maxlength="2000"></textarea>
+          <div class="form-hint">Максимум 2000 символов</div>
+        </div>
+        <div class="form-error hidden" id="ncError" style="padding:10px;background:#fee2e2;border-radius:6px;"></div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="modal.close('modalNewClient')">Отмена</button>
+      <button class="btn btn-primary" id="saveClientBtn" onclick="saveNewClient()">Сохранить клиента</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/utils.js"></script>
+<script>
+  if (!auth.requireAuth()) throw new Error('not auth');
+  initSidebar('clients');
+
+  let allClients = [];
+  let refs = null;
+
+  // Загрузка справочников и клиентов
+  async function init() {
+    refs = await loadReferences();
+    // Заполняем фильтр статусов
+    const sf = document.getElementById('statusFilter');
+    refs.statuses.forEach(s => {
+      const opt = document.createElement('option');
+      opt.value = s.StatusID;
+      opt.textContent = s.StatusName;
+      sf.appendChild(opt);
+    });
+    await loadClients();
+  }
+
+  async function loadClients() {
+    const wrap = document.getElementById('clientsTableWrap');
+    wrap.innerHTML = '<div class="spinner"></div>';
+    try {
+      const search   = document.getElementById('searchInput').value.trim() || null;
+      const statusId = document.getElementById('statusFilter').value || null;
+      // Для страницы "Мои клиенты" всегда фильтруем по текущему пользователю
+      const currentUser = auth.getUser();
+      const managerId = currentUser ? currentUser.user_id : null;
+      allClients = await api.getClients({ search, status_id: statusId, manager_id: managerId });
+      renderTable(allClients);
+    } catch (e) {
+      wrap.innerHTML = `<div class="empty-state"><p>Ошибка: ${e.message}</p></div>`;
+    }
+  }
+
+  function renderTable(clients) {
+    const wrap = document.getElementById('clientsTableWrap');
+    document.getElementById('clientsCount').textContent =
+      `Найдено клиентов: ${clients.length}`;
+
+    if (!clients.length) {
+      wrap.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">👥</div>
+          <h3>Клиенты не найдены</h3>
+          <p>Попробуйте изменить параметры поиска или добавьте нового клиента</p>
+          <button class="btn btn-primary mt-2" onclick="openNewClientModal()">➕ Добавить клиента</button>
+        </div>`;
+      return;
+    }
+
+    wrap.innerHTML = `
+      <div class="table-wrapper">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Клиент</th>
+              <th>Контакты</th>
+              <th>Тип</th>
+              <th>Источник</th>
+              <th>Статус</th>
+              <th>Сумма покупок</th>
+              <th>Последняя покупка</th>
+              <th>Первый контакт</th>
+              <th>Действия</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${clients.map(c => `
+              <tr style="cursor:pointer" onclick="navigate('client.html?id=${c.ClientID}')">
+                <td>
+                  <div style="display:flex;align-items:center;gap:10px">
+                    <div style="width:36px;height:36px;background:#dbeafe;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;color:#2563eb;font-size:.8rem;flex-shrink:0">
+                      ${fmt.initials(c.FullName)}
+                    </div>
+                    <div>
+                      <div style="font-weight:600">${c.FullName}</div>
+                      ${c.CompanyName ? `<div style="font-size:.75rem;color:#64748b">${c.CompanyName}</div>` : ''}
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <div>${fmt.phone(c.Phone)}</div>
+                  ${c.Email ? `<div style="font-size:.75rem;color:#64748b">${c.Email}</div>` : ''}
+                </td>
+                <td><span class="badge badge-secondary">${c.ClientType}</span></td>
+                <td style="font-size:.82rem;color:#64748b">${c.LeadSource}</td>
+                <td>${statusBadge(c.Status)}</td>
+                <td style="font-weight:700;color:#1e293b">${fmt.money(c.TotalPurchases)}</td>
+                <td style="font-size:.85rem">${fmt.date(c.LastPurchaseDate)}</td>
+                <td style="font-size:.85rem">${fmt.date(c.FirstContactDate)}</td>
+                <td onclick="event.stopPropagation()">
+                  <div class="actions">
+                    <button class="btn btn-outline btn-sm" onclick="navigate('client.html?id=${c.ClientID}')">
+                      📋 Карточка
+                    </button>
+                    <button class="btn btn-success btn-sm" onclick="navigate('deals.html?new=1&client=${c.ClientID}')">
+                       🤝
+                     </button>
+                  </div>
+                </td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    `;
+  }
+
+  // Поиск с задержкой
+  let searchTimer;
+  document.getElementById('searchInput').addEventListener('input', () => {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(loadClients, 400);
+  });
+  document.getElementById('statusFilter').addEventListener('change', loadClients);
+
+  function resetFilters() {
+    document.getElementById('searchInput').value = '';
+    document.getElementById('statusFilter').value = '';
+    loadClients();
+  }
+
+  // Новый клиент
+  async function openNewClientModal() {
+    if (!refs) refs = await loadReferences();
+    fillSelect(document.getElementById('nc_type'), refs.client_types, 'ClientTypeID', 'TypeName');
+    fillSelect(document.getElementById('nc_source'), refs.lead_sources, 'LeadSourceID', 'SourceName');
+    document.getElementById('newClientForm').reset();
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('nc_date').value = today;
+    setMaxToday(document.getElementById('nc_date'));
+    document.getElementById('ncError').classList.add('hidden');
+    modal.open('modalNewClient');
+  }
+
+  async function saveNewClient() {
+    const btn = document.getElementById('saveClientBtn');
+    const errEl = document.getElementById('ncError');
+    errEl.classList.add('hidden');
+
+    const rawPhone = document.getElementById('nc_phone').value.trim();
+    const rawEmail = document.getElementById('nc_email').value.trim();
+    const rawDate  = document.getElementById('nc_date').value;
+
+    if (rawPhone && !validateByPhone(rawPhone)) {
+      errEl.textContent = 'Неверный формат телефона. Используйте: +375291234567 или 80291234567';
+      errEl.classList.remove('hidden');
+      return;
+    }
+    if (!validateEmail(rawEmail)) {
+      errEl.textContent = 'Неверный формат email';
+      errEl.classList.remove('hidden');
+      return;
+    }
+    if (rawDate && !validateNotFuture(rawDate)) {
+      errEl.textContent = 'Дата первого контакта не может быть в будущем';
+      errEl.classList.remove('hidden');
+      return;
+    }
+
+    const data = {
+      full_name:          document.getElementById('nc_fullname').value.trim(),
+      company_name:       document.getElementById('nc_company').value.trim() || null,
+      phone:              normalizePhone(rawPhone),
+      email:              rawEmail || null,
+      client_type_id:     document.getElementById('nc_type').value,
+      lead_source_id:     document.getElementById('nc_source').value,
+      first_contact_date: rawDate,
+      birth_date:         document.getElementById('nc_birthday').value || null,
+      address:            document.getElementById('nc_address').value.trim() || null,
+      notes:              document.getElementById('nc_notes').value.trim() || null,
+    };
+
+    if (!data.full_name || !data.phone || !data.client_type_id || !data.lead_source_id) {
+      errEl.textContent = 'Заполните все обязательные поля';
+      errEl.classList.remove('hidden');
+      return;
+    }
+
+    if (data.full_name && data.full_name.length > 200) {
+      errEl.textContent = 'ФИО не может превышать 200 символов';
+      errEl.classList.remove('hidden');
+      return;
+    }
+    if (data.company_name && data.company_name.length > 200) {
+      errEl.textContent = 'Название компании не может превышать 200 символов';
+      errEl.classList.remove('hidden');
+      return;
+    }
+    if (data.email && data.email.length > 100) {
+      errEl.textContent = 'Email не может превышать 100 символов';
+      errEl.classList.remove('hidden');
+      return;
+    }
+    if (data.address && data.address.length > 500) {
+      errEl.textContent = 'Адрес не может превышать 500 символов';
+      errEl.classList.remove('hidden');
+      return;
+    }
+    if (data.notes && data.notes.length > 2000) {
+      errEl.textContent = 'Заметка не может превышать 2000 символов';
+      errEl.classList.remove('hidden');
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Сохранение...';
+    try {
+      const res = await api.createClient(data);
+      toast.success('Клиент успешно добавлен!');
+      modal.close('modalNewClient');
+      navigate('client.html?id=' + res.client_id);
+    } catch (e) {
+      errEl.textContent = e.message;
+      errEl.classList.remove('hidden');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Сохранить клиента';
+    }
+  }
+
+  // Если пришли с параметром ?new=1
+  if (new URLSearchParams(location.search).get('new') === '1') {
+    window.addEventListener('load', () => openNewClientModal());
+  }
+
+  init();
+</script>
+</body>
+</html>

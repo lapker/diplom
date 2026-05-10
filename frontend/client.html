@@ -1,0 +1,1049 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Карточка клиента — FSN GALLERY CRM</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="app-layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">🏠</div>
+      <div>
+        <div class="logo-text">FSN GALLERY</div>
+        <div class="logo-sub">Керамическая плитка</div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-title">Менеджер</div>
+      <button class="nav-item" data-page="dashboard" onclick="navigate('dashboard.html')">
+        <span class="nav-icon">📊</span> Личный кабинет
+      </button>
+      <button class="nav-item" data-page="clients" onclick="navigate('clients.html')">
+        <span class="nav-icon">👥</span> Мои клиенты
+      </button>
+      <button class="nav-item" data-page="deals" onclick="navigate('deals.html')">
+        <span class="nav-icon">🤝</span> Мои сделки
+      </button>
+      <button class="nav-item" data-page="my-offers" id="navMyOffers" onclick="navigate('offers.html?my=1')"><span class="nav-icon">📄</span> Мои КП</button>
+      <div class="nav-section-title" data-role="admin" style="display:none">Администратор</div>
+      <button class="nav-item" data-page="admin" data-role="admin" style="display:none" onclick="navigate('admin.html')">
+        <span class="nav-icon">🏢</span> Панель управления
+      </button>
+      <button class="nav-item" data-page="managers" data-role="admin" style="display:none" onclick="navigate('managers.html')">
+        <span class="nav-icon">👤</span> Менеджеры
+      </button>
+      <button class="nav-item" data-page="all-clients" data-role="admin" style="display:none" onclick="navigate('all-clients.html')">
+        <span class="nav-icon">📋</span> Все клиенты
+      </button>
+      <button class="nav-item" data-page="all-deals" data-role="admin" style="display:none" onclick="navigate('all-deals.html')">
+        <span class="nav-icon">📁</span> Все сделки
+      </button>
+      <button class="nav-item" data-page="offers" data-role="admin" style="display:none" onclick="navigate('offers.html')">
+        <span class="nav-icon">📄</span> Все КП
+      </button>
+      <button class="nav-item" data-page="reports" data-role="admin" style="display:none" onclick="navigate('reports.html')">
+        <span class="nav-icon">📈</span> Отчёты
+      </button>
+      <button class="nav-item" data-page="references" data-role="admin" style="display:none" onclick="navigate('references.html')">
+        <span class="nav-icon">📚</span> Справочники
+      </button>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="avatar" id="sidebarAvatar">?</div>
+        <div class="user-info">
+          <div class="user-name" id="sidebarUserName">—</div>
+          <div class="user-role" id="sidebarUserRole">—</div>
+        </div>
+      </div>
+      <button class="btn-logout" id="logoutBtn">🚪 Выйти</button>
+    </div>
+  </aside>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <!-- Main -->
+  <div class="main-content">
+    <header class="top-header">
+      <button class="sidebar-toggle" id="sidebarToggle">☰</button>
+      <span class="header-title" id="headerTitle">Карточка клиента</span>
+      <div class="header-actions">
+        <button class="btn btn-success btn-sm" onclick="navigate('deals.html?new=1&client=' + clientId)">
+          🤝 Новая сделка
+        </button>
+        <button class="btn btn-outline btn-sm" onclick="openEditModal()">
+          ✏️ Редактировать
+        </button>
+      </div>
+    </header>
+
+    <main class="page-content">
+      <div class="breadcrumb">
+        <a href="clients.html">Клиенты</a>
+        <span class="sep">›</span>
+        <span id="breadcrumbName">Загрузка...</span>
+      </div>
+
+      <div id="pageContent">
+        <div class="spinner"></div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- Модал: Редактирование клиента -->
+<div class="modal-overlay" id="modalEditClient">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <span class="modal-title">✏️ Редактирование клиента</span>
+      <button class="modal-close" onclick="modal.close('modalEditClient')">✕</button>
+    </div>
+    <div class="modal-body">
+      <form id="editClientForm" novalidate>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">ФИО / Название <span class="required">*</span></label>
+            <input type="text" class="form-control" id="ec_fullname" required maxlength="200">
+            <div class="form-hint">Максимум 200 символов</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Компания</label>
+            <input type="text" class="form-control" id="ec_company" maxlength="200">
+            <div class="form-hint">Максимум 200 символов</div>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Телефон <span class="required">*</span></label>
+            <input type="tel" class="form-control" id="ec_phone" required placeholder="+375291234567 или 80291234567">
+            <div class="form-hint">Формат: +375291234567 или 80291234567</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Email</label>
+            <input type="email" class="form-control" id="ec_email" maxlength="100">
+            <div class="form-hint">Максимум 100 символов</div>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Тип клиента <span class="required">*</span></label>
+            <select class="form-control" id="ec_type" required></select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Источник привлечения</label>
+            <select class="form-control" id="ec_source"></select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Статус</label>
+            <select class="form-control" id="ec_status"></select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Дата первого контакта</label>
+            <input type="date" class="form-control" id="ec_date">
+          </div>
+        </div>
+        <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Адрес</label>
+          <input type="text" class="form-control" id="ec_address" maxlength="500">
+          <div class="form-hint">Максимум 500 символов</div>
+        </div>
+          <div class="form-group">
+            <label class="form-label">День рождения</label>
+            <input type="date" class="form-control" id="ec_birthday">
+            <div class="form-hint">Необязательное поле</div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Заметка</label>
+          <textarea class="form-control" id="ec_notes" rows="3" maxlength="2000"></textarea>
+          <div class="form-hint">Максимум 2000 символов</div>
+        </div>
+        <div class="form-error hidden" id="ecError" style="padding:10px;background:#fee2e2;border-radius:6px;"></div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="modal.close('modalEditClient')">Отмена</button>
+      <button class="btn btn-primary" id="saveEditBtn" onclick="saveEdit()">Сохранить изменения</button>
+    </div>
+  </div>
+</div>
+
+<!-- Модал: Добавить заметку -->
+<div class="modal-overlay" id="modalAddNote">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">📝 Добавить заметку</span>
+      <button class="modal-close" onclick="modal.close('modalAddNote')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Текст заметки <span class="required">*</span></label>
+        <textarea class="form-control" id="noteText" rows="5" placeholder="Введите заметку..." maxlength="2000"></textarea>
+        <div class="form-hint">Максимум 2000 символов</div>
+      </div>
+      <div class="form-error hidden" id="noteError" style="padding:10px;background:#fee2e2;border-radius:6px;"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="modal.close('modalAddNote')">Отмена</button>
+      <button class="btn btn-primary" id="saveNoteBtn" onclick="saveNote()">Добавить заметку</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/utils.js"></script>
+<script>
+  if (!auth.requireAuth()) throw new Error('not auth');
+  initSidebar('clients');
+
+  const clientId = parseInt(new URLSearchParams(location.search).get('id'));
+  if (!clientId) { navigate('clients.html'); throw new Error('no id'); }
+
+  let clientData  = null;
+  let refs = null;
+  const currentUser = auth.getUser();
+  const isManager = currentUser?.role === 'manager';
+
+  async function loadClient() {
+    const wrap = document.getElementById('pageContent');
+    try {
+      [clientData, refs] = await Promise.all([
+        api.getClient(clientId),
+        loadReferences(),
+      ]);
+      document.getElementById('breadcrumbName').textContent = clientData.FullName;
+      document.getElementById('headerTitle').textContent = clientData.FullName;
+      renderClient();
+    } catch (e) {
+      wrap.innerHTML = `<div class="empty-state"><p>Ошибка загрузки: ${e.message}</p></div>`;
+    }
+  }
+
+  function renderClient() {
+    const c = clientData;
+    const allTasks = [...(c.client_tasks || []), ...(c.deal_tasks || [])];
+
+    document.getElementById('pageContent').innerHTML = `
+      <!-- Шапка карточки -->
+      <div class="card mb-3" style="overflow:visible">
+        <div class="client-card-header">
+          <div class="client-avatar">${fmt.initials(c.FullName)}</div>
+          <div class="client-card-info">
+            <div class="client-card-name">${c.FullName}</div>
+            ${c.CompanyName ? `<div class="client-card-company">🏢 ${c.CompanyName}</div>` : ''}
+            <div class="client-card-badges">
+              <span class="badge">${c.ClientType}</span>
+              <span class="badge">${c.Status}</span>
+              <span class="badge">📡 ${c.LeadSource}</span>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end">
+            <div style="text-align:right;color:rgba(255,255,255,.8);font-size:.8rem">Менеджер</div>
+            <div style="color:#fff;font-weight:600;font-size:.9rem">${c.ManagerName}</div>
+          </div>
+        </div>
+
+        <!-- Финансовая информация -->
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:0;border-top:1px solid #e2e8f0">
+          <div style="padding:14px 20px;border-right:1px solid #e2e8f0;text-align:center">
+            <div style="font-size:1.3rem;font-weight:800;color:#16a34a">${fmt.money(c.TotalPurchases)}</div>
+            <div style="font-size:.72rem;color:#64748b;margin-top:2px">Сумма покупок</div>
+          </div>
+          <div style="padding:14px 20px;border-right:1px solid #e2e8f0;text-align:center">
+            <div style="font-size:1.3rem;font-weight:800;color:#2563eb">${fmt.money(c.AvgCheck || 0)}</div>
+            <div style="font-size:.72rem;color:#64748b;margin-top:2px">Средний чек</div>
+          </div>
+          <div style="padding:14px 20px;border-right:1px solid #e2e8f0;text-align:center">
+            <div style="font-size:1.3rem;font-weight:800;color:#7c3aed">${c.deals ? c.deals.length : 0}</div>
+            <div style="font-size:.72rem;color:#64748b;margin-top:2px">Сделок</div>
+          </div>
+          <div style="padding:14px 20px;text-align:center">
+            <div style="font-size:1rem;font-weight:700;color:#1e293b">${fmt.date(c.LastPurchaseDate)}</div>
+            <div style="font-size:.72rem;color:#64748b;margin-top:2px">Последняя покупка</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Вкладки -->
+      <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('info')">📋 Информация</button>
+        <button class="tab-btn" onclick="switchTab('events')">📅 Лента событий</button>
+        <button class="tab-btn" onclick="switchTab('tasks')">📌 Задачи (${allTasks.length})</button>
+        <button class="tab-btn" onclick="switchTab('notes')">📝 Заметки (${c.notes ? c.notes.length : 0})</button>
+        <button class="tab-btn" onclick="switchTab('deals')">🤝 Сделки (${c.deals ? c.deals.length : 0})</button>
+        <button class="tab-btn" onclick="switchTab('offers')">📄 КП</button>
+        <button class="tab-btn" onclick="switchTab('docs')">📎 Документы (${(c.documents||[]).length})</button>
+      </div>
+
+      <!-- Вкладка: Информация -->
+      <div class="tab-panel active" id="tab-info">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">📋 Контактные данные</span>
+            <button class="btn btn-outline btn-sm" onclick="openEditModal()">✏️ Редактировать</button>
+          </div>
+          <div class="card-body">
+            <div class="info-grid">
+              <div class="info-item">
+                <div class="info-label">Телефон</div>
+              <div class="info-value">📞 ${fmt.phone(c.Phone)}</div>
+              </div>
+              <div class="info-item">
+                <div class="info-label">Email</div>
+                <div class="info-value">${c.Email ? '✉️ ' + c.Email : '—'}</div>
+              </div>
+              <div class="info-item">
+                <div class="info-label">Адрес</div>
+                <div class="info-value">${c.Address ? '📍 ' + c.Address : '—'}</div>
+              </div>
+              <div class="info-item">
+                <div class="info-label">Дата первого контакта</div>
+                <div class="info-value">📅 ${fmt.date(c.FirstContactDate)}</div>
+              </div>
+              ${c.BirthDate ? `
+              <div class="info-item">
+                <div class="info-label">День рождения</div>
+                <div class="info-value">🎂 ${fmt.date(c.BirthDate)}</div>
+              </div>` : ''}
+              <div class="info-item">
+                <div class="info-label">Тип клиента</div>
+                <div class="info-value"><span class="badge badge-secondary">${c.ClientType}</span></div>
+              </div>
+              <div class="info-item">
+                <div class="info-label">Источник привлечения</div>
+                <div class="info-value"><span class="badge badge-info">${c.LeadSource}</span></div>
+              </div>
+              <div class="info-item">
+                <div class="info-label">Статус</div>
+                <div class="info-value">${statusBadge(c.Status)}</div>
+              </div>
+              <div class="info-item">
+                <div class="info-label">Дата создания</div>
+                <div class="info-value">${fmt.datetime(c.CreatedAt)}</div>
+              </div>
+            </div>
+            ${c.Notes ? `
+              <hr class="divider">
+              <div class="info-item">
+                <div class="info-label">Общая заметка</div>
+                <div class="info-value" style="white-space:pre-wrap;margin-top:6px">${c.Notes}</div>
+              </div>
+            ` : ''}
+          </div>
+        </div>
+      </div>
+
+      <!-- Вкладка: Лента событий -->
+      <div class="tab-panel" id="tab-events">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">📅 Лента событий</span>
+            <button class="btn btn-outline btn-sm" onclick="openAddEventModal()">➕ Добавить событие</button>
+          </div>
+          <div class="card-body" id="eventsContainer">
+            ${renderEvents(c.events)}
+          </div>
+        </div>
+      </div>
+
+      <!-- Вкладка: Задачи -->
+      <div class="tab-panel" id="tab-tasks">
+        <div class="card mb-3">
+          <div class="card-header">
+            <span class="card-title">📌 Задачи по клиенту</span>
+            <button class="btn btn-outline btn-sm" onclick="openAddTaskModal()">📞 Запланировать</button>
+          </div>
+          <div class="card-body" id="clientTasksContainer">
+            ${renderTasks(c.client_tasks || [], 'client')}
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">📌 Задачи по сделкам</span>
+          </div>
+          <div class="card-body" id="dealTasksContainer">
+            ${renderTasks(c.deal_tasks || [], 'deal')}
+          </div>
+        </div>
+      </div>
+
+      <!-- Вкладка: Заметки -->
+      <div class="tab-panel" id="tab-notes">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">📝 Заметки</span>
+            <button class="btn btn-primary btn-sm" onclick="modal.open('modalAddNote')">➕ Добавить заметку</button>
+          </div>
+          <div class="card-body" id="notesContainer">
+            ${renderNotes(c.notes)}
+          </div>
+        </div>
+      </div>
+
+      <!-- Вкладка: Сделки -->
+      <div class="tab-panel" id="tab-deals">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">🤝 Сделки</span>
+            <button class="btn btn-success btn-sm" onclick="navigate('deals.html?new=1&client=${clientId}')">➕ Новая сделка</button>
+          </div>
+          <div id="dealsContainer">
+            ${renderDeals(c.deals)}
+          </div>
+        </div>
+      </div>
+
+      <!-- Вкладка: КП -->
+      <div class="tab-panel" id="tab-offers">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">📄 Коммерческие предложения</span>
+            <button class="btn btn-primary btn-sm" onclick="goToCreateOffer()">➕ Создать КП</button>
+          </div>
+          <div class="card-body" id="clientOffersContainer">
+            <div class="spinner"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Вкладка: Документы -->
+      <div class="tab-panel" id="tab-docs">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">📎 Документы</span>
+            <button class="btn btn-primary btn-sm" onclick="openUploadDoc()">📤 Загрузить</button>
+          </div>
+          <div class="card-body" id="docsContainer">
+            ${renderDocs(c.documents)}
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderNotes(notes) {
+    if (!notes || !notes.length) {
+      return `<div class="empty-state"><div class="empty-icon">📝</div><h3>Нет заметок</h3><p>Добавьте первую заметку</p></div>`;
+    }
+    return notes.map(n => `
+      <div class="note-card" id="note-${n.NoteID}">
+        <div class="note-meta">
+          <span>👤 ${n.AuthorName} · ${fmt.datetime(n.CreatedAt)}</span>
+          <button class="btn btn-ghost btn-sm" onclick="deleteNote(${n.NoteID})" title="Удалить">🗑</button>
+        </div>
+        <div class="note-text">${n.NoteText}</div>
+      </div>
+    `).join('');
+  }
+
+  function switchTab(name) {
+    const tabs = ['info', 'events', 'tasks', 'notes', 'deals', 'offers', 'docs'];
+    document.querySelectorAll('.tab-btn').forEach((b, i) => {
+      b.classList.toggle('active', tabs[i] === name);
+    });
+    document.querySelectorAll('.tab-panel').forEach(p => {
+      p.classList.toggle('active', p.id === 'tab-' + name);
+    });
+    if (name === 'offers') loadClientOffers();
+  }
+
+  async function loadClientOffers() {
+    const el = document.getElementById('clientOffersContainer');
+    if (!el) return;
+    el.innerHTML = '<div class="spinner"></div>';
+    try {
+      const offers = await api.getOffers({ client_id: clientId });
+      if (!offers.length) {
+        el.innerHTML = `<div class="empty-state"><div class="empty-icon">📄</div><h3>Нет КП</h3><p>Создайте коммерческое предложение для клиента</p></div>`;
+        return;
+      }
+      const statusLabel = { active: '✅ Активно', expired: '⌛ Истёк', used: '💙 Использовано' };
+      el.innerHTML = offers.map(o => `
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #f1f5f9;flex-wrap:wrap;gap:8px">
+          <div>
+            <div style="font-weight:700">${o.OfferNumber}</div>
+            <div style="font-size:.78rem;color:#64748b">
+              ${statusLabel[o.Status] || o.Status} · до ${fmt.date(o.ExpiresAt)} · ${o.CreatedByName}
+              ${o.DealTitle ? ' · 🤝 ' + o.DealTitle : ''}
+            </div>
+          </div>
+          <div style="display:flex;gap:6px">
+            <button class="btn btn-outline btn-sm" onclick="navigate('offers.html')">Открыть</button>
+          </div>
+        </div>`).join('');
+    } catch(e) {
+      el.innerHTML = `<p style="color:#ef4444">Ошибка: ${e.message}</p>`;
+    }
+  }
+
+  const EVENT_ICONS = {
+    call: '📞', meeting: '🤝', email: '✉️', note: '📝',
+    task_completed: '✅', doc_added: '📎', doc_deleted: '🗑',
+    deal_stage: '🔄', deal_closed: '🏆'
+  };
+  const EVENT_LABELS = {
+    call: 'Звонок', meeting: 'Встреча', email: 'Письмо', note: 'Заметка',
+    task_completed: 'Задача выполнена', doc_added: 'Документ добавлен',
+    doc_deleted: 'Документ удалён', deal_stage: 'Этап сделки',
+    deal_closed: 'Сделка завершена'
+  };
+  const EVENT_COLORS = {
+    call: '#2563eb', meeting: '#16a34a', email: '#7c3aed', note: '#64748b',
+    task_completed: '#16a34a', doc_added: '#0891b2', doc_deleted: '#dc2626',
+    deal_stage: '#7c3aed', deal_closed: '#16a34a'
+  };
+  const TASK_TYPE_LABELS = { call: '📞 Звонок', meeting: '🤝 Встреча', letter: '✉️ Письмо' };
+  const PRIORITY_LABELS = { 1: 'Низкий', 2: 'Средний', 3: 'Высокий' };
+  const DEAL_PRIORITY_COLOR = { 1: '#94a3b8', 2: '#f59e0b', 3: '#ef4444' };
+
+  function renderEvents(events) {
+    if (!events || !events.length) {
+      return `<div class="empty-state"><div class="empty-icon">📅</div><h3>Нет событий</h3><p>Здесь появятся события</p></div>`;
+    }
+    return events.map(e => {
+      const color = EVENT_COLORS[e.EventType] || '#64748b';
+      const icon  = EVENT_ICONS[e.EventType] || '📌';
+      const label = EVENT_LABELS[e.EventType] || e.EventType;
+      const canDelete = !isManager || !e.IsAutomatic;
+      return `
+        <div class="note-card" id="event-${e.EventID}" style="border-left:3px solid ${color}">
+          <div class="note-meta">
+            <span>${icon} <strong>${label}</strong> · ${fmt.datetime(e.EventDate)} · ${e.AuthorName}
+              ${e.SourceDealID ? ` · <a href="deal.html?id=${e.SourceDealID}" style="color:#2563eb;font-size:.75rem">Сделка #${e.SourceDealID}</a>` : ''}
+            </span>
+            ${canDelete ? `<button class="btn btn-ghost btn-sm" onclick="deleteClientEvent(${e.EventID})" title="Удалить">🗑</button>` : ''}
+          </div>
+          <div class="note-text" style="font-weight:600">${e.Title}</div>
+          ${e.Description ? `<div class="note-text" style="font-weight:400;color:#64748b;margin-top:4px">${e.Description}</div>` : ''}
+        </div>
+      `;
+    }).join('');
+  }
+
+  function renderTasks(tasks, source) {
+    if (!tasks || !tasks.length) {
+      const msg = source === 'deal' ? 'Нет задач из сделок' : 'Нет задач. Запланируйте звонок, встречу или письмо';
+      return `<div class="empty-state"><div class="empty-icon">📌</div><h3>${msg}</h3></div>`;
+    }
+    const today = new Date(); today.setHours(0,0,0,0);
+    return tasks.map(t => {
+      const sd = new Date(t.ScheduledAt); sd.setHours(0,0,0,0);
+      const diff = (sd - today) / 86400000;
+      const color = t.IsCompleted ? '#16a34a' : diff < 0 ? '#dc2626' : diff === 0 ? '#d97706' : '#2563eb';
+      const bgColor = t.IsCompleted ? '#f0fdf4' : diff < 0 ? '#fef2f2' : diff === 0 ? '#fffbeb' : '#eff6ff';
+      const taskIcon = t.TaskType === 'call' ? '📞' : t.TaskType === 'letter' ? '✉️' : '🤝';
+      const taskLabel = TASK_TYPE_LABELS[t.TaskType] || t.TaskType;
+      return `
+        <div style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:${bgColor};border-radius:6px;margin-bottom:6px">
+          <span style="font-size:1.2rem">${taskIcon}</span>
+          <div style="flex:1">
+            <div style="font-weight:600;color:${color}">${t.Title}</div>
+            <div style="font-size:.75rem;color:#64748b">${fmt.datetime(t.ScheduledAt)} · ${taskLabel}</div>
+            ${t.DealTitle ? `<div style="font-size:.72rem;color:#7c3aed;margin-top:2px">🤝 Сделка: ${t.DealTitle}</div>` : ''}
+            ${t.Description ? `<div style="font-size:.78rem;color:#64748b;margin-top:2px">${t.Description}</div>` : ''}
+          </div>
+          <div style="display:flex;gap:6px;align-items:center">
+            ${t.IsCompleted
+              ? '<span class="badge badge-success" style="font-size:.7rem">Готово</span>'
+              : `<button class="btn btn-success btn-sm" onclick="${source === 'deal' ? `completeDealTaskFromClient(${t.TaskID})` : `completeClientTask(${t.TaskID})`}" title="Выполнить">✓</button>`
+            }
+            ${source === 'deal'
+              ? `<a href="deal.html?id=${t.DealID}" class="btn btn-outline btn-sm" style="font-size:.7rem" title="Открыть сделку">🤝</a>`
+              : (!t.IsCompleted ? `<button class="btn btn-ghost btn-sm" onclick="deleteClientTaskItem(${t.TaskID})" title="Удалить">🗑</button>` : '')
+            }
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  function renderDeals(deals) {
+    if (!deals || !deals.length) {
+      return `<div class="empty-state"><div class="empty-icon">🤝</div><h3>Нет сделок</h3><p>Создайте первую сделку</p></div>`;
+    }
+    return `
+      <div class="table-wrapper">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Название</th>
+              <th>Тип</th>
+              <th>Этап</th>
+              <th>Бюджет</th>
+              <th>Приоритет</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${deals.map(d => {
+              const pColor = DEAL_PRIORITY_COLOR[d.Priority] || '#94a3b8';
+              return `
+                <tr onclick="navigate('deal.html?id=${d.DealID}')" style="cursor:pointer">
+                  <td><strong>${d.Title}</strong></td>
+                  <td><span class="badge badge-secondary">${d.DealType}</span></td>
+                  <td><span class="badge">${d.StageName}</span></td>
+                  <td style="font-weight:700;color:#16a34a">${d.Budget ? fmt.money(d.Budget) : '—'}</td>
+                  <td><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${pColor};vertical-align:middle;margin-right:4px"></span>${PRIORITY_LABELS[d.Priority]||'—'}</td>
+                </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>`;
+  }
+
+  function renderDocs(docs) {
+    if (!docs || !docs.length) {
+      return `<div class="empty-state"><div class="empty-icon">📎</div><h3>Нет документов</h3><p>Загрузите первый документ</p></div>`;
+    }
+    return docs.map(d => {
+      const kb = (d.FileSize / 1024).toFixed(1);
+      const mb = (d.FileSize / 1048576).toFixed(1);
+      const size = d.FileSize > 1048576 ? mb + ' МБ' : kb + ' КБ';
+      const ext = d.OriginalName.split('.').pop().toLowerCase();
+      const icon = ['jpg','jpeg','png','gif'].includes(ext) ? '🖼' : ['pdf'].includes(ext) ? '📄' : ['doc','docx'].includes(ext) ? '📝' : ['xls','xlsx'].includes(ext) ? '📊' : '📎';
+      const isClientDoc = d.DocSource === 'client';
+      const downloadUrl = isClientDoc
+        ? `/api/documents/${d.DocID}/download`
+        : `/api/deal-documents/${d.DocID}/download`;
+      const dealBadge = d.DealTitle ? `<span style="font-size:.68rem;color:#7c3aed;margin-left:6px">🤝 ${d.DealTitle}</span>` : '';
+      return `
+        <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #f1f5f9">
+          <span style="font-size:1.5rem">${icon}</span>
+          <div style="flex:1">
+            <div style="font-weight:600;font-size:.9rem">${d.OriginalName}${dealBadge}</div>
+            <div style="font-size:.75rem;color:#64748b">${size} · ${d.UploaderName} · ${fmt.datetime(d.UploadedAt)}</div>
+          </div>
+          <div style="display:flex;gap:6px">
+            <a href="${downloadUrl}" target="_blank" class="btn btn-outline btn-sm">⬇ Скачать</a>
+            ${isClientDoc ? `<button class="btn btn-ghost btn-sm" onclick="deleteDoc(${d.DocID})">🗑</button>` : ''}
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  // Редактирование
+  async function openEditModal() {
+    if (!refs) refs = await loadReferences();
+    const c = clientData;
+    fillSelect(document.getElementById('ec_type'),   refs.client_types, 'ClientTypeID', 'TypeName');
+    fillSelect(document.getElementById('ec_source'), refs.lead_sources, 'LeadSourceID', 'SourceName');
+    fillSelect(document.getElementById('ec_status'), refs.statuses,     'StatusID',     'StatusName');
+
+    document.getElementById('ec_fullname').value = c.FullName || '';
+    document.getElementById('ec_company').value  = c.CompanyName || '';
+    document.getElementById('ec_phone').value    = c.Phone || '';
+    document.getElementById('ec_email').value    = c.Email || '';
+    document.getElementById('ec_address').value  = c.Address || '';
+    document.getElementById('ec_birthday').value = c.BirthDate ? c.BirthDate.split('T')[0] : '';
+    document.getElementById('ec_notes').value    = c.Notes || '';
+    document.getElementById('ec_date').value     = c.FirstContactDate ? c.FirstContactDate.split('T')[0] : '';
+    setMaxToday(document.getElementById('ec_date'));
+    document.getElementById('ec_type').value     = c.ClientTypeID || '';
+    document.getElementById('ec_source').value   = c.LeadSourceID || '';
+    document.getElementById('ec_status').value   = c.StatusID || '';
+
+    modal.open('modalEditClient');
+  }
+
+  async function saveEdit() {
+    const btn = document.getElementById('saveEditBtn');
+    const errEl = document.getElementById('ecError');
+    errEl.classList.add('hidden');
+
+    const rawPhone = document.getElementById('ec_phone').value.trim();
+    const rawEmail = document.getElementById('ec_email').value.trim();
+    const rawDate  = document.getElementById('ec_date').value;
+
+    if (rawPhone && !validateByPhone(rawPhone)) {
+      errEl.textContent = 'Неверный формат телефона. Используйте: +375291234567 или 80291234567';
+      errEl.classList.remove('hidden');
+      return;
+    }
+    if (!validateEmail(rawEmail)) {
+      errEl.textContent = 'Неверный формат email';
+      errEl.classList.remove('hidden');
+      return;
+    }
+    if (rawDate && !validateNotFuture(rawDate)) {
+      errEl.textContent = 'Дата первого контакта не может быть в будущем';
+      errEl.classList.remove('hidden');
+      return;
+    }
+
+    const data = {
+      full_name:          document.getElementById('ec_fullname').value.trim(),
+      company_name:       document.getElementById('ec_company').value.trim() || null,
+      phone:              normalizePhone(rawPhone),
+      email:              rawEmail || null,
+      address:            document.getElementById('ec_address').value.trim() || null,
+      birth_date:         document.getElementById('ec_birthday').value || null,
+      client_type_id:     document.getElementById('ec_type').value || null,
+      lead_source_id:     document.getElementById('ec_source').value || null,
+      status_id:          document.getElementById('ec_status').value || null,
+      first_contact_date: rawDate || null,
+      notes:              document.getElementById('ec_notes').value.trim() || null,
+    };
+
+    if (!data.full_name || !data.phone) {
+      errEl.textContent = 'ФИО и телефон обязательны';
+      errEl.classList.remove('hidden');
+      return;
+    }
+    if (data.full_name && data.full_name.length > 200) {
+      errEl.textContent = 'ФИО не может превышать 200 символов';
+      errEl.classList.remove('hidden');
+      return;
+    }
+    if (data.company_name && data.company_name.length > 200) {
+      errEl.textContent = 'Название компании не может превышать 200 символов';
+      errEl.classList.remove('hidden');
+      return;
+    }
+    if (data.email && data.email.length > 100) {
+      errEl.textContent = 'Email не может превышать 100 символов';
+      errEl.classList.remove('hidden');
+      return;
+    }
+    if (data.address && data.address.length > 500) {
+      errEl.textContent = 'Адрес не может превышать 500 символов';
+      errEl.classList.remove('hidden');
+      return;
+    }
+    if (data.notes && data.notes.length > 2000) {
+      errEl.textContent = 'Заметка не может превышать 2000 символов';
+      errEl.classList.remove('hidden');
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Сохранение...';
+    try {
+      await api.updateClient(clientId, data);
+      toast.success('Данные клиента обновлены!');
+      modal.close('modalEditClient');
+      await loadClient();
+    } catch (e) {
+      errEl.textContent = e.message;
+      errEl.classList.remove('hidden');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Сохранить изменения';
+    }
+  }
+
+  // Заметки
+  async function saveNote() {
+    const btn = document.getElementById('saveNoteBtn');
+    const errEl = document.getElementById('noteError');
+    const text = document.getElementById('noteText').value.trim();
+    errEl.classList.add('hidden');
+
+    if (!text) {
+      errEl.textContent = 'Введите текст заметки';
+      errEl.classList.remove('hidden');
+      return;
+    }
+    if (text.length > 2000) {
+      errEl.textContent = 'Текст заметки не может превышать 2000 символов';
+      errEl.classList.remove('hidden');
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Сохранение...';
+    try {
+      await api.addNote(clientId, text);
+      toast.success('Заметка добавлена!');
+      modal.close('modalAddNote');
+      document.getElementById('noteText').value = '';
+      await loadClient();
+      switchTab('notes');
+    } catch (e) {
+      errEl.textContent = e.message;
+      errEl.classList.remove('hidden');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Добавить заметку';
+    }
+  }
+
+  async function deleteNote(noteId) {
+    if (!window.confirm('Удалить заметку?')) return;
+    try {
+      await api.deleteNote(noteId);
+      toast.success('Заметка удалена');
+      await loadClient();
+      switchTab('notes');
+    } catch (e) {
+      toast.error(e.message);
+    }
+  }
+
+  // Лента событий
+  function openAddEventModal() {
+    const now = new Date().toISOString().slice(0,16);
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay open';
+    overlay.innerHTML = `
+      <div class="modal">
+        <div class="modal-header">
+          <span class="modal-title">📅 Добавить событие</span>
+          <button class="modal-close" onclick="this.closest('.modal-overlay').remove();document.body.style.overflow=''">✕</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Тип <span class="required">*</span></label>
+            <select class="form-control" id="ev_type">
+              <option value="call">📞 Звонок</option>
+              <option value="meeting">🤝 Встреча</option>
+              <option value="email">✉️ Письмо</option>
+              <option value="note">📝 Заметка</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Заголовок <span class="required">*</span></label>
+            <input type="text" class="form-control" id="ev_title" placeholder="Описание события..." maxlength="200">
+            <div class="form-hint">Максимум 200 символов</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Дата и время</label>
+            <input type="datetime-local" class="form-control" id="ev_date" value="${now}">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Описание</label>
+            <textarea class="form-control" id="ev_desc" rows="3" maxlength="1000"></textarea>
+            <div class="form-hint">Максимум 1000 символов</div>
+          </div>
+          <div class="form-error hidden" id="evError" style="padding:8px;background:#fee2e2;border-radius:6px"></div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline" onclick="this.closest('.modal-overlay').remove();document.body.style.overflow=''">Отмена</button>
+          <button class="btn btn-primary" onclick="saveEvent(this)">Добавить</button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+    document.body.style.overflow = 'hidden';
+    overlay.addEventListener('click', e => { if (e.target === overlay) { overlay.remove(); document.body.style.overflow = ''; } });
+  }
+
+  async function saveEvent(btn) {
+    const overlay = btn.closest('.modal-overlay');
+    const errEl   = overlay.querySelector('#evError');
+    const title   = overlay.querySelector('#ev_title').value.trim();
+    if (!title) { errEl.textContent='Введите заголовок'; errEl.classList.remove('hidden'); return; }
+    if (title.length > 200) { errEl.textContent='Заголовок не может превышать 200 символов'; errEl.classList.remove('hidden'); return; }
+    const description = overlay.querySelector('#ev_desc').value.trim();
+    if (description && description.length > 1000) { errEl.textContent='Описание не может превышать 1000 символов'; errEl.classList.remove('hidden'); return; }
+    btn.disabled = true;
+    try {
+      await api.addClientEvent(clientId, {
+        event_type:   overlay.querySelector('#ev_type').value,
+        title,
+        event_date:   overlay.querySelector('#ev_date').value,
+        description:  description || null,
+      });
+      toast.success('Событие добавлено!');
+      overlay.remove(); document.body.style.overflow = '';
+      await loadClient(); switchTab('events');
+    } catch(e) { errEl.textContent=e.message; errEl.classList.remove('hidden'); btn.disabled=false; }
+  }
+
+  async function deleteClientEvent(eventId) {
+    if (!confirm('Удалить событие?')) return;
+    try { await api.deleteEvent(eventId); toast.success('Событие удалено'); await loadClient(); switchTab('events'); }
+    catch(e) { toast.error(e.message); }
+  }
+
+  // ──── Задачи ────────────────────────────────────────────
+  function openAddTaskModal() {
+    const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate()+1);
+    const dts = tomorrow.toISOString().slice(0,16);
+    const minDate = new Date().toISOString().slice(0,16); // Минимальная дата - сегодня
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay open';
+    overlay.innerHTML = `
+      <div class="modal">
+        <div class="modal-header">
+          <span class="modal-title">📞 Запланировать задачу</span>
+          <button class="modal-close" onclick="this.closest('.modal-overlay').remove();document.body.style.overflow=''">✕</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Тип <span class="required">*</span></label>
+            <select class="form-control" id="tk_type">
+              <option value="call">📞 Звонок</option>
+              <option value="meeting">🤝 Встреча</option>
+              <option value="letter">✉️ Письмо</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Тема <span class="required">*</span></label>
+            <input type="text" class="form-control" id="tk_title" placeholder="Уточнить бюджет..." maxlength="200">
+            <div class="form-hint">Максимум 200 символов</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Дата и время <span class="required">*</span></label>
+            <input type="datetime-local" class="form-control" id="tk_sched" value="${dts}" min="${minDate}">
+            <div class="form-hint">Нельзя выбрать дату в прошлом</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Описание</label>
+            <textarea class="form-control" id="tk_desc" rows="2" maxlength="1000"></textarea>
+            <div class="form-hint">Максимум 1000 символов</div>
+          </div>
+          <div class="form-error hidden" id="tkError" style="padding:8px;background:#fee2e2;border-radius:6px"></div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline" onclick="this.closest('.modal-overlay').remove();document.body.style.overflow=''">Отмена</button>
+          <button class="btn btn-primary" onclick="saveTask(this)">Запланировать</button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+    document.body.style.overflow = 'hidden';
+    overlay.addEventListener('click', e => { if (e.target === overlay) { overlay.remove(); document.body.style.overflow = ''; } });
+  }
+
+  async function saveTask(btn) {
+    const overlay = btn.closest('.modal-overlay');
+    const errEl   = overlay.querySelector('#tkError');
+    const title   = overlay.querySelector('#tk_title').value.trim();
+    const sched   = overlay.querySelector('#tk_sched').value;
+    if (!title) { errEl.textContent='Введите тему'; errEl.classList.remove('hidden'); return; }
+    if (title.length > 200) { errEl.textContent='Тема не может превышать 200 символов'; errEl.classList.remove('hidden'); return; }
+    if (!sched) { errEl.textContent='Укажите время'; errEl.classList.remove('hidden'); return; }
+
+    // Проверяем что дата не в прошлом
+    const schedDate = new Date(sched);
+    const today = new Date(); today.setHours(0,0,0,0);
+    if (schedDate < today) {
+      errEl.textContent = 'Нельзя планировать задачу на прошедшую дату';
+      errEl.classList.remove('hidden');
+      return;
+    }
+
+    const description = overlay.querySelector('#tk_desc').value.trim();
+    if (description && description.length > 1000) {
+      errEl.textContent = 'Описание не может превышать 1000 символов';
+      errEl.classList.remove('hidden');
+      return;
+    }
+
+    btn.disabled = true;
+    try {
+      await api.createTask(clientId, {
+        task_type:    overlay.querySelector('#tk_type').value,
+        title,
+        scheduled_at: sched,
+        description:  description || null,
+      });
+      toast.success('Задача запланирована!');
+      overlay.remove(); document.body.style.overflow = '';
+      await loadClient(); switchTab('tasks');
+    } catch(e) { errEl.textContent=e.message; errEl.classList.remove('hidden'); btn.disabled=false; }
+  }
+
+  async function completeClientTask(taskId) {
+    try {
+      await api.completeTask(taskId);
+      toast.success('Задача выполнена');
+      await loadClient();
+      switchTab('tasks');
+    }
+    catch(e) { toast.error(e.message); }
+  }
+
+  async function completeDealTaskFromClient(taskId) {
+    try {
+      await api.completeDealTask(taskId);
+      toast.success('Задача выполнена');
+      await loadClient();
+      switchTab('tasks');
+    }
+    catch(e) { toast.error(e.message); }
+  }
+
+  async function deleteClientTaskItem(taskId) {
+    if (!confirm('Удалить задачу?')) return;
+    try { await api.deleteTask(taskId); toast.success('Задача удалена'); await loadClient(); switchTab('tasks'); }
+    catch(e) { toast.error(e.message); }
+  }
+
+  // ──── Документы ─────────────────────────────────────────
+  function openUploadDoc() {
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay open';
+    overlay.innerHTML = `
+      <div class="modal">
+        <div class="modal-header">
+          <span class="modal-title">📤 Загрузить документ</span>
+          <button class="modal-close" onclick="this.closest('.modal-overlay').remove();document.body.style.overflow=''">✕</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Выберите файл <span class="required">*</span></label>
+            <input type="file" class="form-control" id="docFile" accept=".pdf,.doc,.docx,.xls,.xlsx,.txt,.jpg,.jpeg,.png,.zip,.rar">
+            <div class="form-hint">Допустимые форматы: PDF, Word, Excel, TXT, изображения, архивы. Макс. 20 МБ.</div>
+          </div>
+          <div class="form-error hidden" id="docError" style="padding:8px;background:#fee2e2;border-radius:6px"></div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline" onclick="this.closest('.modal-overlay').remove();document.body.style.overflow=''">Отмена</button>
+          <button class="btn btn-primary" onclick="uploadDoc(this)">Загрузить</button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+    document.body.style.overflow = 'hidden';
+    overlay.addEventListener('click', e => { if (e.target === overlay) { overlay.remove(); document.body.style.overflow = ''; } });
+  }
+
+  async function uploadDoc(btn) {
+    const overlay = btn.closest('.modal-overlay');
+    const errEl   = overlay.querySelector('#docError');
+    const fileInput = overlay.querySelector('#docFile');
+    if (!fileInput.files.length) { errEl.textContent='Выберите файл'; errEl.classList.remove('hidden'); return; }
+    const file = fileInput.files[0];
+    if (file.size > 20 * 1024 * 1024) { errEl.textContent='Файл слишком большой (макс. 20 МБ)'; errEl.classList.remove('hidden'); return; }
+    btn.disabled = true; btn.textContent = 'Загрузка...';
+    const formData = new FormData();
+    formData.append('file', file);
+    try {
+      const res = await fetch(`/api/clients/${clientId}/documents`, {
+        method: 'POST', credentials: 'include', body: formData
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Ошибка загрузки');
+      toast.success('Документ загружен!');
+      overlay.remove(); document.body.style.overflow = '';
+      await loadClient(); switchTab('docs');
+    } catch(e) { errEl.textContent=e.message; errEl.classList.remove('hidden'); btn.disabled=false; btn.textContent='Загрузить'; }
+  }
+
+  async function deleteDoc(docId) {
+    if (!confirm('Удалить документ?')) return;
+    try { await api.deleteDocument(docId); toast.success('Документ удалён'); await loadClient(); switchTab('docs'); }
+    catch(e) { toast.error(e.message); }
+  }
+
+  loadClient();
+
+  // Функция для перехода на страницу создания КП
+  function goToCreateOffer() {
+    const isAdmin = currentUser.role === 'admin';
+    if (isAdmin) {
+      // Администратор -> Все КП с открытием модала
+      navigate('offers.html?create=1&client=' + clientId);
+    } else {
+      // Менеджер -> Мои КП с открытием модала
+      navigate('offers.html?my=1&create=1&client=' + clientId);
+    }
+  }
+</script>
+</body>
+</html>
